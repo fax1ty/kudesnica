@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "jsEngine": "hermes",
+    "name": "Кудесница",
+    "slug": "kudesnica",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "infoPlist": { "UIBackgroundModes": ["audio"] },
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "ru.kudesnica.app"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2d3324de-da98-455f-8093-c57f91c23833"
+      }
+    }
+  }
+}
