@@ -76,6 +76,10 @@ export const CodeInput = ({
           if (v.length === length && onDone) onDone(v);
           if (onChange) onChange(v);
         }}
+        autoComplete="sms-otp"
+        textContentType="oneTimeCode"
+        importantForAutofill="yes"
+        autoFocus
         keyboardType="number-pad"
         style={{
           opacity: 0,

@@ -11,7 +11,7 @@ import { DollsCarousel } from "../components/DollsCarousel";
 import { useDolls } from "../api/dolls";
 import { useEffect, useMemo, useState } from "react";
 import { useStories } from "../api/stories";
-import { dispatch } from "use-bus";
+import { useGlobalStore } from "../store";
 
 import BurgerButton from "../icons/BurgerButton";
 import Logo from "../icons/Logo";
@@ -26,17 +26,14 @@ export const DollsScreen = () => {
   const { data: stories } = useStories(
     dolls ? (isCurrentDollNext ? undefined : dolls[currentDoll].id) : undefined
   );
+  const store = useGlobalStore();
 
   useEffect(() => {
     if (!dolls || !stories) return;
     if (isCurrentDollNext) return;
-    dispatch({
-      type: "UI_BOTTOM_PLAYER_SET_DOLL_ID",
-      value: dolls[currentDoll].id,
-    });
-    dispatch({
-      type: "UI_BOTTOM_PLAYER_SET_STORY_ID",
-      value: stories[0].id,
+    store.setCurrentlyPlaying({
+      dollId: dolls[currentDoll].id,
+      storyId: stories[0].id,
     });
   }, [stories, isCurrentDollNext]);
 

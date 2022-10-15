@@ -1,14 +1,15 @@
 import { View, Text, StatusBar } from "react-native";
 import { Colors, Fonts } from "../resources";
 import { Button } from "../components/Button";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import useCountDown from "react-countdown-hook";
 import { useEffect, useMemo, useState } from "react";
 import pms from "parse-ms";
 import { leadWithZero } from "../utils/math";
 import { CodeInput } from "../components/CodeInput";
-import { dispatch } from "use-bus";
 import { useGlobalStore } from "../store";
+import { verify } from "../api/auth";
+import axios from "axios";
 
 import BackIcon from "../icons/Back";
 
@@ -16,6 +17,7 @@ export const VerifyScreen = () => {
   const navigation = useNavigation<any>();
   const [timeLeft, { start }] = useCountDown(60 * 1000);
   const [code, setCode] = useState("");
+  const route = useRoute<any>();
 
   const store = useGlobalStore();
 
@@ -70,9 +72,20 @@ export const VerifyScreen = () => {
         <Button
           disabled={code.length !== 4}
           style={{ marginTop: 33 }}
-          onPress={() => {
-            navigation.navigate("Home", { Dolls: true });
-            dispatch("UI_MODAL_CONGRATULATIIONS_REG_OPEN");
+          onPress={async () => {
+            if (!store.phone)
+              throw new Error(
+                "Номер телефона должен быть заранее указан! Вы не прошли предыдущий шаг?"
+              );
+            const { token } = await verify(
+              store.phone,
+              code,
+              route.params.requestId
+            );
+            axios.defaults.headers.common.authorization = token;
+            store.setToken(token);
+            navigation.navigate("Home", { screen: "Dolls" });
+            store.openCongratulationsRegModal();
             store.openBottomPlayer();
           }}
         >

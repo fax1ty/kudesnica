@@ -1,15 +1,22 @@
 import { Text } from "react-native";
 import { Colors, Fonts } from "../resources";
 import { CircleModal } from "./CircleModal";
-import { dispatch } from "use-bus";
+import { useGlobalStore } from "../store";
 
 import Ura from "../icons/Ura";
 import AddPhotoIcon from "../icons/AddPhoto";
 
-export const CongratulationsRegModal = () => {
+interface Props {
+  visible: boolean;
+}
+
+export const CongratulationsRegModal = ({ visible }: Props) => {
+  const store = useGlobalStore();
+
   return (
     <CircleModal
-      onClose={() => dispatch("UI_MODAL_CONGRATULATIIONS_REG_CLOSE")}
+      visible={visible}
+      onClose={store.closeCongratulationsRegModal}
       headerContent={
         <>
           <Ura />

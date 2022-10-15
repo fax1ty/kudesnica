@@ -18,6 +18,7 @@ import { dispatch } from "use-bus";
 import { useStories } from "../api/stories";
 import { useDoll } from "../api/dolls";
 import { makeTimeStringFromMs } from "../hooks/playerHelper";
+import { useGlobalStore } from "../store";
 
 import HeartIcon from "../icons/HeartSmall";
 
@@ -29,6 +30,7 @@ export const StoriesScreen = () => {
   const [currentStory, setCurrentStory] = useState<number | null>(null);
   const { data: stories } = useStories(route.params.doll);
   const { data: doll } = useDoll(route.params.doll);
+  const store = useGlobalStore();
 
   const fakeArray = useMemo(
     () => [
@@ -85,15 +87,9 @@ export const StoriesScreen = () => {
           )}
           <Pressable
             onPress={() => {
-              dispatch("UI_BOTTOM_PLAYER_EXPAND");
-              dispatch({
-                type: "UI_BOTTOM_PLAYER_SET_DOLL_ID",
-                value: doll?.id,
-              });
-              dispatch({
-                type: "UI_BOTTOM_PLAYER_SET_STORY_ID",
-                value: item.id,
-              });
+              if (!doll) return;
+              store.setCurrentlyPlaying({ dollId: doll.id, storyId: item.id });
+              store.openBottomPlayer();
             }}
             style={{
               paddingLeft: 16,

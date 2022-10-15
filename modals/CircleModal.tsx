@@ -1,10 +1,18 @@
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
-  useBottomSheet,
+  BottomSheetModal,
   useBottomSheetDynamicSnapPoints,
+  useBottomSheetModal,
 } from "@gorhom/bottom-sheet";
-import { ReactNode, useCallback } from "react";
+import {
+  forwardRef,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { View } from "react-native";
 import { Button, ButtonProps } from "../components/Button";
 import { Colors } from "../resources";
@@ -14,6 +22,7 @@ interface Props {
   footerContent: ReactNode;
   buttonProps?: ButtonProps;
   onClose?: () => void;
+  visible: boolean;
 }
 
 const BottomSheetContent = ({
@@ -24,7 +33,7 @@ const BottomSheetContent = ({
 }: Props & {
   handleContentLayout: any;
 }) => {
-  const { close } = useBottomSheet();
+  const { dismiss } = useBottomSheetModal();
 
   return (
     <View onLayout={handleContentLayout}>
@@ -68,7 +77,7 @@ const BottomSheetContent = ({
           />
           {footerContent}
         </View>
-        <Button {...buttonProps} onPress={close} style={{ marginTop: 43 }}>
+        <Button {...buttonProps} onPress={dismiss} style={{ marginTop: 43 }}>
           {buttonProps?.children || ""}
         </Button>
       </View>
@@ -77,6 +86,17 @@ const BottomSheetContent = ({
 };
 
 export const CircleModal = (props: Props) => {
+  const [index, setIndex] = useState(-1);
+  const ref = useRef<BottomSheetModal>(null);
+
+  useEffect(() => {
+    if (!props.visible) ref.current?.dismiss();
+    else {
+      ref.current?.present();
+      ref.current?.expand();
+    }
+  }, [props.visible]);
+
   const {
     animatedHandleHeight,
     animatedSnapPoints,
@@ -88,16 +108,21 @@ export const CircleModal = (props: Props) => {
     (props: BottomSheetBackdropProps) => (
       <BottomSheetBackdrop
         {...props}
-        animatedIndex={animatedContentHeight}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
         pressBehavior="close"
+        style={{ backgroundColor: Colors.violet100, opacity: 0.5 }}
       />
     ),
     []
   );
 
   return (
-    <BottomSheet
-      enablePanDownToClose
+    <BottomSheetModal
+      onChange={setIndex}
+      index={index}
+      ref={ref}
+      enablePanDownToClose={true}
       snapPoints={animatedSnapPoints}
       handleHeight={animatedHandleHeight}
       contentHeight={animatedContentHeight}
@@ -107,9 +132,6 @@ export const CircleModal = (props: Props) => {
         borderTopRightRadius: 25,
         overflow: "hidden",
       }}
-      containerStyle={{
-        position: "relative",
-      }}
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: Colors.light100 }}
     >
@@ -118,6 +140,6 @@ export const CircleModal = (props: Props) => {
         handleContentLayout={handleContentLayout}
         {...props}
       />
-    </BottomSheet>
+    </BottomSheetModal>
   );
 };

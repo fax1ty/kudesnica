@@ -4,10 +4,15 @@ import { useState } from "react";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { useNavigation } from "@react-navigation/native";
+import { auth } from "../api/auth";
+import { useGlobalStore } from "../store";
+import { serializePhoneNumber } from "../utils/phone";
+import { AxiosError } from "axios";
 
 import BackIcon from "../icons/Back";
 
 export const AuthScreen = () => {
+  const [error, setError] = useState("");
   const navigation = useNavigation<any>();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -32,6 +37,7 @@ export const AuthScreen = () => {
     /\d/,
     /\d/,
   ]);
+  const store = useGlobalStore();
 
   return (
     <View
@@ -72,10 +78,45 @@ export const AuthScreen = () => {
           value={phone}
           mask={mask}
         />
+        {error && (
+          <Text
+            style={{
+              marginTop: 14,
+              color: Colors.red80,
+              fontFamily: Fonts.firasansRegular,
+              fontSize: 13,
+              lineHeight: 16,
+            }}
+          >
+            {error}
+          </Text>
+        )}
         <Button
           style={{ marginTop: 22 }}
           disabled={!name || !phone}
-          onPress={() => navigation.navigate("Verify")}
+          onPress={async () => {
+            try {
+              const serialized = serializePhoneNumber(phone);
+              const requestId = await auth(name, serialized);
+              store.setPhone(serialized);
+              navigation.navigate("Verify", { requestId });
+            } catch (error) {
+              if (error instanceof AxiosError) {
+                if (error.response?.status === 503)
+                  setError(
+                    "Сервер временно не может обрабатывать СМС авторизацию. Повторите попытку чуть позже"
+                  );
+                else if (error.response?.status === 403)
+                  setError(
+                    "Превышен лимит авторизаций. Повторите попытку чуть позже"
+                  );
+                else
+                  setError(
+                    "Прозошла непредвиденная ошибка. Повторите попытку чуть позже"
+                  );
+              }
+            }
+          }}
         >
           Далее
         </Button>
