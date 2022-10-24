@@ -1,24 +1,27 @@
 import Carousel from "react-native-snap-carousel";
 import { Image, Pressable, Text, View } from "react-native";
 import { useDimensions } from "@react-native-community/hooks";
-import { Colors, Fonts } from "../resources";
+import { Colors, Fonts, Values } from "../resources";
 import { useNavigation } from "@react-navigation/native";
-import { IDollData } from "../api/dolls";
+import { IDoll } from "../api/dolls";
+import { Pin } from "./Pin";
 
 import BellIcon from "../icons/Bell";
 
 interface Props {
   onShift?: (v: number) => void;
   onIndexChange?: (v: number, next: boolean) => void;
-  data: Array<IDollData & { next: boolean }>;
+  data: Array<IDoll & { next: boolean; unwatched: number }>;
 }
 
 export const DollMainText = ({
   isNext = false,
   title,
+  unwatched,
 }: {
   isNext?: boolean;
   title: string;
+  unwatched: number;
 }) => {
   return (
     <>
@@ -40,29 +43,7 @@ export const DollMainText = ({
       >
         {!isNext && (
           <>
-            <View
-              style={{
-                width: 18,
-                height: 18,
-                borderRadius: 18 / 2,
-                backgroundColor: Colors.violet80,
-                alignItems: "center",
-                position: "relative",
-              }}
-            >
-              <Text
-                style={{
-                  textAlign: "center",
-                  justifyContent: "center",
-                  color: Colors.light100,
-                  fontSize: 12,
-                  lineHeight: 15,
-                  fontFamily: Fonts.firasansBold,
-                }}
-              >
-                X
-              </Text>
-            </View>
+            <Pin>{unwatched}</Pin>
             <Text
               style={{
                 color: Colors.dark75,
@@ -114,8 +95,9 @@ export const DollsCarousel = ({ data, onShift, onIndexChange }: Props) => {
       onScroll={({ nativeEvent }) => {
         if (onShift) onShift(nativeEvent.contentOffset.x);
       }}
-      contentContainerCustomStyle={{ alignItems: "center" }}
-      containerCustomStyle={{ marginTop: 25 }}
+      contentContainerCustomStyle={{
+        alignItems: "center",
+      }}
       vertical={false}
       data={data}
       renderItem={({ item }) => (
@@ -127,7 +109,6 @@ export const DollsCarousel = ({ data, onShift, onIndexChange }: Props) => {
         >
           <View
             style={{
-              transform: [{ translateY: -80 }],
               alignItems: "center",
             }}
           >
@@ -135,10 +116,15 @@ export const DollsCarousel = ({ data, onShift, onIndexChange }: Props) => {
               style={{
                 width: screenSize.width - 38 * 2,
                 aspectRatio: 302 / 483,
+                resizeMode: "contain",
               }}
               source={{ uri: item.dollsCarouselPhoto }}
             />
-            <DollMainText title={item.title} isNext={item.next} />
+            <DollMainText
+              title={item.title}
+              isNext={item.next}
+              unwatched={item.unwatched}
+            />
           </View>
         </Pressable>
       )}

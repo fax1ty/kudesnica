@@ -1,45 +1,53 @@
 import { DrawerActions, useNavigation } from "@react-navigation/native";
-import { View, StatusBar as StatusBarData, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import Animated, {
-  Easing,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
+  withSpring,
 } from "react-native-reanimated";
-import { Colors } from "../resources";
+import { Colors, Values } from "../resources";
 import { DollsCarousel } from "../components/DollsCarousel";
 import { useDolls } from "../api/dolls";
 import { useEffect, useMemo, useState } from "react";
 import { useStories } from "../api/stories";
 import { useGlobalStore } from "../store";
+import { Avatar } from "../components/Avatar";
+import { useProfile } from "../api/profile";
+import { updateCurrentlyPlaying } from "../utils/audio";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import BurgerButton from "../icons/BurgerButton";
 import Logo from "../icons/Logo";
-import NoAvatar from "../icons/NoAvatar";
 
 export const DollsScreen = () => {
   const [currentDoll, setCurrentDoll] = useState(0);
   const [isCurrentDollNext, setCurrentDollNext] = useState(false);
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const shift = useSharedValue(0);
   const { data: dolls } = useDolls();
   const { data: stories } = useStories(
     dolls ? (isCurrentDollNext ? undefined : dolls[currentDoll].id) : undefined
   );
+  // prefetch our profile
+  useProfile();
   const store = useGlobalStore();
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (!dolls || !stories) return;
     if (isCurrentDollNext) return;
-    store.setCurrentlyPlaying({
-      dollId: dolls[currentDoll].id,
-      storyId: stories[0].id,
-    });
+    const doll = dolls[currentDoll];
+    const story = stories.items[0];
+    updateCurrentlyPlaying(store, doll, story);
   }, [stories, isCurrentDollNext]);
 
   const renderedDolls = useMemo(
     () => [
-      ...(dolls?.map((doll) => ({ ...doll, next: false })) || []),
+      ...(dolls?.map((doll) => ({
+        ...doll,
+        next: false,
+        unwatched: stories?.unwatchedTotal || 0,
+      })) || []),
       {
         title: "Новая героиня",
         id: "next",
@@ -47,6 +55,7 @@ export const DollsScreen = () => {
         storyViewCarousel: [],
         next: true,
         description: [],
+        unwatched: 0,
       },
     ],
     [dolls]
@@ -61,18 +70,40 @@ export const DollsScreen = () => {
           backgroundColor: Colors.light100,
           position: "absolute",
           transform: [
+            { scale: 1.5 },
             {
-              translateX: withTiming(shift.value * -1, {
-                duration: 100,
-                easing: Easing.linear,
-              }),
+              translateX: withSpring(shift.value * -1, { damping: 100000 }),
             },
           ],
         }))}
         source={require("../assets/dolls-parallax-bg.png")}
       />
-      <View style={{ width: "100%", height: "100%", position: "absolute" }}>
-        <View style={{ height: (StatusBarData.currentHeight || 0) + 20 }} />
+      <Animated.Image
+        style={useAnimatedStyle(() => ({
+          width: 607,
+          height: 342,
+          position: "absolute",
+          bottom: 0,
+          transform: [
+            { scale: 2 },
+            { translateY: 342 / 3 - Values.bottomPlayerHeight },
+            {
+              translateX: withSpring((607 / 2.5) * -1 + shift.value * -1, {
+                damping: 100000,
+              }),
+            },
+          ],
+        }))}
+        source={require("../assets/cloud.png")}
+      />
+      <View
+        style={{
+          width: "100%",
+          height: "100%",
+          position: "absolute",
+        }}
+      >
+        <View style={{ height: insets.top + 20 }} />
         <View
           style={{
             flexDirection: "row",
@@ -86,39 +117,22 @@ export const DollsScreen = () => {
             <BurgerButton />
           </Pressable>
           <Logo />
-          <View
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 32 / 2,
-              backgroundColor: Colors.violet40,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <View
-              style={{
-                width: 29,
-                height: 29,
-                borderRadius: 29 / 2,
-                borderColor: "white",
-                borderWidth: 1,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <NoAvatar />
-            </View>
-          </View>
+          <Avatar
+            avatar={null}
+            onPress={() => navigation.navigate("User")}
+            size="small"
+          />
         </View>
-        <DollsCarousel
-          data={renderedDolls}
-          onIndexChange={(value, next) => {
-            setCurrentDoll(value);
-            setCurrentDollNext(next);
-          }}
-          onShift={(v) => (shift.value = v)}
-        />
+        <View style={{ flex: 1, marginBottom: Values.bottomPlayerHeight }}>
+          <DollsCarousel
+            data={renderedDolls}
+            onIndexChange={(value, next) => {
+              setCurrentDoll(value);
+              setCurrentDollNext(next);
+            }}
+            onShift={(v) => (shift.value = v)}
+          />
+        </View>
       </View>
     </View>
   );

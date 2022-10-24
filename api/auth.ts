@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const auth = async (name: string, phone: number) => {
+export const auth = async (phone: number, name?: string) => {
   const { data } = await axios.post<{ requestId: string }>("/auth", {
     name,
     phone,

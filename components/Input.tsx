@@ -1,6 +1,11 @@
 import MaskInput from "react-native-mask-input";
-import { TextInput, TextInputProps, View, Text } from "react-native";
+import { TextInput, TextInputProps, Text, Keyboard } from "react-native";
 import { Colors, Fonts } from "../resources";
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+import { useEffect, useMemo, useState } from "react";
 
 type Props = {
   error?: string;
@@ -22,27 +27,66 @@ const inputStyle = {
 };
 
 export const Input = ({ error, style, mask, ...props }: Props) => {
+  const [value, setValue] = useState("");
+  const showTitle = useMemo(() => value.length > 0, [value]);
+
+  useEffect(() => {
+    if (props.value === value) return;
+    setValue(props.value);
+  }, [props.value]);
+
   return (
-    <View>
+    <Animated.View
+      style={useAnimatedStyle(() => ({
+        ...(style as any),
+        height: withSpring(showTitle ? 78 : inputStyle.height),
+        transform: [
+          { translateY: withSpring(showTitle ? 0 : inputStyle.height - 78) },
+        ],
+      }))}
+    >
+      <Animated.Text
+        style={useAnimatedStyle(() => ({
+          height: 12 + 6,
+          fontFamily: Fonts.firasansRegular,
+          fontSize: 12,
+          lineHeight: 12,
+          color: Colors.dark25,
+          opacity: withSpring(showTitle ? 1 : 0),
+        }))}
+      >
+        {props.placeholder}
+      </Animated.Text>
       {mask ? (
         <MaskInput
+          {...props}
+          allowFontScaling={false}
+          // onBlur={() => Keyboard.dismiss()}
           placeholderTextColor={Colors.light20}
           style={{
             ...inputStyle,
-            ...(style as any),
             borderColor: error ? Colors.red80 : "#e1e1e1",
           }}
-          {...props}
+          mask={mask}
+          onChangeText={(e) => {
+            setValue(e);
+            if (typeof props.onChangeText === "function") props.onChangeText(e);
+          }}
         />
       ) : (
         <TextInput
+          {...props}
+          allowFontScaling={false}
+          // onBlur={() => Keyboard.dismiss()}
           placeholderTextColor={Colors.light20}
           style={{
             ...inputStyle,
-            ...(style as any),
             borderColor: error ? Colors.red80 : "#e1e1e1",
           }}
-          {...props}
+          onChangeText={(e) => {
+            setValue(e);
+            if (typeof props.onChangeText === "function") props.onChangeText(e);
+          }}
         />
       )}
       {error && (
@@ -58,6 +102,6 @@ export const Input = ({ error, style, mask, ...props }: Props) => {
           {error}
         </Text>
       )}
-    </View>
+    </Animated.View>
   );
 };

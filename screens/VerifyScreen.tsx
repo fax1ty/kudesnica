@@ -1,7 +1,11 @@
-import { View, Text, StatusBar } from "react-native";
+import { View, Text } from "react-native";
 import { Colors, Fonts } from "../resources";
 import { Button } from "../components/Button";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import {
+  CommonActions,
+  useNavigation,
+  useRoute,
+} from "@react-navigation/native";
 import useCountDown from "react-countdown-hook";
 import { useEffect, useMemo, useState } from "react";
 import pms from "parse-ms";
@@ -10,16 +14,19 @@ import { CodeInput } from "../components/CodeInput";
 import { useGlobalStore } from "../store";
 import { verify } from "../api/auth";
 import axios from "axios";
-
-import BackIcon from "../icons/Back";
+import { ScreenTemplate } from "../components/ScreenTemplate";
+import { ScreenTitle } from "../components/ScreenTitle";
+import crashlytics from "@react-native-firebase/crashlytics";
 
 export const VerifyScreen = () => {
-  const navigation = useNavigation<any>();
   const [timeLeft, { start }] = useCountDown(60 * 1000);
   const [code, setCode] = useState("");
-  const route = useRoute<any>();
+  const {
+    params: { requestId, mode },
+  } = useRoute<any>();
 
   const store = useGlobalStore();
+  const navigation = useNavigation<any>();
 
   const left = useMemo(() => {
     const timeData = pms(timeLeft);
@@ -31,29 +38,9 @@ export const VerifyScreen = () => {
   useEffect(() => start(), []);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        paddingTop: StatusBar.currentHeight || 0,
-        backgroundColor: Colors.light100,
-      }}
-    >
-      <View style={{ flexDirection: "row", padding: 16, alignItems: "center" }}>
-        <BackIcon />
-        <Text
-          style={{
-            flex: 1,
-            textAlign: "center",
-            fontFamily: Fonts.firasansBold,
-            fontSize: 18,
-            lineHeight: 22,
-            color: Colors.dark50,
-          }}
-        >
-          Регистрация
-        </Text>
-      </View>
-      <View style={{ paddingHorizontal: 16 }}>
+    <ScreenTemplate>
+      <ScreenTitle>Введите код</ScreenTitle>
+      <View>
         <Text
           style={{
             paddingHorizontal: 24 - 16,
@@ -66,7 +53,8 @@ export const VerifyScreen = () => {
             height: 71,
           }}
         >
-          Введите четырехзначный код из смс для заверешния регистрации
+          Введите четырехзначный код из смс для заверешния{" "}
+          {mode === "register" ? "регистрации" : "авторизации"}
         </Text>
         <CodeInput length={4} value={code} onChange={setCode} />
         <Button
@@ -77,36 +65,48 @@ export const VerifyScreen = () => {
               throw new Error(
                 "Номер телефона должен быть заранее указан! Вы не прошли предыдущий шаг?"
               );
-            const { token } = await verify(
-              store.phone,
-              code,
-              route.params.requestId
-            );
+            const { token, phone } = await verify(store.phone, code, requestId);
+            await crashlytics().setUserId(phone.toString());
             axios.defaults.headers.common.authorization = token;
             store.setToken(token);
-            navigation.navigate("Home", { screen: "Dolls" });
-            store.openCongratulationsRegModal();
-            store.openBottomPlayer();
+            navigation.dispatch(
+              CommonActions.reset({ index: 0, routes: [{ name: "Home" }] })
+            );
+            if (mode === "register") store.openCongratulationsRegModal();
+            else store.openLoginWelcomeModal();
           }}
         >
           Подтвердить
         </Button>
       </View>
       <View
-        style={{ marginTop: 22, paddingHorizontal: 24, alignItems: "center" }}
+        style={{
+          marginTop: 20,
+          paddingHorizontal: 24 - 16,
+          alignItems: "center",
+        }}
       >
         <Text
           style={{
+            width: 270,
             fontFamily: Fonts.firasansRegular,
             fontSize: 18,
             lineHeight: 23,
-            color: timeLeft === 0 ? Colors.violet100 : Colors.dark75,
-            marginTop: 16,
+            color: timeLeft === 0 ? Colors.violet100 : Colors.dark50,
           }}
         >
-          {`Отправить код еще раз${timeLeft === 0 ? "" : ` (${left})`}`}
+          Отправить код еще раз{" "}
+          {Boolean(timeLeft) && (
+            <Text
+              style={{
+                color: Colors.violet100,
+              }}
+            >
+              {left}
+            </Text>
+          )}
         </Text>
       </View>
-    </View>
+    </ScreenTemplate>
   );
 };

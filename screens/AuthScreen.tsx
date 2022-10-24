@@ -1,19 +1,23 @@
-import { View, Text, StatusBar } from "react-native";
+import { View, Text } from "react-native";
 import { Colors, Fonts } from "../resources";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { auth } from "../api/auth";
 import { useGlobalStore } from "../store";
 import { serializePhoneNumber } from "../utils/phone";
 import { AxiosError } from "axios";
 
-import BackIcon from "../icons/Back";
+import { ScreenTemplate } from "../components/ScreenTemplate";
+import { ScreenTitle } from "../components/ScreenTitle";
 
 export const AuthScreen = () => {
   const [error, setError] = useState("");
   const navigation = useNavigation<any>();
+  const {
+    params: { mode },
+  } = useRoute<any>();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [mask] = useState([
@@ -39,36 +43,25 @@ export const AuthScreen = () => {
   ]);
   const store = useGlobalStore();
 
+  useEffect(() => {
+    setError("");
+    setName("");
+  }, [mode]);
+
   return (
-    <View
-      style={{
-        flex: 1,
-        paddingTop: StatusBar.currentHeight || 0,
-        backgroundColor: Colors.light100,
-      }}
-    >
-      <View style={{ flexDirection: "row", padding: 16, alignItems: "center" }}>
-        <BackIcon />
-        <Text
-          style={{
-            flex: 1,
-            textAlign: "center",
-            fontFamily: Fonts.firasansBold,
-            fontSize: 18,
-            lineHeight: 22,
-            color: Colors.dark50,
-          }}
-        >
-          Регистрация
-        </Text>
-      </View>
-      <View style={{ paddingHorizontal: 16 }}>
-        <Input
-          placeholder="Ваше имя"
-          autoComplete="name"
-          value={name}
-          onChangeText={(text) => setName(text)}
-        />
+    <ScreenTemplate>
+      <ScreenTitle>
+        {mode === "register" ? "Регистрация" : "Авторизация"}
+      </ScreenTitle>
+      <View>
+        {mode === "register" && (
+          <Input
+            placeholder="Ваше имя"
+            autoComplete="name"
+            value={name}
+            onChangeText={(text) => setName(text)}
+          />
+        )}
         <Input
           placeholder="Ваш номер телефона"
           autoComplete="tel"
@@ -93,14 +86,17 @@ export const AuthScreen = () => {
         )}
         <Button
           style={{ marginTop: 22 }}
-          disabled={!name || !phone}
+          disabled={
+            mode === "register" ? !name || phone.length <= 5 : phone.length <= 5
+          }
           onPress={async () => {
             try {
               const serialized = serializePhoneNumber(phone);
-              const requestId = await auth(name, serialized);
+              const requestId = await auth(serialized, name);
               store.setPhone(serialized);
-              navigation.navigate("Verify", { requestId });
+              navigation.navigate("Verify", { requestId, mode });
             } catch (error) {
+              console.error(error);
               if (error instanceof AxiosError) {
                 if (error.response?.status === 503)
                   setError(
@@ -109,6 +105,14 @@ export const AuthScreen = () => {
                 else if (error.response?.status === 403)
                   setError(
                     "Превышен лимит авторизаций. Повторите попытку чуть позже"
+                  );
+                else if (error.response?.status === 404 && mode === "login")
+                  setError(
+                    "Аккаунт не найден. Вернитесь на предыдущий шаг и пройдите авторизацию там"
+                  );
+                else if (error.response?.status === 409 && mode === "register")
+                  setError(
+                    "Аккаунт с текущим привязанным номером уже существует. Пожалуйста, входите, а не регистрируйтесь"
                   );
                 else
                   setError(
@@ -122,16 +126,21 @@ export const AuthScreen = () => {
         </Button>
       </View>
       <View
-        style={{ marginTop: 22, paddingHorizontal: 24, alignItems: "center" }}
+        style={{
+          marginTop: 22,
+          paddingHorizontal: 24 - 16,
+          alignItems: "center",
+        }}
       >
         <Text
           style={{
-            paddingHorizontal: 24,
+            paddingHorizontal: 24 - 16,
             height: 51,
             fontFamily: Fonts.firasansRegular,
             fontSize: 13,
             lineHeight: 16,
             color: Colors.light20,
+            textAlign: "center",
           }}
         >
           Нажимая кнопку "Далее", вы принимаете условия Пользовательского
@@ -146,7 +155,7 @@ export const AuthScreen = () => {
               color: Colors.dark50,
             }}
           >
-            Уже есть аккаунт?
+            {mode === "register" ? "Уже есть аккаунт?" : "Нет аккаунта?"}
           </Text>
           <Text
             style={{
@@ -156,11 +165,12 @@ export const AuthScreen = () => {
               marginLeft: 18 / 2,
               color: Colors.violet100,
             }}
+            onPress={() => navigation.navigate("Auth", { mode: "login" })}
           >
-            Войти!
+            {mode === "register" ? "Войти!" : "Зарегистрироваться"}
           </Text>
         </View>
       </View>
-    </View>
+    </ScreenTemplate>
   );
 };

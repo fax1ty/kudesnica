@@ -1,0 +1,84 @@
+{
+  "project_info": {
+    "project_number": "72657618084",
+    "project_id": "kudesnica-app",
+    "storage_bucket": "kudesnica-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:72657618084:android:05c3b1c27cd174c59a9231",
+        "android_client_info": {
+          "package_name": "ru.kudesnica.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "72657618084-0tsmn3us6nre83qfs6p41lbbn37p3vc1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClgJvieM_DC9IYknh8zzCkwaMk9IT5IRg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "72657618084-0tsmn3us6nre83qfs6p41lbbn37p3vc1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "72657618084-7fvlc305tkh6hifn2olksb1vsm8khuoe.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ru.kudesnica.app",
+                "app_store_id": "6443952536"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:72657618084:android:638987e88e51588f9a9231",
+        "android_client_info": {
+          "package_name": "ru.kudesnica.app.local"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "72657618084-0tsmn3us6nre83qfs6p41lbbn37p3vc1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClgJvieM_DC9IYknh8zzCkwaMk9IT5IRg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "72657618084-0tsmn3us6nre83qfs6p41lbbn37p3vc1.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "72657618084-7fvlc305tkh6hifn2olksb1vsm8khuoe.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ru.kudesnica.app",
+                "app_store_id": "6443952536"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

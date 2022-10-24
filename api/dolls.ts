@@ -1,8 +1,9 @@
 import useSWR from "swr";
+import { authGuard } from "../utils/misc";
 import { fetcher } from "./fetcher";
 import { IRichBlock } from "./stories";
 
-export interface IDollData {
+export interface IDoll {
   id: string;
   title: string;
   dollsCarouselPhoto: string;
@@ -11,9 +12,9 @@ export interface IDollData {
 }
 
 export const useDolls = () =>
-  useSWR<Array<IDollData>>("/dolls", fetcher, { refreshInterval: 0 });
+  useSWR<Array<IDoll>>(authGuard("/dolls"), fetcher, { refreshInterval: 0 });
 
 export const useDoll = (dollId: string | null) =>
-  useSWR<IDollData>(dollId ? `/dolls/${dollId}` : null, fetcher, {
+  useSWR<IDoll>(authGuard(dollId ? `/dolls/${dollId}` : null), fetcher, {
     refreshInterval: 0,
   });

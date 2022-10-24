@@ -1,16 +1,22 @@
 import { CircularProgressBase } from "react-native-circular-progress-indicator";
-import useBus from "use-bus";
+import useBus, { dispatch } from "use-bus";
 import { View, Text, Image, Pressable } from "react-native";
-import { useState, ReactNode } from "react";
-import { Colors, Fonts } from "../resources";
+import { useState, ReactNode, useMemo, useEffect } from "react";
+import { Colors, Fonts, Values } from "../resources";
 import { Skeleton } from "./Skeleton";
+import { percentageOf } from "../utils/math";
+import { useGlobalStore } from "../store";
+import { useDoll } from "../api/dolls";
+import { useStory } from "../api/stories";
+import { useProfile } from "../api/profile";
+import { updateCurrentlyPlaying } from "../utils/audio";
 
 import PlayIcon from "../icons/Play";
 import PauseIcon from "../icons/Pause";
+import LockIcon from "../icons/PlayerLock";
 
-const PLAYER_HEIGHT = 80;
 const PLAYER_COVER_SIZE = 59;
-const PLAYER_COVER_PROGRESS_WIDTH = 59 - 51;
+const PLAYER_COVER_PROGRESS_WIDTH = 4;
 
 interface Props {
   cover?: string;
@@ -18,9 +24,9 @@ interface Props {
   description?: string;
   titleHilighted?: boolean;
   icon?: ReactNode;
-  onCoverClick?: () => void;
-  isPlaying?: boolean;
-  id: string;
+  id?: string;
+  duration?: number;
+  dollId?: string;
 }
 
 const IndependentCircularProgress = ({ progress = 0 }) => {
@@ -30,6 +36,7 @@ const IndependentCircularProgress = ({ progress = 0 }) => {
       value={progress}
       maxValue={100}
       radius={PLAYER_COVER_SIZE / 2}
+      inActiveStrokeWidth={PLAYER_COVER_PROGRESS_WIDTH}
       activeStrokeWidth={PLAYER_COVER_PROGRESS_WIDTH}
       activeStrokeColor={Colors.pink100}
       inActiveStrokeColor={Colors.light60}
@@ -43,16 +50,64 @@ export const LowPlayer = ({
   description,
   titleHilighted = false,
   icon,
-  onCoverClick,
-  isPlaying = false,
-  id,
+  id: storyId,
+  dollId,
+  duration,
 }: Props) => {
   const [progress, setProgress] = useState(0);
+  const [state, setState] = useState<"paused" | "playing">("paused");
   const [coverLoaded, setCoverLoaded] = useState(false);
+  const total = useMemo(
+    () => percentageOf(progress, duration || 1000),
+    [progress]
+  );
+  const store = useGlobalStore();
+  const { data: doll } = useDoll(dollId || null);
+  const { data: story } = useStory(dollId || null, storyId || null);
+  const { data: profile } = useProfile();
+  const locked = useMemo(
+    () => (!story || !profile ? true : story.premium && !profile.premium),
+    [story, profile]
+  );
 
-  useBus(`UI_BOTTOM_PLAYER_SET_PROGRESS/${id}`, ({ value }) => {
-    setProgress(value);
-  });
+  useEffect(() => {
+    if (
+      store.currentlyPlaying.dollId === doll?.id &&
+      store.currentlyPlaying.storyId === story?.id
+    )
+      setState(store.currentlyPlaying.state);
+  }, [store.currentlyPlaying.state]);
+
+  useEffect(() => {
+    setProgress(0);
+  }, [storyId]);
+
+  useBus(
+    "REMOTE_AUDIO_PROGRESS",
+    ({ id, value }) => {
+      console.log(
+        "Удалённое аудио",
+        id,
+        "хочет обновить прогресс. Текущее значение:",
+        value
+      );
+      if (id === storyId) setProgress(value);
+    },
+    [storyId]
+  );
+  useBus(
+    "REMOTE_AUDIO_STATE_CHANGE",
+    ({ id, value }) => {
+      console.log(
+        "Удалённое аудио",
+        id,
+        "хочет сменить состояние. Текущее значение:",
+        value
+      );
+      if (id === storyId) setState(value);
+    },
+    [storyId]
+  );
 
   return (
     <View
@@ -60,12 +115,23 @@ export const LowPlayer = ({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        height: PLAYER_HEIGHT,
+        height: Values.bottomPlayerHeight,
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Pressable
-          onPress={onCoverClick}
+          onPress={() => {
+            if (!story || !doll) return;
+            if (locked) return store.openPremiumStoryModal();
+            if (story.id === store.currentlyPlaying.storyId)
+              dispatch({
+                type: "UI_AUDIO_TOGGLE",
+                id: storyId,
+              });
+            else {
+              updateCurrentlyPlaying(store, doll, story, true);
+            }
+          }}
           style={{
             width: PLAYER_COVER_SIZE,
             height: PLAYER_COVER_SIZE,
@@ -120,7 +186,9 @@ export const LowPlayer = ({
               )}
               {title && (
                 <>
-                  {isPlaying ? (
+                  {locked ? (
+                    <LockIcon style={{ position: "absolute" }} />
+                  ) : state === "playing" ? (
                     <PauseIcon style={{ position: "absolute" }} />
                   ) : (
                     <PlayIcon style={{ position: "absolute" }} />
@@ -137,7 +205,7 @@ export const LowPlayer = ({
               opacity: progress === 0 ? 0 : 1,
             }}
           >
-            <IndependentCircularProgress progress={progress} />
+            <IndependentCircularProgress progress={total} />
           </View>
         </Pressable>
         <View style={{ marginLeft: 10, flexShrink: 1 }}>

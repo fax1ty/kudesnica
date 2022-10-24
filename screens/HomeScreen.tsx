@@ -1,69 +1,97 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createElement } from "react";
-import { View, Text, StatusBar as StatusBarData } from "react-native";
-import { Colors, Fonts } from "../resources";
+import { View, Text, Image } from "react-native";
+import { Colors, Fonts, Values } from "../resources";
 import { DollsScreen } from "./DollsScreen";
 import { CompanyScreen } from "./CompanyScreen";
 import { WhereToBuyScreen } from "./WhereToBuyScreen";
 import { AppScreen } from "./AppScreen";
+import { useNavigation } from "@react-navigation/native";
+import TelegramIcon from "../icons/Telegram";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import LogoFull from "../icons/LogoFull";
 import InstagramIcon from "../icons/Instagram";
 import VKIcon from "../icons/VK";
-import TelegramIcon from "../icons/Telegram";
 
 export const HomeScreen = () => {
   const Drawer = createDrawerNavigator();
+  const navigation = useNavigation<any>();
+  const insets = useSafeAreaInsets();
 
   return (
     <Drawer.Navigator
       drawerContent={() => (
-        <View
-          style={{
-            alignItems: "center",
-            flex: 1,
-            paddingBottom: 30,
-            paddingTop: 30 + (StatusBarData.currentHeight || 0),
-          }}
-        >
-          <LogoFull />
-          <View style={{ flex: 1, justifyContent: "center" }}>
-            {[
-              { label: "О Кудеснице", url: "About" },
-              { label: "Где купить", url: "About" },
-              { label: "О приложении", url: "About" },
-            ].map(({ label }, i) => (
-              <Text
-                key={`url-${i}`}
+        <View style={{ flex: 1 }}>
+          <Image
+            source={require("../assets/drawer-bg.png")}
+            style={{ width: "100%", height: "100%", position: "absolute" }}
+          />
+          <View
+            style={{
+              position: "relative",
+              alignItems: "center",
+              width: "100%",
+              height: "100%",
+              paddingBottom: 30,
+              paddingTop: 30 + insets.top,
+            }}
+          >
+            <LogoFull />
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                paddingBottom: Values.bottomPlayerHeight,
+              }}
+            >
+              <View>
+                {[
+                  { label: "О Кудеснице", url: "Company" },
+                  { label: "Где купить", url: "WhereToBuy" },
+                  { label: "О приложении", url: "App" },
+                ].map(({ label, url }, i) => (
+                  <Text
+                    onPress={() => navigation.navigate("Home", { screen: url })}
+                    key={`url-${i}`}
+                    style={{
+                      fontFamily: Fonts.playfairdisplayItalic,
+                      fontSize: 20,
+                      lineHeight: 27,
+                      color: Colors.violet100,
+                      marginTop: i == 0 ? 0 : 32,
+                    }}
+                  >
+                    {label}
+                  </Text>
+                ))}
+              </View>
+              <View
                 style={{
-                  fontFamily: Fonts.playfairdisplayItalic,
-                  fontSize: 20,
-                  lineHeight: 27,
-                  color: Colors.violet100,
-                  marginTop: i == 0 ? 0 : 32,
+                  flexDirection: "row",
+                  bottom: Values.bottomPlayerHeight + 30,
+                  position: "absolute",
                 }}
               >
-                {label}
-              </Text>
-            ))}
-          </View>
-          <View style={{ flexDirection: "row" }}>
-            {[
-              { icon: InstagramIcon, url: "" },
-              { icon: VKIcon, url: "" },
-              { icon: TelegramIcon, url: "" },
-            ].map(({ icon }, i) =>
-              createElement(icon, {
-                key: `social-${i}`,
-                style: { marginLeft: i === 0 ? 0 : 20 },
-              })
-            )}
+                {[
+                  { icon: InstagramIcon, url: "" },
+                  { icon: VKIcon, url: "" },
+                  { icon: TelegramIcon, url: "" },
+                ].map(({ icon }, i) =>
+                  createElement(icon, {
+                    key: `social-${i}`,
+                    style: { marginLeft: i === 0 ? 0 : 20 },
+                  })
+                )}
+              </View>
+            </View>
           </View>
         </View>
       )}
       screenOptions={{
         headerShown: false,
         drawerType: "slide",
+        overlayColor: "rgba(67, 44, 119, 0.5)",
         drawerStyle: { width: 300 },
       }}
     >

@@ -1,6 +1,7 @@
 import axios from "axios";
+import Constants from "expo-constants";
 
-axios.defaults.baseURL = "http://192.168.0.104:1234";
+axios.defaults.baseURL = Constants.expoConfig?.extra?.apiUrl;
 
 export const fetcher = async <T>(url: string) => {
   console.log(url);

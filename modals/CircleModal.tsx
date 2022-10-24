@@ -1,20 +1,12 @@
-import BottomSheet, {
-  BottomSheetBackdrop,
+import {
   BottomSheetBackdropProps,
   BottomSheetModal,
   useBottomSheetDynamicSnapPoints,
-  useBottomSheetModal,
 } from "@gorhom/bottom-sheet";
-import {
-  forwardRef,
-  ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, useCallback, useEffect, useRef } from "react";
 import { View } from "react-native";
 import { Button, ButtonProps } from "../components/Button";
+import { CustomBackdrop } from "../components/CustomBackdrop";
 import { Colors } from "../resources";
 
 interface Props {
@@ -33,8 +25,6 @@ const BottomSheetContent = ({
 }: Props & {
   handleContentLayout: any;
 }) => {
-  const { dismiss } = useBottomSheetModal();
-
   return (
     <View onLayout={handleContentLayout}>
       <View
@@ -77,7 +67,7 @@ const BottomSheetContent = ({
           />
           {footerContent}
         </View>
-        <Button {...buttonProps} onPress={dismiss} style={{ marginTop: 43 }}>
+        <Button {...buttonProps} style={{ marginTop: 43 }}>
           {buttonProps?.children || ""}
         </Button>
       </View>
@@ -86,7 +76,6 @@ const BottomSheetContent = ({
 };
 
 export const CircleModal = (props: Props) => {
-  const [index, setIndex] = useState(-1);
   const ref = useRef<BottomSheetModal>(null);
 
   useEffect(() => {
@@ -104,23 +93,15 @@ export const CircleModal = (props: Props) => {
     handleContentLayout,
   } = useBottomSheetDynamicSnapPoints(["CONTENT_HEIGHT"]);
 
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
-      <BottomSheetBackdrop
-        {...props}
-        disappearsOnIndex={-1}
-        appearsOnIndex={0}
-        pressBehavior="close"
-        style={{ backgroundColor: Colors.violet100, opacity: 0.5 }}
-      />
-    ),
-    []
-  );
+  const renderBackdrop = useCallback((props: BottomSheetBackdropProps) => {
+    // Не знаю почему это работает (трюк с disappearsOnIndex и appearsOnIndex)
+    return (
+      <CustomBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} />
+    );
+  }, []);
 
   return (
     <BottomSheetModal
-      onChange={setIndex}
-      index={index}
       ref={ref}
       enablePanDownToClose={true}
       snapPoints={animatedSnapPoints}

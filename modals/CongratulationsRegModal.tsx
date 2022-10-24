@@ -51,7 +51,10 @@ export const CongratulationsRegModal = ({ visible }: Props) => {
           <AddPhotoIcon />
         </>
       }
-      buttonProps={{ children: "Перейти к историям!" }}
+      buttonProps={{
+        children: "Перейти к историям!",
+        onPress: store.closeCongratulationsRegModal,
+      }}
     />
   );
 };
