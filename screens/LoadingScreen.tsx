@@ -11,8 +11,10 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import * as SplashScreen from "expo-splash-screen";
-import { useGlobalStore } from "../store";
+import { useGlobalStore } from "../stores/global";
 import { StackActions, useNavigation } from "@react-navigation/native";
+import { initAudio } from "../utils/audio";
+import { usePersistedState } from "react-native-use-persisted-state";
 
 import LogoWithouText from "../icons/LogoWithoutText";
 import LogoTextOnly from "../icons/LogoTextOnly";
@@ -25,21 +27,29 @@ export const LoadingScreen = () => {
   const opacity1 = useSharedValue(0);
   const opacity2 = useSharedValue(0);
   const opacity3 = useSharedValue(0);
-  const store = useGlobalStore();
   const navigation = useNavigation();
+  const fontsLoaded = useGlobalStore((state) => state.fontsLoaded);
+  const token = useGlobalStore((state) => state.token);
+  const [shouldShowWelcomeScreen] = usePersistedState(
+    "@shouldShowWelcomeScreen",
+    true
+  );
 
   useEffect(() => {
-    if (!store.fontsLoaded) return;
-    SplashScreen.hideAsync();
+    if (!fontsLoaded) return;
+    (async () => {
+      await initAudio().catch(console.error);
+      await SplashScreen.hideAsync();
+    })();
     const timeout = setTimeout(() => {
-      if (!store.token) {
+      if (shouldShowWelcomeScreen) {
         navigation.dispatch(StackActions.replace("Welcome"));
       } else {
         navigation.dispatch(StackActions.replace("Home"));
       }
     }, 1000 * 3);
     return () => clearTimeout(timeout);
-  }, [store.fontsLoaded, store.token]);
+  }, [fontsLoaded, token]);
 
   useEffect(() => {
     shift1.value = withRepeat(

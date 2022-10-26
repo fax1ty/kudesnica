@@ -5,6 +5,7 @@ import { Colors, Fonts } from "../resources";
 export interface ButtonProps {
   children: string;
   theme?: "filled" | "outlined";
+  action?: "primary" | "secondary";
   style?: ViewStyle;
   disabled?: boolean;
   onPress?: () => void;
@@ -14,6 +15,7 @@ export const Button = ({
   disabled = false,
   children,
   theme = "filled",
+  action = "primary",
   style,
   onPress,
 }: ButtonProps) => {
@@ -29,7 +31,9 @@ export const Button = ({
           theme === "filled"
             ? disabled
               ? Colors.light20
-              : Colors.pink100
+              : action === "primary"
+              ? Colors.pink100
+              : Colors.light20
             : undefined,
         borderRadius: 30,
         height: 56,

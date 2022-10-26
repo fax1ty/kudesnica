@@ -53,7 +53,7 @@ export type IRichBlock =
 
 export const useStories = (dollId?: string) =>
   useSWR<{ items: Array<IStory>; unwatchedTotal: number }>(
-    authGuard(dollId ? `/dolls/${dollId}/storiesList` : null),
+    dollId ? `/dolls/${dollId}/storiesList` : null,
     fetcher,
     {
       refreshInterval: 0,

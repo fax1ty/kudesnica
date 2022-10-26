@@ -1,10 +1,10 @@
 import { View, Pressable, Text } from "react-native";
 import { Colors, Fonts } from "../resources";
 import { Slider } from "@sharcoux/slider";
-import { useEffect, useMemo, useState } from "react";
-import useBus, { dispatch } from "use-bus";
+import { useMemo } from "react";
 import { makeTimeStringFromMs } from "../utils/time";
-import { toFixed } from "../utils/math";
+import TrackPlayer from "react-native-track-player";
+import { useTrackProgress, useTrackState } from "../hooks/audio";
 
 import Back15Icon from "../icons/Back15";
 import Next15Icon from "../icons/Next15";
@@ -17,42 +17,11 @@ interface Props {
 }
 
 export const Player = ({ storyId, duration }: Props) => {
-  const [progress, setProgress] = useState(0);
-  const [state, setState] = useState<"paused" | "playing">("paused");
+  const progress = useTrackProgress(storyId);
+  const state = useTrackState(storyId);
 
   const now = useMemo(() => makeTimeStringFromMs(progress), [progress]);
   const total = useMemo(() => makeTimeStringFromMs(duration), [duration]);
-
-  useEffect(() => {
-    setProgress(0);
-  }, [storyId]);
-
-  useBus(
-    "REMOTE_AUDIO_PROGRESS",
-    ({ id, value }) => {
-      console.log(
-        "Удалённое аудио",
-        id,
-        "хочет обновить прогресс. Текущее значение:",
-        value
-      );
-      if (id === storyId) setProgress(value);
-    },
-    [storyId]
-  );
-  useBus(
-    "REMOTE_AUDIO_STATE_CHANGE",
-    ({ id, value }) => {
-      console.log(
-        "Удалённое аудио",
-        id,
-        "хочет сменить состояние. Текущее значение:",
-        value
-      );
-      if (id === storyId) setState(value);
-    },
-    [storyId]
-  );
 
   return (
     <>
@@ -65,11 +34,10 @@ export const Player = ({ storyId, duration }: Props) => {
       >
         <Back15Icon />
         <Pressable
-          onPress={() => {
+          onPress={async () => {
             if (!storyId) return;
-            if (state === "paused")
-              dispatch({ type: "UI_AUDIO_PLAY", id: storyId });
-            else dispatch({ type: "UI_AUDIO_PAUSE", id: storyId });
+            if (state === "playing") await TrackPlayer.pause();
+            else await TrackPlayer.play();
           }}
           style={{
             alignItems: "center",
@@ -125,11 +93,7 @@ export const Player = ({ storyId, duration }: Props) => {
       </View>
       <Slider
         onSlidingComplete={(value) => {
-          dispatch({
-            type: "UI_AUDIO_SEEK",
-            id: storyId,
-            value: toFixed(value, 1),
-          });
+          TrackPlayer.seekTo(Math.floor(value / 1000));
         }}
         style={{ marginTop: 15 }}
         minimumValue={0}

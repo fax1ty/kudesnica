@@ -5,6 +5,8 @@ import { IRichBlock, IRichImageBorders } from "../api/stories";
 import { LoadableImage } from "./LoadableImage";
 import { Button } from "./Button";
 import { Skeleton } from "./Skeleton";
+import { useGlobalStore } from "../stores/global";
+import { useProfile } from "../api/profile";
 
 import RubyIcon from "../icons/Ruby";
 import PlusWithStars from "../icons/PlusWithStars";
@@ -125,6 +127,9 @@ const Image = ({
 };
 
 const Attachment = ({ kind }: { kind: "image" | "video" }) => {
+  const openAuthOnlyModal = useGlobalStore((state) => state.openAuthOnlyModal);
+  const { data: profile } = useProfile();
+
   return (
     <View
       style={{
@@ -170,7 +175,13 @@ const Attachment = ({ kind }: { kind: "image" | "video" }) => {
         </Text>
         <PlusWithStars style={{ marginTop: 18, alignSelf: "center" }} />
         <View style={{ paddingLeft: 26, paddingRight: 29, marginTop: 26 }}>
-          <Button disabled>Загрузить!</Button>
+          <Button
+            onPress={() => {
+              if (!profile) openAuthOnlyModal();
+            }}
+          >
+            Загрузить!
+          </Button>
         </View>
         <Text
           style={{

@@ -1,11 +1,13 @@
 const ENV = process.env.APP_ENV || "local";
 
+const version = [0, 0, 2];
+
 module.exports = {
   expo: {
     jsEngine: "hermes",
     name: ENV === "local" ? "Кудесница (local)" : "Кудесница",
     slug: "kudesnica",
-    version: "0.0.1",
+    version: version.join("."),
     orientation: "portrait",
     icon: "./assets/icon.png",
     userInterfaceStyle: "light",
@@ -18,6 +20,7 @@ module.exports = {
     },
     assetBundlePatterns: ["**/*"],
     ios: {
+      buildNumber: version[2].toString(),
       bundleIdentifier: "ru.kudesnica.app",
       infoPlist: {
         UIBackgroundModes: ["audio"],
@@ -30,6 +33,7 @@ module.exports = {
       translucent: true,
     },
     android: {
+      versionCode: version[2],
       package: ENV === "local" ? "ru.kudesnica.app.local" : "ru.kudesnica.app",
       permissions: ["android.permission.FOREGROUND_SERVICE"],
       googleServicesFile: "./google-services.json",
@@ -58,6 +62,11 @@ module.exports = {
       [
         "expo-build-properties",
         {
+          android: {
+            compileSdkVersion: 33,
+            targetSdkVersion: 33,
+            buildToolsVersion: "33.0.0",
+          },
           ios: {
             useFrameworks: "static",
           },

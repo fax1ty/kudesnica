@@ -5,7 +5,7 @@ import Toggle from "react-native-toggle-element";
 import { useState } from "react";
 import { Pin } from "../components/Pin";
 import { useNavigation } from "@react-navigation/native";
-import { useGlobalStore } from "../store";
+import { useGlobalStore } from "../stores/global";
 import { Avatar } from "../components/Avatar";
 import { GradientCard } from "../components/GradientCard";
 import { useFavorites } from "../api/stories";
@@ -25,9 +25,11 @@ export const UserScreen = () => {
   const { data: profile } = useProfile();
   const [isNotificationActive, setNotificationActive] = useState(true);
   const navigation = useNavigation<any>();
-  const store = useGlobalStore();
   const { data: favorites } = useFavorites();
   const insets = useSafeAreaInsets();
+  const openExitConfirmModal = useGlobalStore(
+    (state) => state.openExitConfirmModal
+  );
 
   return (
     <View style={{ position: "relative", flex: 1 }}>
@@ -266,7 +268,7 @@ export const UserScreen = () => {
             }}
           />
           <Pressable
-            onPress={() => store.setToken("")}
+            onPress={() => openExitConfirmModal()}
             style={{
               flexDirection: "row",
               height: 67 - 1,

@@ -19,11 +19,8 @@ import { StoriesScreen } from "./screens/StoriesScreen";
 import { AuthScreen } from "./screens/AuthScreen";
 import { VerifyScreen } from "./screens/VerifyScreen";
 import { CongratulationsRegModal } from "./modals/CongratulationsRegModal";
-import { useGlobalStore } from "./store";
-import MusicControl, { Command } from "react-native-music-control";
-import { useEffect, useRef, useState } from "react";
-import { Audio, InterruptionModeAndroid, InterruptionModeIOS } from "expo-av";
-import { toFixed } from "./utils/math";
+import { useGlobalStore } from "./stores/global";
+import { useEffect, useRef } from "react";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import {
   PersistedStateProvider,
@@ -35,8 +32,6 @@ import { UserScreen } from "./screens/UserScreen";
 import { UserEditScreen } from "./screens/UserEditScreen";
 import { AddCardScreen } from "./screens/AddCardScreen";
 import { WelcomeScreen } from "./screens/WelcomeScreen";
-import useBus, { dispatch } from "use-bus";
-import { useAudio } from "./hooks/audio";
 import * as SplashScreen from "expo-splash-screen";
 import { usePreviousImmediate } from "rooks";
 import { PremiumStoryModal } from "./modals/PremiumStoryModal";
@@ -46,36 +41,44 @@ import { LoginWelcomeModal } from "./modals/LoginWelcomeModal";
 import analytics from "@react-native-firebase/analytics";
 import perf, { FirebasePerformanceTypes } from "@react-native-firebase/perf";
 import { getCurrentEnv } from "./utils/misc";
+import { useAudioStore } from "./stores/audio";
+import { AuthOnlyModal } from "./modals/AuthOnlyModal";
+import crashlytics from "@react-native-firebase/crashlytics";
+import { ExitConfirmModal } from "./modals/ExitConfirmModal";
+import { StoreLinksModal } from "./modals/StoreLinksModal";
 
 SplashScreen.preventAutoHideAsync();
 
-console.log(getCurrentEnv());
-
 const AuthController = () => {
-  const store = useGlobalStore();
   const navigation = useNavigation();
   const route = useNavigationState((state) => state?.index);
-  const previousToken = usePreviousImmediate(store.token);
-  const [token, setToken] = usePersistedState("@token", "");
+  const token = useGlobalStore((state) => state.token);
+  const setToken = useGlobalStore((state) => state.setToken);
+  const closeBottomPlayer = useGlobalStore((state) => state.closeBottomPlayer);
+  const previousToken = usePreviousImmediate(token);
+  const [persistToken, setPersistToken] = usePersistedState("@token", "");
 
   useEffect(() => {
-    if (token && token !== store.token) store.setToken(token);
+    if (persistToken && persistToken !== token) setToken(persistToken);
+  }, [persistToken, token]);
+
+  useEffect(() => {
+    setPersistToken(token);
+    axios.defaults.headers.common.authorization = token;
+
     if (!token) {
       analytics().setAnalyticsCollectionEnabled(false);
-      store.closeBottomPlayer();
+      crashlytics().setCrashlyticsCollectionEnabled(false);
     } else {
       analytics().setAnalyticsCollectionEnabled(true);
+      crashlytics().setCrashlyticsCollectionEnabled(true);
     }
   }, [token]);
 
   useEffect(() => {
-    setToken(store.token);
-    axios.defaults.headers.common.authorization = store.token;
-  }, [store.token]);
-
-  useEffect(() => {
-    if (!store.token && previousToken) {
+    if (!token && previousToken) {
       console.log("Разлогинились, идём на логин!");
+      closeBottomPlayer();
       navigation.dispatch(
         CommonActions.reset({
           index: 0,
@@ -83,275 +86,43 @@ const AuthController = () => {
         })
       );
     }
-  }, [store.token, route]);
+  }, [token, previousToken, route]);
 
   return null;
 };
 
 export default function App() {
-  const store = useGlobalStore();
-  const [url, setUrl] = useState("");
-  const [currentAudioAutoPlay, setCurrentAudioAutoPlay] = useState(false);
-  const {
-    play,
-    pause,
-    seekTo,
-    isReady,
-    progress,
-    duration,
-    isPlaying,
-    buffered,
-  } = useAudio(url, currentAudioAutoPlay);
-  const [currentAudioStoryId, setCurrentAudioStoryId] = useState<string | null>(
-    null
+  const isLoginWelcomeModalVisible = useGlobalStore(
+    (state) => state.isLoginWelcomeModalVisible
   );
-  const [currentAudioTitle, setCurrentAudioTitle] = useState("");
-  const [currentAudioArtist, setCurrentAudioArtist] = useState("");
-  const [currentAudioArtwork, setCurrentAudioArtwork] = useState("");
+  const isPremiumStoryModalVisible = useGlobalStore(
+    (state) => state.isPremiumStoryModalVisible
+  );
+  const isBottomPlayerOpen = useGlobalStore(
+    (state) => state.isBottomPlayerOpen
+  );
+  const isCongratulationsRegModalVisible = useGlobalStore(
+    (state) => state.isCongratulationsRegModalVisible
+  );
+  const isAuthOnlyModalVisible = useGlobalStore(
+    (state) => state.isAuthOnlyModalVisible
+  );
+  const isExitConfirmModalVisible = useGlobalStore(
+    (state) => state.isExitConfirmModalVisible
+  );
+  const isStoreLinksModalVisible = useGlobalStore(
+    (state) => state.isStoreLinksModalVisible
+  );
+  const setFontsLoaded = useGlobalStore((state) => state.setFontsLoaded);
+  const setToken = useGlobalStore((state) => state.setToken);
+  const currentlyPlayingStoryId = useAudioStore(
+    (state) => state.currentlyPlaying.storyId
+  );
+  const currentlyPlayingDollId = useAudioStore(
+    (state) => state.currentlyPlaying.dollId
+  );
   const routeNameRef = useRef<string | null>(null);
   const navigationRef = useRef<NavigationContainerRef<any> | null>(null);
-
-  useEffect(() => {
-    Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: true,
-      interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
-      interruptionModeIOS: InterruptionModeIOS.DoNotMix,
-    });
-
-    MusicControl.enableBackgroundMode(true);
-    // MusicControl.handleAudioInterruptions(true);
-
-    MusicControl.on(Command.play, async () => {
-      console.log("play!!");
-      dispatch({ type: "UI_AUDIO_PLAY", id: currentAudioStoryId });
-    });
-    MusicControl.on(Command.pause, async () => {
-      dispatch({ type: "UI_AUDIO_PAUSE", id: currentAudioStoryId });
-    });
-    MusicControl.on(Command.stop, async () => {
-      dispatch({ type: "UI_AUDIO_PAUSE", id: currentAudioStoryId });
-    });
-    MusicControl.on(
-      Command.changePlaybackPosition,
-      async (playbackPosition) => {
-        dispatch({
-          type: "UI_AUDIO_SEEK",
-          id: currentAudioStoryId,
-          value: playbackPosition * 1000,
-        });
-      }
-    );
-    MusicControl.on(Command.seekForward, (e) => console.log(e, "seek_forward"));
-    MusicControl.on(Command.seekBackward, (e) =>
-      console.log(e, "seek_backward")
-    );
-    MusicControl.on(Command.seek, async (playbackPosition) => {
-      dispatch({
-        type: "UI_AUDIO_SEEK",
-        id: currentAudioStoryId,
-        value: playbackPosition * 1000,
-      });
-    });
-    MusicControl.on(Command.togglePlayPause, () => {
-      console.log("toggle_play_pause");
-      dispatch({
-        type: "UI_AUDIO_TOGGLE",
-        id: currentAudioStoryId,
-      });
-    });
-    MusicControl.on(Command.setRating, (rating) => {
-      console.log(rating, "set_rating");
-    });
-    MusicControl.on(Command.closeNotification, async () => {
-      dispatch({
-        type: "UI_AUDIO_PAUSE",
-        id: currentAudioStoryId,
-      });
-    });
-
-    return () => {
-      MusicControl.off(Command.play);
-      MusicControl.off(Command.pause);
-      MusicControl.off(Command.stop);
-      MusicControl.off(Command.changePlaybackPosition);
-      MusicControl.off(Command.seekForward);
-      MusicControl.off(Command.seekBackward);
-      MusicControl.off(Command.seek);
-      MusicControl.off(Command.togglePlayPause);
-      MusicControl.off(Command.setRating);
-      MusicControl.off(Command.closeNotification);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isReady) return;
-    if (
-      !currentAudioStoryId ||
-      !currentAudioTitle ||
-      !currentAudioArtist ||
-      !currentAudioArtwork
-    )
-      return;
-
-    MusicControl.enableControl(Command.closeNotification, true, {
-      when: "always",
-    });
-    MusicControl.enableControl(Command.play, true);
-    MusicControl.enableControl(Command.pause, true);
-    MusicControl.enableControl(Command.stop, false);
-    MusicControl.enableControl(Command.changePlaybackPosition, true);
-    MusicControl.enableControl(Command.seekForward, true); // iOS only
-    MusicControl.enableControl(Command.seekBackward, true); // iOS only
-    MusicControl.enableControl(Command.seek, true); // Android only
-    MusicControl.setNowPlaying({
-      title: currentAudioTitle,
-      artwork: currentAudioArtwork,
-      artist: currentAudioArtist,
-      duration: toFixed(duration / 1000, 1),
-      colorized: true,
-      rating: MusicControl.RATING_HEART,
-      state: MusicControl.STATE_BUFFERING,
-    });
-
-    return () => {
-      MusicControl.stopControl();
-    };
-  }, [
-    duration,
-    isReady,
-    currentAudioStoryId,
-    currentAudioTitle,
-    currentAudioArtist,
-    currentAudioArtwork,
-  ]);
-
-  useEffect(() => {
-    if (!isReady) return;
-
-    MusicControl.updatePlayback({
-      elapsedTime: toFixed(progress / 1000, 1),
-      bufferedTime: toFixed(buffered / 1000, 1),
-    });
-    dispatch({
-      type: "REMOTE_AUDIO_PROGRESS",
-      id: currentAudioStoryId,
-      value: progress,
-    });
-  }, [isReady, progress, buffered]);
-
-  useEffect(() => {
-    if (!isReady) return;
-
-    MusicControl.updatePlayback({
-      state: !isPlaying
-        ? MusicControl.STATE_STOPPED
-        : MusicControl.STATE_PLAYING,
-    });
-    dispatch({
-      type: "REMOTE_AUDIO_STATE_CHANGE",
-      id: currentAudioStoryId,
-      value: isPlaying ? "playing" : "paused",
-    });
-    if (currentAudioStoryId)
-      store.setCurrentlyPlaying({
-        dollId: store.currentlyPlaying.dollId,
-        storyId: currentAudioStoryId,
-        state: isPlaying ? "playing" : "paused",
-      });
-  }, [isReady, isPlaying]);
-
-  useBus("UI_AUDIO_METADATA", ({ url, id, title, artist, cover, autoPlay }) => {
-    console.log(
-      "Мы получили новые аудиоданные от",
-      id,
-      "/",
-      title,
-      artist,
-      cover,
-      autoPlay
-    );
-    setUrl(url);
-    setCurrentAudioStoryId((oldId) => {
-      dispatch({
-        type: "REMOTE_AUDIO_STATE_CHANGE",
-        id: oldId,
-        value: "paused",
-      });
-      dispatch({
-        type: "REMOTE_AUDIO_PROGRESS",
-        id: oldId,
-        value: 0,
-      });
-      return id;
-    });
-    setCurrentAudioTitle(title);
-    setCurrentAudioArtist(artist);
-    setCurrentAudioArtwork(cover);
-    setCurrentAudioAutoPlay(autoPlay);
-  });
-  useBus(
-    "UI_AUDIO_PLAY",
-    ({ id }) => {
-      console.log(
-        id,
-        "попытался запустить текущее воспроизведение. Текущий ID:",
-        currentAudioStoryId
-      );
-      if (id !== currentAudioStoryId) return;
-      play();
-      dispatch({ type: "REMOTE_AUDIO_STATE_CHANGE", id, value: "playing" });
-    },
-    [currentAudioStoryId]
-  );
-  useBus(
-    "UI_AUDIO_PAUSE",
-    ({ id }) => {
-      console.log(
-        id,
-        "попытался остановить текущее воспроизведение. Текущий ID:",
-        currentAudioStoryId
-      );
-      if (id !== currentAudioStoryId) return;
-      pause();
-      dispatch({ type: "REMOTE_AUDIO_STATE_CHANGE", id, value: "paused" });
-    },
-    [currentAudioStoryId]
-  );
-  useBus(
-    "UI_AUDIO_TOGGLE",
-    ({ id }) => {
-      console.log(
-        id,
-        "попытался затоглить текущее воспроизведение. Текущий ID:",
-        currentAudioStoryId
-      );
-      if (id !== currentAudioStoryId) return;
-      if (isPlaying) pause();
-      else play();
-      dispatch({
-        type: "REMOTE_AUDIO_STATE_CHANGE",
-        id,
-        value: isPlaying ? "paused" : "playing",
-      });
-    },
-    [currentAudioStoryId]
-  );
-  useBus(
-    "UI_AUDIO_SEEK",
-    ({ id, value }) => {
-      console.log(
-        id,
-        "попытался использовать перемотку к",
-        value,
-        "/ Текущий ID:",
-        currentAudioStoryId
-      );
-      if (id !== currentAudioStoryId) return;
-      seekTo(value);
-    },
-    [currentAudioStoryId]
-  );
 
   const Stack = createNativeStackNavigator();
 
@@ -363,7 +134,7 @@ export default function App() {
   });
 
   useEffect(() => {
-    if (fontsLoaded) store.setFontsLoaded(true);
+    if (fontsLoaded) setFontsLoaded(true);
   }, [fontsLoaded]);
 
   type AxiosConfig = AxiosRequestConfig & {
@@ -399,7 +170,7 @@ export default function App() {
       },
       function (error) {
         if (error instanceof AxiosError) {
-          if (error.response?.status === 401) store.setToken("");
+          if (error.response?.status === 401) setToken("");
         }
         return Promise.reject(error);
       }
@@ -484,17 +255,20 @@ export default function App() {
             </View>
             <AuthController />
             {/* #region Modals */}
-            {store.isBottomPlayerOpen && (
+            {isBottomPlayerOpen && (
               <StoryModal
-                dollId={store.currentlyPlaying.dollId}
-                storyId={store.currentlyPlaying.storyId}
+                dollId={currentlyPlayingDollId}
+                storyId={currentlyPlayingStoryId}
               />
             )}
             <CongratulationsRegModal
-              visible={store.isCongratulationsRegModalVisible}
+              visible={isCongratulationsRegModalVisible}
             />
-            <PremiumStoryModal visible={store.isPremiumStoryModalVisible} />
-            <LoginWelcomeModal visible={store.isLoginWelcomeModalVisible} />
+            <PremiumStoryModal visible={isPremiumStoryModalVisible} />
+            <LoginWelcomeModal visible={isLoginWelcomeModalVisible} />
+            <AuthOnlyModal visible={isAuthOnlyModalVisible} />
+            <ExitConfirmModal visible={isExitConfirmModalVisible} />
+            <StoreLinksModal visible={isStoreLinksModalVisible} />
             {/* #endregion Modals */}
             <StatusBar style="dark" />
           </NavigationContainer>

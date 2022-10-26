@@ -1,6 +1,6 @@
 import { FlatList, View, Pressable } from "react-native";
 import { useProfile } from "../api/profile";
-import { useGlobalStore } from "../store";
+import { useGlobalStore } from "../stores/global";
 import { LowPlayer } from "../components/LowPlayer";
 import { Colors } from "../resources";
 import { ScreenTemplate } from "../components/ScreenTemplate";
@@ -21,7 +21,9 @@ import HeartFilledIcon from "../icons/HeartSmallFilled";
 export const FavoritesScreen = () => {
   const { data: profile } = useProfile();
   const { data: favorites, mutate: mutateStories } = useFavorites();
-  const store = useGlobalStore();
+  const openPremiumStoryModal = useGlobalStore(
+    (state) => state.openPremiumStoryModal
+  );
 
   return (
     <ScreenTemplate>
@@ -38,11 +40,11 @@ export const FavoritesScreen = () => {
                 if (!profile) return;
 
                 if (item.premium && !profile.premium)
-                  return store.openPremiumStoryModal();
+                  return openPremiumStoryModal();
 
                 const { doll, ...story } = item;
 
-                updateCurrentlyPlaying(store, doll, story);
+                updateCurrentlyPlaying(doll, story);
                 dispatch("UI_STORY_EXPAND");
               }}
             >

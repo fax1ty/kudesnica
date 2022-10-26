@@ -1,5 +1,4 @@
 import useSWR from "swr";
-import { authGuard } from "../utils/misc";
 import { fetcher } from "./fetcher";
 import { IRichBlock } from "./stories";
 
@@ -9,12 +8,13 @@ export interface IDoll {
   dollsCarouselPhoto: string;
   storyViewCarousel: Array<string>;
   description: Array<IRichBlock>;
+  storeLinks: Array<string>;
 }
 
 export const useDolls = () =>
-  useSWR<Array<IDoll>>(authGuard("/dolls"), fetcher, { refreshInterval: 0 });
+  useSWR<Array<IDoll>>("/dolls", fetcher, { refreshInterval: 0 });
 
 export const useDoll = (dollId: string | null) =>
-  useSWR<IDoll>(authGuard(dollId ? `/dolls/${dollId}` : null), fetcher, {
+  useSWR<IDoll>(dollId ? `/dolls/${dollId}` : null, fetcher, {
     refreshInterval: 0,
   });

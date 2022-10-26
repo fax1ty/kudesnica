@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 import pms from "parse-ms";
 import { leadWithZero } from "../utils/math";
 import { CodeInput } from "../components/CodeInput";
-import { useGlobalStore } from "../store";
+import { useGlobalStore } from "../stores/global";
 import { verify } from "../api/auth";
 import axios from "axios";
 import { ScreenTemplate } from "../components/ScreenTemplate";

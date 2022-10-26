@@ -1,7 +1,7 @@
 import { Text } from "react-native";
 import { Colors, Fonts } from "../resources";
 import { CircleModal } from "./CircleModal";
-import { useGlobalStore } from "../store";
+import { useGlobalStore } from "../stores/global";
 
 import Ura from "../icons/Ura";
 import AddPhotoIcon from "../icons/AddPhoto";
@@ -11,12 +11,14 @@ interface Props {
 }
 
 export const CongratulationsRegModal = ({ visible }: Props) => {
-  const store = useGlobalStore();
+  const closeCongratulationsRegModal = useGlobalStore(
+    (state) => state.closeCongratulationsRegModal
+  );
 
   return (
     <CircleModal
       visible={visible}
-      onClose={store.closeCongratulationsRegModal}
+      onClose={closeCongratulationsRegModal}
       headerContent={
         <>
           <Ura />
@@ -53,7 +55,7 @@ export const CongratulationsRegModal = ({ visible }: Props) => {
       }
       buttonProps={{
         children: "Перейти к историям!",
-        onPress: store.closeCongratulationsRegModal,
+        onPress: closeCongratulationsRegModal,
       }}
     />
   );

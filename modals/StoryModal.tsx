@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Player } from "../components/Player";
 import { generateComponentsFromRichComponents } from "../components/RichView";
 import BottomSheet, {
@@ -6,7 +6,7 @@ import BottomSheet, {
   BottomSheetFlatList,
   BottomSheetFlatListMethods,
 } from "@gorhom/bottom-sheet";
-import { Image, View, Text, Pressable } from "react-native";
+import { Image, View, Text, Pressable, ViewToken } from "react-native";
 import { useDimensions } from "@react-native-community/hooks";
 import { percentageOf } from "../utils/math";
 import Animated, {
@@ -16,7 +16,6 @@ import Animated, {
 } from "react-native-reanimated";
 import useBus from "use-bus";
 import { Colors, Fonts, Values } from "../resources";
-// import InView from "../components/VisibilityTracker";
 import { Button } from "../components/Button";
 import { LowPlayer } from "../components/LowPlayer";
 import { getNextStoryId, getStory, IStory, useStory } from "../api/stories";
@@ -25,7 +24,7 @@ import { LoadableImage } from "../components/LoadableImage";
 import { Skeleton } from "../components/Skeleton";
 import { LinearGradient } from "expo-linear-gradient";
 import { updateCurrentlyPlaying } from "../utils/audio";
-import { useGlobalStore } from "../store";
+import { useGlobalStore } from "../stores/global";
 import { useProfile } from "../api/profile";
 import { CustomBackdrop } from "../components/CustomBackdrop";
 
@@ -60,19 +59,40 @@ const SheetContent = ({ story, doll }: ContentProps) => {
   const { animatedIndex, expand, collapse } = useBottomSheet();
   const scroll = useRef<BottomSheetFlatListMethods>(null);
   const { screen: screenSize } = useDimensions();
-  const [isTopPlayerVisible, setIsTopPlayerVisible] = useState(false);
   const components = useMemo(
     () => (story ? generateComponentsFromRichComponents(story.content) : []),
     [story]
   );
-  const store = useGlobalStore();
   const { data: profile } = useProfile();
+  const [lastViewableItemIndex, setLastViewableItemIndex] = useState<
+    number | null
+  >(null);
+  const isBottomPlayerVisible = useMemo(
+    () =>
+      typeof lastViewableItemIndex !== "number"
+        ? false
+        : lastViewableItemIndex >= 3,
+    [lastViewableItemIndex]
+  );
+  const openPremiumStoryModal = useGlobalStore(
+    (state) => state.openPremiumStoryModal
+  );
+
+  const onViewableItemsChanged = useCallback(
+    (data: { viewableItems: Array<ViewToken> }) =>
+      setLastViewableItemIndex(
+        data.viewableItems[data.viewableItems.length - 1].index
+      ),
+    []
+  );
 
   useBus("UI_STORY_EXPAND", () => expand());
 
   return (
     <View style={{ flex: 1, position: "relative" }}>
       <BottomSheetFlatList
+        viewabilityConfig={{ itemVisiblePercentThreshold: 75 }}
+        onViewableItemsChanged={onViewableItemsChanged}
         ref={scroll}
         style={{
           flex: 1,
@@ -124,13 +144,10 @@ const SheetContent = ({ story, doll }: ContentProps) => {
                   }}
                 />
                 <View style={{ paddingHorizontal: 26, marginTop: 24 }}>
-                  {/* massive performance impact!  */}
-                  {/* <InView onChange={setIsTopPlayerVisible}> */}
                   <Player
                     storyId={story?.id}
                     duration={story?.audio.duration || 0}
                   />
-                  {/* </InView> */}
                 </View>
                 {story ? (
                   <Text
@@ -184,8 +201,8 @@ const SheetContent = ({ story, doll }: ContentProps) => {
                   const nextStoryId = await getNextStoryId(doll.id, story.id);
                   const nextStory = await getStory(doll.id, nextStoryId);
                   if (nextStory.premium && !profile.premium)
-                    return store.openPremiumStoryModal();
-                  updateCurrentlyPlaying(store, doll, nextStory);
+                    return openPremiumStoryModal();
+                  updateCurrentlyPlaying(doll, nextStory);
                 }}
               >
                 Следующая история →
@@ -207,9 +224,9 @@ const SheetContent = ({ story, doll }: ContentProps) => {
               screenSize.height * MODAL_OPEN_SNAP_NORMALIZED -
                 (animatedIndex.value === 0
                   ? Values.bottomPlayerHeight
-                  : isTopPlayerVisible
-                  ? 0
-                  : Values.bottomPlayerHeight),
+                  : isBottomPlayerVisible
+                  ? Values.bottomPlayerHeight
+                  : 0),
             ],
             Extrapolate.CLAMP
           ),

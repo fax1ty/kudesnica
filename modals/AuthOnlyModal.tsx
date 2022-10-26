@@ -2,6 +2,7 @@ import { Text } from "react-native";
 import { Colors, Fonts } from "../resources";
 import { CircleModal } from "./CircleModal";
 import { useGlobalStore } from "../stores/global";
+import { useNavigation } from "@react-navigation/native";
 
 import LockCircled from "../icons/LockCircled";
 
@@ -9,15 +10,16 @@ interface Props {
   visible: boolean;
 }
 
-export const PremiumStoryModal = ({ visible }: Props) => {
-  const closePremiumStoryModal = useGlobalStore(
-    (state) => state.closePremiumStoryModal
+export const AuthOnlyModal = ({ visible }: Props) => {
+  const closeAuthOnlyModal = useGlobalStore(
+    (state) => state.closeAuthOnlyModal
   );
+  const navigation = useNavigation<any>();
 
   return (
     <CircleModal
       visible={visible}
-      onClose={closePremiumStoryModal}
+      onClose={closeAuthOnlyModal}
       headerContent={
         <>
           <LockCircled style={{ marginBottom: 14 }} />
@@ -27,20 +29,10 @@ export const PremiumStoryModal = ({ visible }: Props) => {
               fontSize: 18,
               lineHeight: 22,
               color: Colors.violet100,
+              textAlign: "center",
             }}
           >
-            История доступна по подписке
-          </Text>
-          <Text
-            style={{
-              marginTop: 7,
-              fontFamily: Fonts.firasansRegular,
-              fontSize: 14,
-              lineHeight: 18,
-              color: Colors.green100,
-            }}
-          >
-            Ежемесяная подписка всего за 199 ₽!
+            Функция доступна только зарегистрированным
           </Text>
         </>
       }
@@ -57,15 +49,16 @@ export const PremiumStoryModal = ({ visible }: Props) => {
               textAlign: "center",
             }}
           >
-            {
-              "Оформите ежемесячную подписку и\nкаждый месяц вас ждут новые\nувлекательные истории из\nжизни кукол!"
-            }
+            Придумайте классный текст сюда, пожалуйста
           </Text>
         </>
       }
       buttonProps={{
-        children: "Оформить подписку за 199 ₽!",
-        onPress: closePremiumStoryModal,
+        children: "Зарегистрироваться",
+        onPress: () => {
+          navigation.navigate("Auth", { mode: "register" });
+          closeAuthOnlyModal();
+        },
       }}
     />
   );

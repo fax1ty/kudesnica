@@ -10,11 +10,11 @@ import { DollsCarousel } from "../components/DollsCarousel";
 import { useDolls } from "../api/dolls";
 import { useEffect, useMemo, useState } from "react";
 import { useStories } from "../api/stories";
-import { useGlobalStore } from "../store";
 import { Avatar } from "../components/Avatar";
 import { useProfile } from "../api/profile";
 import { updateCurrentlyPlaying } from "../utils/audio";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useGlobalStore } from "../stores/global";
 
 import BurgerButton from "../icons/BurgerButton";
 import Logo from "../icons/Logo";
@@ -29,16 +29,16 @@ export const DollsScreen = () => {
     dolls ? (isCurrentDollNext ? undefined : dolls[currentDoll].id) : undefined
   );
   // prefetch our profile
-  useProfile();
-  const store = useGlobalStore();
+  const { data: profile } = useProfile();
   const insets = useSafeAreaInsets();
+  const openAuthOnlyModal = useGlobalStore((state) => state.openAuthOnlyModal);
 
   useEffect(() => {
     if (!dolls || !stories) return;
     if (isCurrentDollNext) return;
     const doll = dolls[currentDoll];
     const story = stories.items[0];
-    updateCurrentlyPlaying(store, doll, story);
+    updateCurrentlyPlaying(doll, story);
   }, [stories, isCurrentDollNext]);
 
   const renderedDolls = useMemo(
@@ -56,6 +56,7 @@ export const DollsScreen = () => {
         next: true,
         description: [],
         unwatched: 0,
+        storeLinks: [],
       },
     ],
     [dolls]
@@ -119,7 +120,10 @@ export const DollsScreen = () => {
           <Logo />
           <Avatar
             avatar={null}
-            onPress={() => navigation.navigate("User")}
+            onPress={() => {
+              if (!profile) return openAuthOnlyModal();
+              navigation.navigate("User");
+            }}
             size="small"
           />
         </View>

@@ -1,15 +1,17 @@
 import { CircularProgressBase } from "react-native-circular-progress-indicator";
-import useBus, { dispatch } from "use-bus";
 import { View, Text, Image, Pressable } from "react-native";
-import { useState, ReactNode, useMemo, useEffect } from "react";
+import { useState, ReactNode, useMemo } from "react";
 import { Colors, Fonts, Values } from "../resources";
 import { Skeleton } from "./Skeleton";
 import { percentageOf } from "../utils/math";
-import { useGlobalStore } from "../store";
+import { useGlobalStore } from "../stores/global";
 import { useDoll } from "../api/dolls";
 import { useStory } from "../api/stories";
 import { useProfile } from "../api/profile";
 import { updateCurrentlyPlaying } from "../utils/audio";
+import { useAudioStore } from "../stores/audio";
+import TrackPlayer from "react-native-track-player";
+import { useTrackProgress, useTrackState } from "../hooks/audio";
 
 import PlayIcon from "../icons/Play";
 import PauseIcon from "../icons/Pause";
@@ -54,59 +56,30 @@ export const LowPlayer = ({
   dollId,
   duration,
 }: Props) => {
-  const [progress, setProgress] = useState(0);
-  const [state, setState] = useState<"paused" | "playing">("paused");
   const [coverLoaded, setCoverLoaded] = useState(false);
-  const total = useMemo(
-    () => percentageOf(progress, duration || 1000),
-    [progress]
-  );
-  const store = useGlobalStore();
   const { data: doll } = useDoll(dollId || null);
   const { data: story } = useStory(dollId || null, storyId || null);
   const { data: profile } = useProfile();
   const locked = useMemo(
-    () => (!story || !profile ? true : story.premium && !profile.premium),
+    () =>
+      !story
+        ? true
+        : !profile
+        ? story.premium
+        : story.premium && !profile.premium,
     [story, profile]
   );
-
-  useEffect(() => {
-    if (
-      store.currentlyPlaying.dollId === doll?.id &&
-      store.currentlyPlaying.storyId === story?.id
-    )
-      setState(store.currentlyPlaying.state);
-  }, [store.currentlyPlaying.state]);
-
-  useEffect(() => {
-    setProgress(0);
-  }, [storyId]);
-
-  useBus(
-    "REMOTE_AUDIO_PROGRESS",
-    ({ id, value }) => {
-      console.log(
-        "Удалённое аудио",
-        id,
-        "хочет обновить прогресс. Текущее значение:",
-        value
-      );
-      if (id === storyId) setProgress(value);
-    },
-    [storyId]
+  const progress = useTrackProgress(story?.id);
+  const state = useTrackState(story?.id);
+  const total = useMemo(
+    () => percentageOf(progress, duration || 1000),
+    [progress]
   );
-  useBus(
-    "REMOTE_AUDIO_STATE_CHANGE",
-    ({ id, value }) => {
-      console.log(
-        "Удалённое аудио",
-        id,
-        "хочет сменить состояние. Текущее значение:",
-        value
-      );
-      if (id === storyId) setState(value);
-    },
-    [storyId]
+  const openPremiumStoryModal = useGlobalStore(
+    (state) => state.openPremiumStoryModal
+  );
+  const currentlyPlayingStoryId = useAudioStore(
+    (state) => state.currentlyPlaying.storyId
   );
 
   return (
@@ -120,16 +93,14 @@ export const LowPlayer = ({
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <Pressable
-          onPress={() => {
+          onPress={async () => {
             if (!story || !doll) return;
-            if (locked) return store.openPremiumStoryModal();
-            if (story.id === store.currentlyPlaying.storyId)
-              dispatch({
-                type: "UI_AUDIO_TOGGLE",
-                id: storyId,
-              });
+            if (locked) return openPremiumStoryModal();
+            if (story.id === currentlyPlayingStoryId)
+              if (state === "playing") await TrackPlayer.pause();
+              else await TrackPlayer.play();
             else {
-              updateCurrentlyPlaying(store, doll, story, true);
+              updateCurrentlyPlaying(doll, story, true);
             }
           }}
           style={{

@@ -15,7 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { ScreenTemplate } from "../components/ScreenTemplate";
 import { ScreenTitle } from "../components/ScreenTitle";
-import { useGlobalStore } from "../store";
+import { useGlobalStore } from "../stores/global";
 import { usePreviousImmediate } from "rooks";
 import { useNavigation } from "@react-navigation/native";
 
@@ -28,10 +28,10 @@ export const UserEditScreen = () => {
   const [email, setEmail] = useState("");
   const { data: profile, mutate } = useProfile();
   const [status, requestPermission] = ImagePicker.useMediaLibraryPermissions();
-  const store = useGlobalStore();
   const previousEmail = usePreviousImmediate(email);
   const previousName = usePreviousImmediate(name);
   const navigation = useNavigation<any>();
+  const token = useGlobalStore((state) => state.token);
 
   useEffect(() => {
     if (!profile) return;
@@ -53,7 +53,7 @@ export const UserEditScreen = () => {
         uploadType: FileSystem.FileSystemUploadType.MULTIPART,
         fieldName: "file",
         headers: {
-          authorization: store.token,
+          authorization: token,
         },
         mimeType: "image/png",
         httpMethod: "PUT",

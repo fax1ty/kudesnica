@@ -1,29 +1,28 @@
 import create from "zustand";
 import { combine } from "zustand/middleware";
 
-interface ICurrentlyPlaying {
-  dollId: string;
-  storyId: string;
-  state:'paused'|'playing'
-}
-
 export const useGlobalStore = create(
   combine(
     {
       fontsLoaded: false,
-      currentlyPlaying: { dollId: "", storyId: "",state:'paused' } as ICurrentlyPlaying,
       isBottomPlayerOpen: false,
       isCongratulationsRegModalVisible: false,
       isPremiumStoryModalVisible: false,
       isLoginWelcomeModalVisible: false,
+      isAuthOnlyModalVisible: false,
+      isExitConfirmModalVisible: false,
+      isStoreLinksModalVisible: false,
       phone: 0,
       token: "",
+      storeLinksModalUrls: [
+        "https://ozon.ru",
+        "https://wildberries.ru",
+        "https://aliexpress.ru",
+      ],
     },
     (set) => ({
       setFontsLoaded: (value: boolean) =>
         set((state) => ({ ...state, fontsLoaded: value })),
-      setCurrentlyPlaying: (value: ICurrentlyPlaying) =>
-        set((state) => ({ ...state, currentlyPlaying: value })),
       openBottomPlayer: () =>
         set((state) => ({ ...state, isBottomPlayerOpen: true })),
       closeBottomPlayer: () =>
@@ -40,8 +39,22 @@ export const useGlobalStore = create(
         set((state) => ({ ...state, isLoginWelcomeModalVisible: true })),
       closeLoginWelcomeModal: () =>
         set((state) => ({ ...state, isLoginWelcomeModalVisible: false })),
+      openAuthOnlyModal: () =>
+        set((state) => ({ ...state, isAuthOnlyModalVisible: true })),
+      closeAuthOnlyModal: () =>
+        set((state) => ({ ...state, isAuthOnlyModalVisible: false })),
+      openExitConfirmModal: () =>
+        set((state) => ({ ...state, isExitConfirmModalVisible: true })),
+      closeExitConfirmModal: () =>
+        set((state) => ({ ...state, isExitConfirmModalVisible: false })),
+      openStoreLinksModal: () =>
+        set((state) => ({ ...state, isStoreLinksModalVisible: true })),
+      closeStoreLinksModal: () =>
+        set((state) => ({ ...state, isStoreLinksModalVisible: false })),
       setPhone: (phone: number) => set((state) => ({ ...state, phone })),
       setToken: (token: string) => set((state) => ({ ...state, token })),
+      setStoreLinksModalUrls: (urls: Array<string>) =>
+        set((state) => ({ ...state, storeLinksModalUrls: urls })),
     })
   )
 );

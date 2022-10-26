@@ -5,7 +5,7 @@ import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { auth } from "../api/auth";
-import { useGlobalStore } from "../store";
+import { useGlobalStore } from "../stores/global";
 import { serializePhoneNumber } from "../utils/phone";
 import { AxiosError } from "axios";
 
@@ -13,13 +13,14 @@ import { ScreenTemplate } from "../components/ScreenTemplate";
 import { ScreenTitle } from "../components/ScreenTitle";
 
 export const AuthScreen = () => {
+  const setPhone = useGlobalStore((state) => state.setPhone);
   const [error, setError] = useState("");
   const navigation = useNavigation<any>();
   const {
     params: { mode },
   } = useRoute<any>();
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [localPhone, setLocalPhone] = useState("");
   const [mask] = useState([
     "+",
     /\d/,
@@ -41,7 +42,6 @@ export const AuthScreen = () => {
     /\d/,
     /\d/,
   ]);
-  const store = useGlobalStore();
 
   useEffect(() => {
     setError("");
@@ -67,8 +67,8 @@ export const AuthScreen = () => {
           autoComplete="tel"
           keyboardType="number-pad"
           style={{ marginTop: 21 }}
-          onChangeText={(masked) => setPhone(masked)}
-          value={phone}
+          onChangeText={(masked) => setLocalPhone(masked)}
+          value={localPhone}
           mask={mask}
         />
         {error && (
@@ -87,13 +87,15 @@ export const AuthScreen = () => {
         <Button
           style={{ marginTop: 22 }}
           disabled={
-            mode === "register" ? !name || phone.length <= 5 : phone.length <= 5
+            mode === "register"
+              ? !name || localPhone.length <= 5
+              : localPhone.length <= 5
           }
           onPress={async () => {
             try {
-              const serialized = serializePhoneNumber(phone);
+              const serialized = serializePhoneNumber(localPhone);
               const requestId = await auth(serialized, name);
-              store.setPhone(serialized);
+              setPhone(serialized);
               navigation.navigate("Verify", { requestId, mode });
             } catch (error) {
               console.error(error);

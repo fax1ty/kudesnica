@@ -17,7 +17,7 @@ import {
   useStories,
 } from "../api/stories";
 import { useDoll } from "../api/dolls";
-import { useGlobalStore } from "../store";
+import { useGlobalStore } from "../stores/global";
 import { Pagination } from "../components/Pagination";
 import { makeTimeStringFromMs } from "../utils/time";
 import { mutate } from "swr";
@@ -25,6 +25,7 @@ import { updateCurrentlyPlaying } from "../utils/audio";
 import { useProfile } from "../api/profile";
 import { ScreenTitle } from "../components/ScreenTitle";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAudioStore } from "../stores/audio";
 
 import HeartIcon from "../icons/HeartSmall";
 import HeartFilledIcon from "../icons/HeartSmallFilled";
@@ -37,11 +38,23 @@ export const StoriesScreen = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { data: stories, mutate: mutateStories } = useStories(dollId);
   const { data: doll } = useDoll(dollId);
-  const store = useGlobalStore();
   const [currentSeason, setCurrentSeason] = useState(-1);
   const [currentEpisode, setCurrentEpisode] = useState(-1);
   const { data: profile } = useProfile();
   const insets = useSafeAreaInsets();
+  const openPremiumStoryModal = useGlobalStore(
+    (state) => state.openPremiumStoryModal
+  );
+  const openAuthOnlyModal = useGlobalStore((state) => state.openAuthOnlyModal);
+  const currentlyPlayingStoryId = useAudioStore(
+    (state) => state.currentlyPlaying.storyId
+  );
+  const openStoreLinksModal = useGlobalStore(
+    (state) => state.openStoreLinksModal
+  );
+  const setStoreLinksModalUrls = useGlobalStore(
+    (state) => state.setStoreLinksModalUrls
+  );
 
   const fakeArray = useMemo(
     () => [
@@ -98,20 +111,18 @@ export const StoriesScreen = () => {
                   return;
 
                 if (item.premium && !profile.premium)
-                  return store.openPremiumStoryModal();
+                  return openPremiumStoryModal();
 
                 setCurrentSeason(item.season);
                 setCurrentEpisode(item.episode);
-                updateCurrentlyPlaying(store, doll, item);
+                updateCurrentlyPlaying(doll, item);
                 dispatch("UI_STORY_EXPAND");
               }}
               style={{
                 paddingLeft: 16,
                 paddingRight: 24,
                 backgroundColor:
-                  store.currentlyPlaying.storyId === item.id
-                    ? "#f6f6f6"
-                    : undefined,
+                  currentlyPlayingStoryId === item.id ? "#f6f6f6" : undefined,
               }}
             >
               {
@@ -127,6 +138,7 @@ export const StoriesScreen = () => {
                     item.isFavorite ? (
                       <HeartFilledIcon
                         onPress={async () => {
+                          if (!profile) return openAuthOnlyModal();
                           await removeStoryFromFavorites(doll!.id, item.id);
                           await mutate<IStory>(
                             `/stories/${dollId}/${item.id}`,
@@ -139,6 +151,7 @@ export const StoriesScreen = () => {
                     ) : (
                       <HeartIcon
                         onPress={async () => {
+                          if (!profile) return openAuthOnlyModal();
                           await addStoryToFavorites(doll!.id, item.id);
                           await mutate<IStory>(
                             `/stories/${dollId}/${item.id}`,
@@ -224,7 +237,15 @@ export const StoriesScreen = () => {
                             borderRadius: 30,
                           }}
                         >
-                          <Button>Купить куклу</Button>
+                          <Button
+                            onPress={() => {
+                              if (!doll) return;
+                              setStoreLinksModalUrls(doll.storeLinks);
+                              openStoreLinksModal();
+                            }}
+                          >
+                            Купить куклу
+                          </Button>
                         </View>
                       )}
                     </View>

@@ -1,5 +1,5 @@
 import { useDimensions } from "@react-native-community/hooks";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, Image, Text } from "react-native";
 import Carousel from "react-native-snap-carousel";
 import { Button } from "../components/Button";
@@ -8,6 +8,7 @@ import { Pagination } from "../components/Pagination";
 import { useNavigation } from "@react-navigation/native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { usePersistedState } from "react-native-use-persisted-state";
 
 export const WelcomeScreen = () => {
   const { screen: screenSize } = useDimensions();
@@ -15,6 +16,12 @@ export const WelcomeScreen = () => {
   const ref = useRef<Carousel<any>>(null);
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
+  const [, setShouldShowWelcomeScreen] = usePersistedState(
+    "@shouldShowWelcomeScreen",
+    true
+  );
+
+  useEffect(() => setShouldShowWelcomeScreen(false), []);
 
   return (
     <View style={{ flex: 1, position: "relative" }}>
@@ -108,7 +115,7 @@ export const WelcomeScreen = () => {
         />
         <Button
           onPress={() => {
-            if (currentScreen == 2) navigation.navigate("Auth");
+            if (currentScreen == 2) navigation.navigate("Home");
             else ref.current?.snapToNext();
           }}
           style={{ marginTop: 24 }}

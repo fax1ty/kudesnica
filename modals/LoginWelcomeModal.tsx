@@ -1,7 +1,7 @@
 import { Text } from "react-native";
 import { Colors, Fonts } from "../resources";
 import { CircleModal } from "./CircleModal";
-import { useGlobalStore } from "../store";
+import { useGlobalStore } from "../stores/global";
 import { useProfile } from "../api/profile";
 
 interface Props {
@@ -9,13 +9,15 @@ interface Props {
 }
 
 export const LoginWelcomeModal = ({ visible }: Props) => {
-  const store = useGlobalStore();
   const { data: profile } = useProfile();
+  const closeLoginWelcomeModal = useGlobalStore(
+    (state) => state.closeLoginWelcomeModal
+  );
 
   return (
     <CircleModal
       visible={visible}
-      onClose={store.closeLoginWelcomeModal}
+      onClose={closeLoginWelcomeModal}
       headerContent={
         <>
           <Text
@@ -89,7 +91,7 @@ export const LoginWelcomeModal = ({ visible }: Props) => {
       }
       buttonProps={{
         children: "Перейти к историям!",
-        onPress: store.closeLoginWelcomeModal,
+        onPress: closeLoginWelcomeModal,
       }}
     />
   );
