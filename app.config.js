@@ -1,6 +1,6 @@
 const ENV = process.env.APP_ENV || "local";
 
-const version = [0, 0, 2];
+const version = [0, 0, 4];
 
 module.exports = {
   expo: {
@@ -67,12 +67,12 @@ module.exports = {
             targetSdkVersion: 33,
             buildToolsVersion: "33.0.0",
           },
-          ios: {
-            useFrameworks: "static",
-          },
+          // https://forums.expo.dev/t/eas-update-could-not-get-batchedbridge/66824/8
+          // ios: {
+          //   useFrameworks: "static",
+          // },
         },
       ],
-      "./rnf-disable-ad-id-support.plugin.js",
     ],
   },
 };

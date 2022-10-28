@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 2.1.0"
+    "version": ">= 2.6.0"
   },
   "build": {
     "development": {
@@ -18,6 +18,9 @@
       }
     },
     "production": {
+      "ios": {
+        "image": "latest"
+      },
       "env": {
         "APP_ENV": "dev"
       }
