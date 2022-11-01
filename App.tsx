@@ -46,7 +46,6 @@ import { AuthOnlyModal } from "./modals/AuthOnlyModal";
 import crashlytics from "@react-native-firebase/crashlytics";
 import { ExitConfirmModal } from "./modals/ExitConfirmModal";
 import { StoreLinksModal } from "./modals/StoreLinksModal";
-import { SelectModalProvider } from "@mobile-reality/react-native-select-pro";
 import { HelpScreen } from "./screens/HelpScreen";
 import { GalleryModal } from "./modals/GalleryModal";
 import { PortalProvider } from "@gorhom/portal";
@@ -192,107 +191,102 @@ export default function App() {
       <SafeAreaProvider>
         <PersistedStateProvider>
           <BottomSheetModalProvider>
-            <SelectModalProvider>
-              <PortalProvider>
-                <NavigationContainer
-                  ref={navigationRef}
-                  onReady={() => {
-                    if (!navigationRef.current) return;
-                    const route = navigationRef.current.getCurrentRoute();
-                    if (!route) return;
-                    routeNameRef.current = route.name;
-                  }}
-                  onStateChange={async () => {
-                    if (!navigationRef.current) return;
-                    const route = navigationRef.current.getCurrentRoute();
-                    if (!route) return;
-                    const previousRouteName = routeNameRef.current;
-                    const currentRouteName = route.name;
+            <PortalProvider>
+              <NavigationContainer
+                ref={navigationRef}
+                onReady={() => {
+                  if (!navigationRef.current) return;
+                  const route = navigationRef.current.getCurrentRoute();
+                  if (!route) return;
+                  routeNameRef.current = route.name;
+                }}
+                onStateChange={async () => {
+                  if (!navigationRef.current) return;
+                  const route = navigationRef.current.getCurrentRoute();
+                  if (!route) return;
+                  const previousRouteName = routeNameRef.current;
+                  const currentRouteName = route.name;
 
-                    if (previousRouteName !== currentRouteName) {
-                      await analytics().logScreenView({
-                        screen_name: currentRouteName,
-                        screen_class: currentRouteName,
-                      });
-                    }
-                    routeNameRef.current = currentRouteName;
-                  }}
-                  linking={{
-                    prefixes: ["kudesnica://"],
-                    config: {
-                      screens: {
-                        Stories: "story/:doll",
-                        Verify: "verify/:requestId/:mode",
-                        Auth: "auth/:mode",
-                      },
+                  if (previousRouteName !== currentRouteName) {
+                    await analytics().logScreenView({
+                      screen_name: currentRouteName,
+                      screen_class: currentRouteName,
+                    });
+                  }
+                  routeNameRef.current = currentRouteName;
+                }}
+                linking={{
+                  prefixes: ["kudesnica://"],
+                  config: {
+                    screens: {
+                      Stories: "story/:doll",
+                      Verify: "verify/:requestId/:mode",
+                      Auth: "auth/:mode",
                     },
+                  },
+                }}
+              >
+                <View
+                  style={{
+                    flex: 1,
+                    backgroundColor: Colors.light100,
                   }}
                 >
-                  <View
-                    style={{
-                      flex: 1,
-                      backgroundColor: Colors.light100,
+                  <Stack.Navigator
+                    screenOptions={{
+                      animation: "fade",
+                      headerShown: false,
+                      contentStyle: { backgroundColor: Colors.light100 },
                     }}
+                    initialRouteName="Loading"
                   >
-                    <Stack.Navigator
-                      screenOptions={{
-                        animation: "fade",
-                        headerShown: false,
-                        contentStyle: { backgroundColor: Colors.light100 },
-                      }}
-                      initialRouteName="Loading"
-                    >
-                      <Stack.Screen name="Welcome" component={WelcomeScreen} />
-                      <Stack.Screen name="Loading" component={LoadingScreen} />
-                      <Stack.Screen name="Home" component={HomeScreen} />
-                      <Stack.Screen name="Stories" component={StoriesScreen} />
-                      <Stack.Screen
-                        name="Auth"
-                        component={AuthScreen}
-                        initialParams={{ mode: "register" }}
-                      />
-                      <Stack.Screen
-                        name="Verify"
-                        component={VerifyScreen}
-                        initialParams={{ mode: "register" }}
-                      />
-                      <Stack.Screen name="User" component={UserScreen} />
-                      <Stack.Screen
-                        name="UserEdit"
-                        component={UserEditScreen}
-                      />
-                      <Stack.Screen name="AddCard" component={AddCardScreen} />
-                      <Stack.Screen
-                        name="Favorites"
-                        component={FavoritesScreen}
-                      />
-                      <Stack.Screen name="Privacy" component={PrivacyScreen} />
-                      <Stack.Screen name="Help" component={HelpScreen} />
-                    </Stack.Navigator>
-                    <StatusBar style="dark" />
-                  </View>
-                  <AuthController />
-                  {/* #region Modals */}
-                  {isBottomPlayerOpen && (
-                    <StoryModal
-                      dollId={currentlyPlayingDollId}
-                      storyId={currentlyPlayingStoryId}
+                    <Stack.Screen name="Welcome" component={WelcomeScreen} />
+                    <Stack.Screen name="Loading" component={LoadingScreen} />
+                    <Stack.Screen name="Home" component={HomeScreen} />
+                    <Stack.Screen name="Stories" component={StoriesScreen} />
+                    <Stack.Screen
+                      name="Auth"
+                      component={AuthScreen}
+                      initialParams={{ mode: "register" }}
                     />
-                  )}
-                  <CongratulationsRegModal
-                    visible={isCongratulationsRegModalVisible}
-                  />
-                  <PremiumStoryModal visible={isPremiumStoryModalVisible} />
-                  <LoginWelcomeModal visible={isLoginWelcomeModalVisible} />
-                  <AuthOnlyModal visible={isAuthOnlyModalVisible} />
-                  <ExitConfirmModal visible={isExitConfirmModalVisible} />
-                  <StoreLinksModal visible={isStoreLinksModalVisible} />
-                  {isGalleryModalVisible && <GalleryModal />}
-                  {/* #endregion Modals */}
+                    <Stack.Screen
+                      name="Verify"
+                      component={VerifyScreen}
+                      initialParams={{ mode: "register" }}
+                    />
+                    <Stack.Screen name="User" component={UserScreen} />
+                    <Stack.Screen name="UserEdit" component={UserEditScreen} />
+                    <Stack.Screen name="AddCard" component={AddCardScreen} />
+                    <Stack.Screen
+                      name="Favorites"
+                      component={FavoritesScreen}
+                    />
+                    <Stack.Screen name="Privacy" component={PrivacyScreen} />
+                    <Stack.Screen name="Help" component={HelpScreen} />
+                  </Stack.Navigator>
                   <StatusBar style="dark" />
-                </NavigationContainer>
-              </PortalProvider>
-            </SelectModalProvider>
+                </View>
+                <AuthController />
+                {/* #region Modals */}
+                {isBottomPlayerOpen && (
+                  <StoryModal
+                    dollId={currentlyPlayingDollId}
+                    storyId={currentlyPlayingStoryId}
+                  />
+                )}
+                <CongratulationsRegModal
+                  visible={isCongratulationsRegModalVisible}
+                />
+                <PremiumStoryModal visible={isPremiumStoryModalVisible} />
+                <LoginWelcomeModal visible={isLoginWelcomeModalVisible} />
+                <AuthOnlyModal visible={isAuthOnlyModalVisible} />
+                <ExitConfirmModal visible={isExitConfirmModalVisible} />
+                <StoreLinksModal visible={isStoreLinksModalVisible} />
+                {isGalleryModalVisible && <GalleryModal />}
+                {/* #endregion Modals */}
+                <StatusBar style="dark" />
+              </NavigationContainer>
+            </PortalProvider>
           </BottomSheetModalProvider>
         </PersistedStateProvider>
       </SafeAreaProvider>
