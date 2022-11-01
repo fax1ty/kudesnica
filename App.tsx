@@ -264,7 +264,11 @@ export default function App() {
                     <Stack.Screen name="Privacy" component={PrivacyScreen} />
                     <Stack.Screen name="Help" component={HelpScreen} />
                   </Stack.Navigator>
-                  <StatusBar style="dark" />
+                  <StatusBar
+                    style="dark"
+                    translucent
+                    backgroundColor="transparent"
+                  />
                 </View>
                 <AuthController />
                 {/* #region Modals */}
@@ -284,7 +288,11 @@ export default function App() {
                 <StoreLinksModal visible={isStoreLinksModalVisible} />
                 {isGalleryModalVisible && <GalleryModal />}
                 {/* #endregion Modals */}
-                <StatusBar style="dark" />
+                <StatusBar
+                  style="dark"
+                  translucent
+                  backgroundColor="transparent"
+                />
               </NavigationContainer>
             </PortalProvider>
           </BottomSheetModalProvider>

@@ -1,6 +1,6 @@
 const ENV = process.env.APP_ENV || "local";
 
-const version = [0, 0, 5];
+const version = [0, 0, 6];
 
 module.exports = {
   expo: {
