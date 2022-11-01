@@ -22,17 +22,32 @@ export const AuthOnlyModal = ({ visible }: Props) => {
       onClose={closeAuthOnlyModal}
       headerContent={
         <>
-          <LockCircled style={{ marginBottom: 14 }} />
           <Text
             style={{
-              fontFamily: Fonts.firasansBold,
-              fontSize: 18,
-              lineHeight: 22,
-              color: Colors.violet100,
-              textAlign: "center",
+              fontFamily: Fonts.firasansRegular,
+              fontSize: 16,
+              lineHeight: 16,
+              color: Colors.dark25,
             }}
           >
-            Функция доступна только зарегистрированным
+            Нет аккаунта?
+          </Text>
+          <Text
+            onPress={() => {
+              navigation.navigate("Auth", { mode: "register" });
+              closeAuthOnlyModal();
+            }}
+            style={{
+              marginTop: 7,
+              fontFamily: Fonts.playfairDisplayItalic,
+              fontSize: 26,
+              color: Colors.violet100,
+              lineHeight: 32,
+              marginBottom: 32 - 24,
+              textDecorationLine: "underline",
+            }}
+          >
+            К регистрации!
           </Text>
         </>
       }
@@ -40,23 +55,37 @@ export const AuthOnlyModal = ({ visible }: Props) => {
         <>
           <Text
             style={{
-              width: 250,
-              marginTop: 18,
+              marginTop: 33,
               fontFamily: Fonts.firasansRegular,
-              fontSize: 13,
+              fontSize: 16,
               lineHeight: 16,
               color: Colors.dark25,
-              textAlign: "center",
             }}
           >
-            Придумайте классный текст сюда, пожалуйста
+            Уже есть аккаунт?
+          </Text>
+          <Text
+            onPress={() => {
+              navigation.navigate("Auth", { mode: "login" });
+              closeAuthOnlyModal();
+            }}
+            style={{
+              marginTop: 7,
+              fontFamily: Fonts.playfairDisplayItalic,
+              fontSize: 26,
+              lineHeight: 32,
+              color: Colors.violet100,
+              height: 57,
+              textDecorationLine: "underline",
+            }}
+          >
+            Войти!
           </Text>
         </>
       }
       buttonProps={{
-        children: "Зарегистрироваться",
+        children: "Продолжить гостевой доступ",
         onPress: () => {
-          navigation.navigate("Auth", { mode: "register" });
           closeAuthOnlyModal();
         },
       }}

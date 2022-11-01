@@ -11,6 +11,7 @@ type Props = {
   error?: string;
   value: string;
   mask?: Array<string | RegExp>;
+  disabled?: boolean;
 } & TextInputProps;
 
 const inputStyle = {
@@ -26,7 +27,13 @@ const inputStyle = {
   paddingHorizontal: 16,
 };
 
-export const Input = ({ error, style, mask, ...props }: Props) => {
+export const Input = ({
+  disabled = false,
+  error,
+  style,
+  mask,
+  ...props
+}: Props) => {
   const [value, setValue] = useState("");
   const showTitle = useMemo(() => value.length > 0, [value]);
 
@@ -37,6 +44,7 @@ export const Input = ({ error, style, mask, ...props }: Props) => {
 
   return (
     <Animated.View
+      pointerEvents={disabled ? "none" : undefined}
       style={useAnimatedStyle(() => ({
         ...(style as any),
         height: withSpring(showTitle ? 78 : inputStyle.height),
@@ -65,6 +73,9 @@ export const Input = ({ error, style, mask, ...props }: Props) => {
           placeholderTextColor={Colors.light20}
           style={{
             ...inputStyle,
+            backgroundColor: !disabled
+              ? inputStyle.backgroundColor
+              : Colors.light60,
             borderColor: error ? Colors.red80 : "#e1e1e1",
           }}
           mask={mask}
@@ -81,6 +92,9 @@ export const Input = ({ error, style, mask, ...props }: Props) => {
           placeholderTextColor={Colors.light20}
           style={{
             ...inputStyle,
+            backgroundColor: !disabled
+              ? inputStyle.backgroundColor
+              : Colors.light60,
             borderColor: error ? Colors.red80 : "#e1e1e1",
           }}
           onChangeText={(e) => {

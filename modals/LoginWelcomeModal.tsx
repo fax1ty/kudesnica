@@ -23,7 +23,7 @@ export const LoginWelcomeModal = ({ visible }: Props) => {
           <Text
             numberOfLines={2}
             style={{
-              fontFamily: Fonts.playfairdisplayItalic,
+              fontFamily: Fonts.playfairDisplayItalic,
               fontSize: 26,
               lineHeight: 32,
               color: Colors.violet100,

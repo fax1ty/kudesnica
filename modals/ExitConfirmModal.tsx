@@ -3,6 +3,9 @@ import { Button } from "../components/Button";
 import { Colors, Fonts } from "../resources";
 import { useGlobalStore } from "../stores/global";
 import { AutoHeightModal } from "./AutoHeightModal";
+import { mutate } from "swr";
+import axios from "axios";
+import { usePersistedState } from "react-native-use-persisted-state";
 
 interface Props {
   visible: boolean;
@@ -10,8 +13,9 @@ interface Props {
 
 export const ExitConfirmModal = ({ visible }: Props) => {
   const setToken = useGlobalStore((state) => state.setToken);
+  const [, setPersistToken] = usePersistedState("@token", "");
   const closeExitConfirmModal = useGlobalStore(
-    (store) => store.closeExitConfirmModal
+    (state) => state.closeExitConfirmModal
   );
 
   return (
@@ -50,8 +54,11 @@ export const ExitConfirmModal = ({ visible }: Props) => {
           </Button>
           <Button
             style={{ flex: 1, marginLeft: 16, flexShrink: 0 }}
-            onPress={() => {
+            onPress={async () => {
+              await mutate(() => true, undefined, false);
+              axios.defaults.headers.common.authorization = "";
               setToken("");
+              setPersistToken("");
               closeExitConfirmModal();
             }}
           >

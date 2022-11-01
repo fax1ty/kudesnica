@@ -1,8 +1,8 @@
-import { FlatList, View, Pressable } from "react-native";
+import { FlatList, View, Pressable, Text } from "react-native";
 import { useProfile } from "../api/profile";
 import { useGlobalStore } from "../stores/global";
 import { LowPlayer } from "../components/LowPlayer";
-import { Colors } from "../resources";
+import { Colors, Fonts } from "../resources";
 import { ScreenTemplate } from "../components/ScreenTemplate";
 import { ScreenTitle } from "../components/ScreenTitle";
 import {
@@ -20,10 +20,11 @@ import HeartFilledIcon from "../icons/HeartSmallFilled";
 
 export const FavoritesScreen = () => {
   const { data: profile } = useProfile();
-  const { data: favorites, mutate: mutateStories } = useFavorites();
+  const { data: favorites, mutate: mutateFavorites } = useFavorites();
   const openPremiumStoryModal = useGlobalStore(
     (state) => state.openPremiumStoryModal
   );
+  const openAuthOnlyModal = useGlobalStore((state) => state.openAuthOnlyModal);
 
   return (
     <ScreenTemplate>
@@ -33,6 +34,36 @@ export const FavoritesScreen = () => {
       <FlatList
         style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
+        ListHeaderComponent={
+          favorites && favorites.length === 0 ? (
+            <View style={{ marginTop: 45 }}>
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontFamily: Fonts.playfairDisplayItalic,
+                  fontSize: 32,
+                  lineHeight: 37,
+                  color: Colors.violet100,
+                }}
+              >
+                Пока нет историй
+              </Text>
+              <Text
+                style={{
+                  textAlign: "center",
+                  marginTop: 19,
+                  fontFamily: Fonts.firasansRegular,
+                  fontSize: 14,
+                  lineHeight: 18,
+                  color: Colors.dark50,
+                }}
+              >
+                Поставьте лайк любимой истории, и она{"\n"}отобразится в этом
+                списке
+              </Text>
+            </View>
+          ) : undefined
+        }
         renderItem={({ item, index }) => (
           <View key={`story-${item.season}-${item.episode}`}>
             <Pressable
@@ -67,19 +98,20 @@ export const FavoritesScreen = () => {
                             (old) => ({ ...old!, isFavorite: false }),
                             false
                           );
-                          await mutateStories();
+                          await mutateFavorites();
                         }}
                       />
                     ) : (
                       <HeartIcon
                         onPress={async () => {
+                          if (!profile) return openAuthOnlyModal();
                           await addStoryToFavorites(item.doll.id, item.id);
                           await mutate<IStory>(
                             `/stories/${item.doll.id}/${item.id}`,
                             (old) => ({ ...old!, isFavorite: true }),
                             false
                           );
-                          await mutateStories();
+                          await mutateFavorites();
                         }}
                       />
                     )

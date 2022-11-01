@@ -89,7 +89,7 @@ export const DollsScreen = () => {
             { scale: 2 },
             { translateY: 342 / 3 - Values.bottomPlayerHeight },
             {
-              translateX: withSpring((607 / 2.5) * -1 + shift.value * -1, {
+              translateX: withSpring((607 / 2.5) * -1 + shift.value * 1, {
                 damping: 100000,
               }),
             },

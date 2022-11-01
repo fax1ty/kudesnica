@@ -7,6 +7,7 @@ import { IDoll } from "../api/dolls";
 import { Pin } from "./Pin";
 
 import BellIcon from "../icons/Bell";
+import { LoadableImage } from "./LoadableImage";
 
 interface Props {
   onShift?: (v: number) => void;
@@ -31,7 +32,7 @@ export const DollMainText = ({
           fontSize: 32,
           color: Colors.violet100,
           lineHeight: 37,
-          fontFamily: Fonts.playfairdisplayItalic,
+          fontFamily: Fonts.playfairDisplayItalic,
           width: "100%",
           textAlign: "center",
         }}
@@ -88,6 +89,7 @@ export const DollsCarousel = ({ data, onShift, onIndexChange }: Props) => {
 
   return (
     <Carousel
+      inactiveSlideOpacity={1}
       inactiveSlideScale={1}
       onScrollIndexChanged={(value) => {
         if (onIndexChange) onIndexChange(value, data[value].next);
@@ -112,11 +114,14 @@ export const DollsCarousel = ({ data, onShift, onIndexChange }: Props) => {
               alignItems: "center",
             }}
           >
-            <Image
+            <LoadableImage
+              resetBordersAfterLoad
+              resizeMode="contain"
               style={{
                 width: screenSize.width - 38 * 2,
                 aspectRatio: 302 / 483,
-                resizeMode: "contain",
+                borderTopLeftRadius: 500,
+                borderTopRightRadius: 500,
               }}
               source={{ uri: item.dollsCarouselPhoto }}
             />

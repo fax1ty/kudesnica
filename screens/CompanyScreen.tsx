@@ -24,7 +24,7 @@ export const CompanyScreen = () => {
       <View style={{ position: "absolute", width: "100%", height: "100%" }}>
         <LinearGradient
           colors={["rgba(255, 255, 255, 0.3)", "#fff"]}
-          style={{ height: 50, marginTop: 461 / 2 }}
+          style={{ height: 50, marginTop: 461 / 2 + insets.top }}
         />
         <View style={{ flex: 1, backgroundColor: "white" }} />
         <Image
@@ -35,7 +35,7 @@ export const CompanyScreen = () => {
             height: 819,
             position: "absolute",
             top: 140,
-            transform: [{ translateY: (819 / 2) * -1 + 140 * 2 }],
+            transform: [{ translateY: (819 / 2) * -1 + 461 / 2 + insets.top }],
           }}
         />
       </View>
@@ -51,6 +51,7 @@ export const CompanyScreen = () => {
         <View style={{ height: 85, marginTop: 48 }}>
           <Carousel
             inactiveSlideScale={1}
+            inactiveSlideOpacity={1}
             onScrollIndexChanged={setCurrentTab}
             vertical={false}
             data={[
@@ -64,7 +65,7 @@ export const CompanyScreen = () => {
                 style={{
                   paddingLeft: 34,
                   paddingRight: 27,
-                  fontFamily: Fonts.playfairdisplayItalic,
+                  fontFamily: Fonts.playfairDisplayItalic,
                   fontSize: 18,
                   lineHeight: 24,
                   color: Colors.dark75,
@@ -90,7 +91,8 @@ export const CompanyScreen = () => {
         style={{
           width: "100%",
           top: insets.top,
-          paddingHorizontal: 16,
+          marginLeft: 16,
+          paddingRight: 16,
         }}
       >
         O Кудеснице

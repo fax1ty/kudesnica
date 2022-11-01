@@ -6,6 +6,7 @@ import {
 import { ReactNode, useCallback, useEffect, useRef } from "react";
 import { View } from "react-native";
 import { CustomBackdrop } from "../components/CustomBackdrop";
+import { useBottomSheetBackHandler } from "../hooks/bottom-sheet";
 import { Colors } from "../resources";
 
 interface Props {
@@ -71,9 +72,12 @@ export const AutoHeightModal = (props: Props) => {
     );
   }, []);
 
+  // const { handleSheetPositionChange } = useBottomSheetBackHandler(ref);
+
   return (
     <BottomSheetModal
       ref={ref}
+      // onChange={handleSheetPositionChange}
       enablePanDownToClose={true}
       snapPoints={animatedSnapPoints}
       handleHeight={animatedHandleHeight}

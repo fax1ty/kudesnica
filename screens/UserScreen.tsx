@@ -61,7 +61,7 @@ export const UserScreen = () => {
               numberOfLines={2}
               style={{
                 marginLeft: 21,
-                fontFamily: Fonts.playfairdisplayItalic,
+                fontFamily: Fonts.playfairDisplayItalic,
                 fontSize: 26,
                 lineHeight: 32,
                 color: Colors.violet100,
@@ -303,7 +303,8 @@ export const UserScreen = () => {
           </Pressable>
         </View>
         {/* Поддержка */}
-        <View
+        <Pressable
+          onPress={() => navigation.navigate("Help")}
           style={{
             position: "absolute",
             flexDirection: "row",
@@ -324,7 +325,7 @@ export const UserScreen = () => {
           >
             Поддержка
           </Text>
-        </View>
+        </Pressable>
       </View>
     </View>
   );

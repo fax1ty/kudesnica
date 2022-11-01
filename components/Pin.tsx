@@ -16,17 +16,15 @@ export const Pin = ({ children, color = Colors.violet80, style }: Props) => {
         height: 18,
         borderRadius: 18 / 2,
         backgroundColor: color,
-        position: "relative",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
       <Text
         style={{
-          position: "absolute",
-          top: 3,
-          left: 5.5,
+          transform: [{ translateY: (12 / 4) * -1 }],
           color: Colors.light100,
           fontSize: 12,
-          lineHeight: 12,
           fontFamily: Fonts.firasansBold,
         }}
       >

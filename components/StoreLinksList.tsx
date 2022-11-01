@@ -8,15 +8,19 @@ import NextIcon from "../icons/Next";
 
 interface Props {
   urls: Array<string>;
+  onLinkPress?: () => void;
 }
 
-export const StoreLinksList = ({ urls }: Props) => {
+export const StoreLinksList = ({ urls, onLinkPress }: Props) => {
   return (
     <View>
       {urls.map((link, i, arr) => (
         <View key={`store-link-${i}`}>
           <Pressable
-            onPress={() => Linking.openURL(link)}
+            onPress={async () => {
+              await Linking.openURL(link);
+              if (onLinkPress) onLinkPress();
+            }}
             style={{
               height: 54,
               flexDirection: "row",

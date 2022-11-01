@@ -1,5 +1,6 @@
 import create from "zustand";
 import { combine } from "zustand/middleware";
+import { IStory } from "../api/stories";
 
 export const useGlobalStore = create(
   combine(
@@ -12,6 +13,7 @@ export const useGlobalStore = create(
       isAuthOnlyModalVisible: false,
       isExitConfirmModalVisible: false,
       isStoreLinksModalVisible: false,
+      isGalleryModalVisible: false,
       phone: 0,
       token: "",
       storeLinksModalUrls: [
@@ -19,6 +21,11 @@ export const useGlobalStore = create(
         "https://wildberries.ru",
         "https://aliexpress.ru",
       ],
+      gallery: {
+        urls: new Array<string>(),
+        kind: "image",
+        preselectedIndex: 0,
+      },
     },
     (set) => ({
       setFontsLoaded: (value: boolean) =>
@@ -51,10 +58,19 @@ export const useGlobalStore = create(
         set((state) => ({ ...state, isStoreLinksModalVisible: true })),
       closeStoreLinksModal: () =>
         set((state) => ({ ...state, isStoreLinksModalVisible: false })),
+      openGalleryModal: () =>
+        set((state) => ({ ...state, isGalleryModalVisible: true })),
+      closeGalleryModal: () =>
+        set((state) => ({ ...state, isGalleryModalVisible: false })),
       setPhone: (phone: number) => set((state) => ({ ...state, phone })),
       setToken: (token: string) => set((state) => ({ ...state, token })),
       setStoreLinksModalUrls: (urls: Array<string>) =>
         set((state) => ({ ...state, storeLinksModalUrls: urls })),
+      setGallery: (value: {
+        urls: Array<string>;
+        kind: keyof IStory["attachments"];
+        preselectedIndex: number;
+      }) => set((state) => ({ ...state, gallery: value })),
     })
   )
 );

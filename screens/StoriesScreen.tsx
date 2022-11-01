@@ -209,6 +209,7 @@ export const StoriesScreen = () => {
                 }}
               >
                 <Carousel
+                  inactiveSlideOpacity={1}
                   inactiveSlideScale={1}
                   onScrollIndexChanged={setSelectedIndex}
                   vertical={false}
@@ -239,6 +240,7 @@ export const StoriesScreen = () => {
                         >
                           <Button
                             onPress={() => {
+                              console.log(doll, "meow");
                               if (!doll) return;
                               setStoreLinksModalUrls(doll.storeLinks);
                               openStoreLinksModal();
@@ -282,7 +284,11 @@ export const StoriesScreen = () => {
             </View>
             {doll && (
               <View style={{ marginTop: 27 }}>
-                <RichView data={doll.description} />
+                <RichView
+                  data={doll.description}
+                  dollId={doll.id}
+                  storyId="doesntmatter"
+                />
               </View>
             )}
           </>

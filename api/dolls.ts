@@ -11,6 +11,11 @@ export interface IDoll {
   storeLinks: Array<string>;
 }
 
+export type IDollShort = Omit<
+  IDoll,
+  "dollsCarouselPhoto" | "storyViewCarousel" | "description" | "storeLinks"
+>;
+
 export const useDolls = () =>
   useSWR<Array<IDoll>>("/dolls", fetcher, { refreshInterval: 0 });
 

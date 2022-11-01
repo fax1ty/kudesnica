@@ -17,6 +17,7 @@ import axios from "axios";
 import { ScreenTemplate } from "../components/ScreenTemplate";
 import { ScreenTitle } from "../components/ScreenTitle";
 import crashlytics from "@react-native-firebase/crashlytics";
+import { usePersistedState } from "react-native-use-persisted-state";
 
 export const VerifyScreen = () => {
   const [timeLeft, { start }] = useCountDown(60 * 1000);
@@ -25,8 +26,16 @@ export const VerifyScreen = () => {
     params: { requestId, mode },
   } = useRoute<any>();
 
-  const store = useGlobalStore();
   const navigation = useNavigation<any>();
+  const userPhone = useGlobalStore((state) => state.phone);
+  const setToken = useGlobalStore((state) => state.setToken);
+  const openCongratulationsRegModal = useGlobalStore(
+    (state) => state.openCongratulationsRegModal
+  );
+  const openLoginWelcomeModal = useGlobalStore(
+    (state) => state.openLoginWelcomeModal
+  );
+  const [, setPersistToken] = usePersistedState("@token", "");
 
   const left = useMemo(() => {
     const timeData = pms(timeLeft);
@@ -61,19 +70,20 @@ export const VerifyScreen = () => {
           disabled={code.length !== 4}
           style={{ marginTop: 33 }}
           onPress={async () => {
-            if (!store.phone)
+            if (!userPhone)
               throw new Error(
                 "Номер телефона должен быть заранее указан! Вы не прошли предыдущий шаг?"
               );
-            const { token, phone } = await verify(store.phone, code, requestId);
+            const { token, phone } = await verify(userPhone, code, requestId);
             await crashlytics().setUserId(phone.toString());
             axios.defaults.headers.common.authorization = token;
-            store.setToken(token);
+            setToken(token);
+            setPersistToken(token);
             navigation.dispatch(
               CommonActions.reset({ index: 0, routes: [{ name: "Home" }] })
             );
-            if (mode === "register") store.openCongratulationsRegModal();
-            else store.openLoginWelcomeModal();
+            if (mode === "register") openCongratulationsRegModal();
+            else openLoginWelcomeModal();
           }}
         >
           Подтвердить

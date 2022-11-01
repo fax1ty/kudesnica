@@ -1,6 +1,6 @@
 import { CircularProgressBase } from "react-native-circular-progress-indicator";
 import { View, Text, Image, Pressable } from "react-native";
-import { useState, ReactNode, useMemo } from "react";
+import { useState, ReactNode, useMemo, createElement } from "react";
 import { Colors, Fonts, Values } from "../resources";
 import { Skeleton } from "./Skeleton";
 import { percentageOf } from "../utils/math";
@@ -12,6 +12,7 @@ import { updateCurrentlyPlaying } from "../utils/audio";
 import { useAudioStore } from "../stores/audio";
 import TrackPlayer from "react-native-track-player";
 import { useTrackProgress, useTrackState } from "../hooks/audio";
+import { TouchableWithoutFeedback } from "@gorhom/bottom-sheet";
 
 import PlayIcon from "../icons/Play";
 import PauseIcon from "../icons/Pause";
@@ -21,6 +22,7 @@ const PLAYER_COVER_SIZE = 59;
 const PLAYER_COVER_PROGRESS_WIDTH = 4;
 
 interface Props {
+  PressableComponent?: typeof TouchableWithoutFeedback;
   cover?: string;
   title?: string;
   description?: string;
@@ -31,22 +33,8 @@ interface Props {
   dollId?: string;
 }
 
-const IndependentCircularProgress = ({ progress = 0 }) => {
-  // VERY BIG PERFORMANCE IMAPCT!!!
-  return (
-    <CircularProgressBase
-      value={progress}
-      maxValue={100}
-      radius={PLAYER_COVER_SIZE / 2}
-      inActiveStrokeWidth={PLAYER_COVER_PROGRESS_WIDTH}
-      activeStrokeWidth={PLAYER_COVER_PROGRESS_WIDTH}
-      activeStrokeColor={Colors.pink100}
-      inActiveStrokeColor={Colors.light60}
-    />
-  );
-};
-
 export const LowPlayer = ({
+  PressableComponent,
   cover,
   title,
   description,
@@ -81,6 +69,10 @@ export const LowPlayer = ({
   const currentlyPlayingStoryId = useAudioStore(
     (state) => state.currentlyPlaying.storyId
   );
+  const PressableElement = useMemo(
+    () => PressableComponent || Pressable,
+    [PressableComponent]
+  );
 
   return (
     <View
@@ -92,7 +84,7 @@ export const LowPlayer = ({
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <Pressable
+        <PressableElement
           onPress={async () => {
             if (!story || !doll) return;
             if (locked) return openPremiumStoryModal();
@@ -176,9 +168,17 @@ export const LowPlayer = ({
               opacity: progress === 0 ? 0 : 1,
             }}
           >
-            <IndependentCircularProgress progress={total} />
+            <CircularProgressBase
+              value={total}
+              maxValue={100}
+              radius={PLAYER_COVER_SIZE / 2}
+              inActiveStrokeWidth={PLAYER_COVER_PROGRESS_WIDTH}
+              activeStrokeWidth={PLAYER_COVER_PROGRESS_WIDTH}
+              activeStrokeColor={Colors.pink100}
+              inActiveStrokeColor={Colors.light60}
+            />
           </View>
-        </Pressable>
+        </PressableElement>
         <View style={{ marginLeft: 10, flexShrink: 1 }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             {titleHilighted && (

@@ -1,24 +1,33 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Player } from "../components/Player";
 import { generateComponentsFromRichComponents } from "../components/RichView";
 import BottomSheet, {
   useBottomSheet,
   BottomSheetFlatList,
   BottomSheetFlatListMethods,
+  TouchableWithoutFeedback,
 } from "@gorhom/bottom-sheet";
-import { Image, View, Text, Pressable, ViewToken } from "react-native";
+import { Image, View, Text, ViewToken } from "react-native";
 import { useDimensions } from "@react-native-community/hooks";
 import { percentageOf } from "../utils/math";
 import Animated, {
   Extrapolate,
   interpolate,
   useAnimatedStyle,
+  withSpring,
 } from "react-native-reanimated";
 import useBus from "use-bus";
 import { Colors, Fonts, Values } from "../resources";
 import { Button } from "../components/Button";
 import { LowPlayer } from "../components/LowPlayer";
-import { getNextStoryId, getStory, IStory, useStory } from "../api/stories";
+import {
+  addStoryToFavorites,
+  getNextStoryId,
+  getStory,
+  IStory,
+  removeStoryFromFavorites,
+  useStory,
+} from "../api/stories";
 import { IDoll, useDoll } from "../api/dolls";
 import { LoadableImage } from "../components/LoadableImage";
 import { Skeleton } from "../components/Skeleton";
@@ -27,10 +36,13 @@ import { updateCurrentlyPlaying } from "../utils/audio";
 import { useGlobalStore } from "../stores/global";
 import { useProfile } from "../api/profile";
 import { CustomBackdrop } from "../components/CustomBackdrop";
+import { useBottomSheetBackHandler } from "../hooks/bottom-sheet";
+import { mutate } from "swr";
 
 import ArrowUpIcon from "../icons/ArrowUp";
 import ArrowDownButton from "../icons/ArrowDownButton";
 import HeartIcon from "../icons/Heart";
+import HeartFilledIcon from "../icons/HeartFilled";
 
 const MODAL_OPEN_SNAP = 95;
 const MODAL_OPEN_SNAP_NORMALIZED = 0.95;
@@ -60,8 +72,17 @@ const SheetContent = ({ story, doll }: ContentProps) => {
   const scroll = useRef<BottomSheetFlatListMethods>(null);
   const { screen: screenSize } = useDimensions();
   const components = useMemo(
-    () => (story ? generateComponentsFromRichComponents(story.content) : []),
-    [story]
+    () =>
+      story
+        ? generateComponentsFromRichComponents(
+            doll?.id,
+            story.id,
+            story.media,
+            story.content,
+            story.attachments
+          )
+        : [],
+    [doll, story]
   );
   const { data: profile } = useProfile();
   const [lastViewableItemIndex, setLastViewableItemIndex] = useState<
@@ -77,22 +98,29 @@ const SheetContent = ({ story, doll }: ContentProps) => {
   const openPremiumStoryModal = useGlobalStore(
     (state) => state.openPremiumStoryModal
   );
+  const openAuthOnlyModal = useGlobalStore((state) => state.openAuthOnlyModal);
 
-  const onViewableItemsChanged = useCallback(
-    (data: { viewableItems: Array<ViewToken> }) =>
-      setLastViewableItemIndex(
-        data.viewableItems[data.viewableItems.length - 1].index
-      ),
-    []
-  );
+  // https://github.com/facebook/react-native/issues/30171#issuecomment-711154425
+  const viewabilityConfigCallbackPairs = useRef([
+    {
+      viewabilityConfig: { itemVisiblePercentThreshold: 75 },
+      onViewableItemsChanged: (data: { viewableItems: Array<ViewToken> }) => {
+        if (!data || !data.viewableItems || data.viewableItems.length === 0)
+          return 0;
+        else
+          setLastViewableItemIndex(
+            data.viewableItems[data.viewableItems.length - 1].index
+          );
+      },
+    },
+  ]);
 
   useBus("UI_STORY_EXPAND", () => expand());
 
   return (
     <View style={{ flex: 1, position: "relative" }}>
       <BottomSheetFlatList
-        viewabilityConfig={{ itemVisiblePercentThreshold: 75 }}
-        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfigCallbackPairs={viewabilityConfigCallbackPairs.current}
         ref={scroll}
         style={{
           flex: 1,
@@ -134,7 +162,7 @@ const SheetContent = ({ story, doll }: ContentProps) => {
               />
               <View style={{ position: "relative" }}>
                 <LoadableImage
-                  url={story?.cover}
+                  source={{ uri: story?.cover }}
                   style={{
                     marginTop: 30,
                     alignSelf: "center",
@@ -154,7 +182,7 @@ const SheetContent = ({ story, doll }: ContentProps) => {
                     style={{
                       fontSize: 26,
                       lineHeight: 30,
-                      fontFamily: Fonts.playfairdisplayItalic,
+                      fontFamily: Fonts.playfairDisplayItalic,
                       color: Colors.dark75,
                       textAlign: "center",
                       marginTop: 21,
@@ -232,8 +260,8 @@ const SheetContent = ({ story, doll }: ContentProps) => {
           ),
         }))}
       >
-        <Pressable
-          onPress={() => console.log("test")}
+        <TouchableWithoutFeedback
+          onPress={() => expand()}
           style={{
             height: Values.bottomPlayerHeight,
             width: "100%",
@@ -242,6 +270,7 @@ const SheetContent = ({ story, doll }: ContentProps) => {
           }}
         >
           <LowPlayer
+            PressableComponent={TouchableWithoutFeedback}
             duration={story?.audio.duration}
             dollId={doll?.id}
             id={story?.id}
@@ -251,7 +280,7 @@ const SheetContent = ({ story, doll }: ContentProps) => {
             icon={
               story &&
               doll && (
-                <Pressable
+                <TouchableWithoutFeedback
                   onPress={() => expand()}
                   style={{
                     width: 20,
@@ -262,11 +291,11 @@ const SheetContent = ({ story, doll }: ContentProps) => {
                   }}
                 >
                   <ArrowUpIcon />
-                </Pressable>
+                </TouchableWithoutFeedback>
               )
             }
           />
-        </Pressable>
+        </TouchableWithoutFeedback>
       </Animated.View>
       <Animated.View
         style={useAnimatedStyle(() => ({
@@ -281,14 +310,24 @@ const SheetContent = ({ story, doll }: ContentProps) => {
           ),
         }))}
       >
-        <LinearGradient
-          colors={["#fff", "rgba(255, 255, 255, 0)"]}
-          style={{
+        <Animated.View
+          style={useAnimatedStyle(() => ({
             position: "absolute",
             width: "100%",
             height: "100%",
-          }}
-        />
+            opacity: withSpring(isBottomPlayerVisible ? 1 : 0, {
+              damping: 100000,
+            }),
+          }))}
+        >
+          <LinearGradient
+            colors={["#fff", "rgba(255, 255, 255, 0)"]}
+            style={{
+              width: "100%",
+              height: "100%",
+            }}
+          />
+        </Animated.View>
         <View
           style={{
             position: "absolute",
@@ -301,7 +340,29 @@ const SheetContent = ({ story, doll }: ContentProps) => {
           }}
         >
           <ArrowDownButton onPress={() => collapse()} />
-          <HeartIcon />
+          {story && (
+            <TouchableWithoutFeedback
+              onPress={async () => {
+                if (!doll || !story) return;
+                if (!profile) return openAuthOnlyModal();
+
+                if (story.isFavorite)
+                  await removeStoryFromFavorites(doll.id, story.id);
+                else await addStoryToFavorites(doll.id, story.id);
+                await mutate<IStory>(
+                  `/stories/${doll.id}/${story.id}`,
+                  (old) => ({
+                    ...old!,
+                    isFavorite: story.isFavorite ? false : true,
+                  }),
+                  false
+                );
+                await mutate("/stories/favorites");
+              }}
+            >
+              {story.isFavorite ? <HeartFilledIcon /> : <HeartIcon />}
+            </TouchableWithoutFeedback>
+          )}
         </View>
       </Animated.View>
     </View>
@@ -319,9 +380,14 @@ export const StoryModal = ({ dollId, storyId }: Props) => {
   );
   const { data: story } = useStory(dollId, storyId);
   const { data: doll } = useDoll(dollId);
+  const ref = useRef<BottomSheet>(null);
+
+  const { handleSheetPositionChange } = useBottomSheetBackHandler(ref, false);
 
   return (
     <BottomSheet
+      ref={ref}
+      onChange={handleSheetPositionChange}
       enableContentPanningGesture={Boolean(dollId && storyId)}
       enableHandlePanningGesture={Boolean(dollId && storyId)}
       snapPoints={snapPoints}

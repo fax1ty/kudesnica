@@ -1,7 +1,7 @@
 import axios from "axios";
 import useSWR from "swr";
 import { authGuard } from "../utils/misc";
-import { IDoll } from "./dolls";
+import { IDollShort } from "./dolls";
 import { fetcher } from "./fetcher";
 
 export type IRichImageBorders = [number, number, number, number];
@@ -52,16 +52,15 @@ export type IRichBlock =
   | IRichAttachment;
 
 export const useStories = (dollId?: string) =>
-  useSWR<{ items: Array<IStory>; unwatchedTotal: number }>(
-    dollId ? `/dolls/${dollId}/storiesList` : null,
-    fetcher,
-    {
-      refreshInterval: 0,
-    }
-  );
+  useSWR<{
+    items: Array<Omit<IStoryShort, "isLastInSeason">>;
+    unwatchedTotal: number;
+  }>(dollId ? `/dolls/${dollId}/storiesList` : null, fetcher, {
+    refreshInterval: 0,
+  });
 
 export const useFavorites = () =>
-  useSWR<Array<IStory & { doll: IDoll }>>(
+  useSWR<Array<IStoryShortiest & { doll: IDollShort }>>(
     authGuard("/stories/favorites"),
     fetcher,
     {
@@ -81,7 +80,12 @@ export interface IStory {
   watched: boolean;
   isFavorite: boolean;
   isLastInSeason: boolean;
+  media?: string;
+  attachments: Partial<{ video: Array<string>; image: Array<string> }>;
 }
+
+export type IStoryShort = Omit<IStory, "content" | "media" | "attachments">;
+export type IStoryShortiest = Omit<IStoryShort, "isLastInSeason">;
 
 export const useStory = (dollId: string | null, storyId: string | null) =>
   useSWR<IStory>(

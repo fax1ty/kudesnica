@@ -167,11 +167,29 @@ export const AuthScreen = () => {
               marginLeft: 18 / 2,
               color: Colors.violet100,
             }}
-            onPress={() => navigation.navigate("Auth", { mode: "login" })}
+            onPress={() =>
+              navigation.navigate("Auth", {
+                mode: mode === "register" ? "login" : "login",
+              })
+            }
           >
             {mode === "register" ? "Войти!" : "Зарегистрироваться"}
           </Text>
         </View>
+        {mode === "login" && (
+          <Text
+            onPress={() => navigation.navigate("Home")}
+            style={{
+              marginTop: 12,
+              fontFamily: Fonts.firasansRegular,
+              fontSize: 18,
+              lineHeight: 23,
+              color: Colors.violet100,
+            }}
+          >
+            Продолжить как гость
+          </Text>
+        )}
       </View>
     </ScreenTemplate>
   );

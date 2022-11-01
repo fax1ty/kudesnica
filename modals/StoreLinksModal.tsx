@@ -11,12 +11,15 @@ export const StoreLinksModal = ({ visible }: Props) => {
     (state) => state.storeLinksModalUrls
   );
   const closeStoreLinksModal = useGlobalStore(
-    (store) => store.closeStoreLinksModal
+    (state) => state.closeStoreLinksModal
   );
 
   return (
     <AutoHeightModal visible={visible} onClose={closeStoreLinksModal}>
-      <StoreLinksList urls={storeLinksModalUrls} />
+      <StoreLinksList
+        onLinkPress={() => closeStoreLinksModal()}
+        urls={storeLinksModalUrls}
+      />
     </AutoHeightModal>
   );
 };

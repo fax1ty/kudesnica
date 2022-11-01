@@ -29,6 +29,7 @@ export const WelcomeScreen = () => {
         ref={ref}
         onScrollIndexChanged={setCurrentScreen}
         inactiveSlideScale={1}
+        inactiveSlideOpacity={1}
         contentContainerCustomStyle={{ alignItems: "center" }}
         vertical={false}
         data={[
@@ -72,7 +73,7 @@ export const WelcomeScreen = () => {
                 <Text
                   style={{
                     textAlign: "center",
-                    fontFamily: Fonts.playfairdisplayItalic,
+                    fontFamily: Fonts.playfairDisplayItalic,
                     fontSize: 32,
                     lineHeight: 37,
                     color: Colors.violet100,
@@ -102,7 +103,7 @@ export const WelcomeScreen = () => {
       <Animated.View
         entering={FadeIn.duration(300).delay(500)}
         style={{
-          bottom: 50 - 33,
+          bottom: 50 - 33 + insets.bottom,
           paddingHorizontal: 16,
           width: "100%",
           position: "absolute",

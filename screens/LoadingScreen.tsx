@@ -145,7 +145,11 @@ export const LoadingScreen = () => {
           <LogoWithouText style={{ position: "absolute" }} />
           <Animated.View
             entering={FadeIn.duration(500)}
-            style={{ position: "absolute", top: 35.14 }}
+            style={{
+              position: "absolute",
+              top: 35.14,
+              transform: [{ translateX: -9 }, { translateX: -7 }],
+            }}
           >
             <LogoTextOnly />
           </Animated.View>

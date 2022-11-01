@@ -23,7 +23,8 @@ export const Colors = {
 };
 
 export const Fonts = {
-  playfairdisplayItalic: "PlayfairDisplay-Italic",
+  playfairDisplayRegular: "PlayfairDisplay-Regular",
+  playfairDisplayItalic: "PlayfairDisplay-Italic",
   firasansRegular: "FiraSans-Regular",
   firasansBold: "FiraSans-Bold",
   firasansMedium: "FiraSans-Medium",
@@ -32,4 +33,7 @@ export const Fonts = {
 export const Values = {
   titleHeight: 64,
   bottomPlayerHeight: 80,
+  instagramUrl: "https://instagram.com/kudesnica.store",
+  vkUrl: "https://vk.com/kudesnica.store",
+  tgUrl: "https://t.me/kudesnicastore",
 };

@@ -1,19 +1,18 @@
 import axios from "axios";
-import { IDoll } from "../api/dolls";
-import { IStory } from "../api/stories";
+import { IDollShort } from "../api/dolls";
+import { IStoryShortiest } from "../api/stories";
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
   RatingType,
   IOSCategoryOptions,
   IOSCategory,
 } from "react-native-track-player";
-import { PlaybackService } from "../service";
 import { useAudioStore } from "../stores/audio";
 import { useGlobalStore } from "../stores/global";
 
 export const updateCurrentlyPlaying = async (
-  doll: IDoll,
-  story: IStory,
+  doll: IDollShort,
+  story: IStoryShortiest,
   autoPlay = false
 ) => {
   // const currentlyPlayingStoryId =
@@ -47,7 +46,6 @@ export const initAudio = async () => {
   try {
     await TrackPlayer.getCurrentTrack();
   } catch {
-    TrackPlayer.registerPlaybackService(() => PlaybackService);
     await TrackPlayer.setupPlayer({
       iosCategoryOptions: [IOSCategoryOptions.DuckOthers],
       iosCategory: IOSCategory.Playback,

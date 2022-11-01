@@ -1,6 +1,6 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createElement } from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, Linking } from "react-native";
 import { Colors, Fonts, Values } from "../resources";
 import { DollsScreen } from "./DollsScreen";
 import { CompanyScreen } from "./CompanyScreen";
@@ -55,7 +55,7 @@ export const HomeScreen = () => {
                     onPress={() => navigation.navigate("Home", { screen: url })}
                     key={`url-${i}`}
                     style={{
-                      fontFamily: Fonts.playfairdisplayItalic,
+                      fontFamily: Fonts.playfairDisplayItalic,
                       fontSize: 20,
                       lineHeight: 27,
                       color: Colors.violet100,
@@ -74,11 +74,12 @@ export const HomeScreen = () => {
                 }}
               >
                 {[
-                  { icon: InstagramIcon, url: "" },
-                  { icon: VKIcon, url: "" },
-                  { icon: TelegramIcon, url: "" },
-                ].map(({ icon }, i) =>
+                  { icon: InstagramIcon, url: Values.instagramUrl },
+                  { icon: VKIcon, url: Values.vkUrl },
+                  { icon: TelegramIcon, url: Values.tgUrl },
+                ].map(({ icon, url }, i) =>
                   createElement(icon, {
+                    onPress: () => Linking.openURL(url),
                     key: `social-${i}`,
                     style: { marginLeft: i === 0 ? 0 : 20 },
                   })
