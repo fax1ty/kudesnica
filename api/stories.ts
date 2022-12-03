@@ -30,26 +30,32 @@ export interface IRichImage {
   height?: number;
 }
 
-export interface IRichVideoAttachment {
-  type: "attachment";
-  kind: "video";
-  ids: Array<string>;
-}
+type IRichChat = {
+  type: "chat";
+  messages: Array<
+    Array<
+      | { kind: "text"; text: string }
+      | {
+          kind: "gallery";
+          ids: Array<string>;
+          mediaType: "video" | "image";
+        }
+    >
+  >;
+};
 
-export interface IRichImageAttachment {
-  type: "attachment";
-  kind: "image";
-  urls: Array<string>;
+interface IRichLyrics {
+  type: "lyrics";
+  text: string;
 }
-
-export type IRichAttachment = IRichVideoAttachment | IRichImageAttachment;
 
 export type IRichBlock =
   | IRichHeading
   | IRichParagraph
   | IRichAudio
   | IRichImage
-  | IRichAttachment;
+  | IRichChat
+  | IRichLyrics;
 
 export const useStories = (dollId?: string) =>
   useSWR<{
@@ -81,7 +87,7 @@ export interface IStory {
   isFavorite: boolean;
   isLastInSeason: boolean;
   media?: string;
-  attachments: Partial<{ video: Array<string>; image: Array<string> }>;
+  chat?: IRichChat["messages"];
 }
 
 export type IStoryShort = Omit<IStory, "content" | "media" | "attachments">;

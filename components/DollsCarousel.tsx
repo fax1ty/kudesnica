@@ -1,10 +1,11 @@
 import Carousel from "react-native-snap-carousel";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, View } from "react-native";
 import { useDimensions } from "@react-native-community/hooks";
-import { Colors, Fonts, Values } from "../resources";
+import { Colors, Fonts } from "../resources";
 import { useNavigation } from "@react-navigation/native";
 import { IDoll } from "../api/dolls";
 import { Pin } from "./Pin";
+import { IndependentText as Text } from "./IndependentText";
 
 import BellIcon from "../icons/Bell";
 import { LoadableImage } from "./LoadableImage";
@@ -114,17 +115,49 @@ export const DollsCarousel = ({ data, onShift, onIndexChange }: Props) => {
               alignItems: "center",
             }}
           >
-            <LoadableImage
-              resetBordersAfterLoad
-              resizeMode="contain"
-              style={{
-                width: screenSize.width - 38 * 2,
-                aspectRatio: 302 / 483,
-                borderTopLeftRadius: 500,
-                borderTopRightRadius: 500,
-              }}
-              source={{ uri: item.dollsCarouselPhoto }}
-            />
+            <View style={{ position: "relative" }}>
+              <LoadableImage
+                resizeMode="contain"
+                style={{
+                  width: screenSize.width - 38 * 2,
+                  aspectRatio: 296 / 409,
+                  borderTopLeftRadius: 500,
+                  borderTopRightRadius: 500,
+                }}
+                source={{ uri: item.dollsCarouselPhoto.background }}
+                skeletonColors={[
+                  Colors.light100,
+                  Colors.light80,
+                  Colors.light100,
+                ]}
+              />
+              {item.dollsCarouselPhoto.label && (
+                <Image
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    width: 73,
+                    aspectRatio: 1,
+                    resizeMode: "contain",
+                  }}
+                  source={{ uri: item.dollsCarouselPhoto.label }}
+                />
+              )}
+              {item.dollsCarouselPhoto.doll && (
+                <Image
+                  style={{
+                    position: "absolute",
+                    bottom: 20,
+                    alignSelf: "center",
+                    width: screenSize.width * 0.6,
+                    aspectRatio: 226 / 463,
+                    resizeMode: "contain",
+                  }}
+                  source={{ uri: item.dollsCarouselPhoto.doll }}
+                />
+              )}
+            </View>
             <DollMainText
               title={item.title}
               isNext={item.next}

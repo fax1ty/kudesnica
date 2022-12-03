@@ -5,7 +5,11 @@ import { IRichBlock } from "./stories";
 export interface IDoll {
   id: string;
   title: string;
-  dollsCarouselPhoto: string;
+  dollsCarouselPhoto: Partial<{
+    doll: string;
+    background: string;
+    label: string;
+  }>;
   storyViewCarousel: Array<string>;
   description: Array<IRichBlock>;
   storeLinks: Array<string>;

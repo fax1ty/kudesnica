@@ -1,6 +1,6 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { createElement } from "react";
-import { View, Text, Image, Linking } from "react-native";
+import { View, Image, Linking } from "react-native";
 import { Colors, Fonts, Values } from "../resources";
 import { DollsScreen } from "./DollsScreen";
 import { CompanyScreen } from "./CompanyScreen";
@@ -9,6 +9,7 @@ import { AppScreen } from "./AppScreen";
 import { useNavigation } from "@react-navigation/native";
 import TelegramIcon from "../icons/Telegram";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { IndependentText as Text } from "../components/IndependentText";
 
 import LogoFull from "../icons/LogoFull";
 import InstagramIcon from "../icons/Instagram";

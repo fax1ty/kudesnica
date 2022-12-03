@@ -1,4 +1,5 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
+import { IndependentText as Text } from "../components/IndependentText";
 import { Button } from "../components/Button";
 import { Colors, Fonts } from "../resources";
 import { useGlobalStore } from "../stores/global";

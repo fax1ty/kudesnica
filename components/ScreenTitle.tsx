@@ -1,8 +1,9 @@
 import { useNavigation } from "@react-navigation/native";
-import { View, Text, ViewStyle, Pressable } from "react-native";
+import { View, ViewStyle, Pressable } from "react-native";
 import { Colors, Fonts, Values } from "../resources";
 import { useMemo } from "react";
 import { Pin } from "./Pin";
+import { IndependentText as Text } from "./IndependentText";
 
 import BackIcon from "../icons/Back";
 

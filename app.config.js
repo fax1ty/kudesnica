@@ -1,6 +1,9 @@
+const info = require("./package.json");
+
 const ENV = process.env.APP_ENV || "local";
 
-const version = [0, 0, 6];
+const version = info.version.split(".").map((value) => parseInt(value));
+const buildNumber = version[0] * 100 + version[1] * 10 + version[2];
 
 module.exports = {
   expo: {
@@ -20,7 +23,7 @@ module.exports = {
     },
     assetBundlePatterns: ["**/*"],
     ios: {
-      buildNumber: version[2].toString(),
+      buildNumber: buildNumber.toString(),
       bundleIdentifier: "ru.kudesnica.app",
       infoPlist: {
         UIBackgroundModes: ["audio"],
@@ -30,10 +33,11 @@ module.exports = {
     },
     androidStatusBar: {
       barStyle: "dark-content",
-      translucent: true,
+      translucent: false,
+      backgroundColor: "#00000000",
     },
     android: {
-      versionCode: version[2],
+      versionCode: buildNumber,
       package: ENV === "local" ? "ru.kudesnica.app.local" : "ru.kudesnica.app",
       permissions: ["android.permission.FOREGROUND_SERVICE"],
       googleServicesFile: "./google-services.json",

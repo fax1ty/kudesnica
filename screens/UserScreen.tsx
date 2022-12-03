@@ -1,4 +1,4 @@
-import { View, Text, Image, Pressable } from "react-native";
+import { View, Image, Pressable } from "react-native";
 import { Colors, Fonts, Values } from "../resources";
 import { useProfile } from "../api/profile";
 import Toggle from "react-native-toggle-element";
@@ -10,6 +10,7 @@ import { Avatar } from "../components/Avatar";
 import { GradientCard } from "../components/GradientCard";
 import { useFavorites } from "../api/stories";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { IndependentText as Text } from "../components/IndependentText";
 
 import BackIcon from "../icons/Back";
 import EditIcon from "../icons/Edit";

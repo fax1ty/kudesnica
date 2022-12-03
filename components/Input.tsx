@@ -1,11 +1,12 @@
 import MaskInput from "react-native-mask-input";
-import { TextInput, TextInputProps, Text, Keyboard } from "react-native";
+import { TextInput, TextInputProps } from "react-native";
 import { Colors, Fonts } from "../resources";
 import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
 import { useEffect, useMemo, useState } from "react";
+import { IndependentText as Text } from "./IndependentText";
 
 type Props = {
   error?: string;

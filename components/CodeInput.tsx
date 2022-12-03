@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { View, Text, TextInput, ViewStyle } from "react-native";
+import { View, TextInput, ViewStyle } from "react-native";
 import { Colors, Fonts } from "../resources";
+import { IndependentText as Text } from "./IndependentText";
 
 interface Props {
   length: number;

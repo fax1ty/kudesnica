@@ -18,8 +18,8 @@ interface Props {
 const BottomSheetContent = ({
   children,
   handleContentLayout,
-  visible,
-}: Props & {
+}: {
+  children: ReactNode;
   handleContentLayout: any;
 }) => {
   return (
@@ -47,16 +47,8 @@ const BottomSheetContent = ({
   );
 };
 
-export const AutoHeightModal = (props: Props) => {
+export const AutoHeightModal = ({ visible, children, onClose }: Props) => {
   const ref = useRef<BottomSheetModal>(null);
-
-  useEffect(() => {
-    if (!props.visible) ref.current?.dismiss();
-    else {
-      ref.current?.present();
-      ref.current?.expand();
-    }
-  }, [props.visible]);
 
   const {
     animatedHandleHeight,
@@ -72,12 +64,27 @@ export const AutoHeightModal = (props: Props) => {
     );
   }, []);
 
+  useEffect(() => {
+    if (!ref.current) return;
+
+    if (!visible) ref.current.dismiss();
+    else {
+      ref.current.present();
+      ref.current.expand();
+    }
+  }, [visible]);
+
   // const { handleSheetPositionChange } = useBottomSheetBackHandler(ref);
 
   return (
     <BottomSheetModal
       ref={ref}
       // onChange={handleSheetPositionChange}
+      onChange={(index) => {
+        if (index === -1) {
+          if (onClose) onClose();
+        }
+      }}
       enablePanDownToClose={true}
       snapPoints={animatedSnapPoints}
       handleHeight={animatedHandleHeight}
@@ -91,11 +98,9 @@ export const AutoHeightModal = (props: Props) => {
       backdropComponent={renderBackdrop}
       backgroundStyle={{ backgroundColor: Colors.light100 }}
     >
-      <BottomSheetContent
-        onClose={props.onClose}
-        handleContentLayout={handleContentLayout}
-        {...props}
-      />
+      <BottomSheetContent handleContentLayout={handleContentLayout}>
+        {children}
+      </BottomSheetContent>
     </BottomSheetModal>
   );
 };

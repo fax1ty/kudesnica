@@ -1,20 +1,12 @@
 import { useRef, useState } from "react";
-import { Dimensions, StyleSheet, View, Animated, Easing } from "react-native";
+import { Dimensions, View, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { ViewStyle } from "react-native";
-
-const styles = StyleSheet.create({
-  shimmer: {
-    overflow: "hidden",
-    backgroundColor: "#eee",
-  },
-});
 
 const SCREEN_WIDTH = Dimensions.get("screen").width;
 const START = -1;
 const END = 1;
 const DURATION = 2000;
-const COLORS = ["#eee", "#ddd", "#eee"];
 const LOCATIONS = [0.3, 0.5, 0.7];
 const ANIMATION = new Animated.Value(START);
 
@@ -61,18 +53,29 @@ interface Props {
   height: number | string;
   borderRadius?: number | [number, number, number, number];
   style?: ViewStyle;
+  colors?: Array<string>;
 }
 
-export const Skeleton = ({ width, height, borderRadius, style }: Props) => {
+export const Skeleton = ({
+  width,
+  height,
+  borderRadius,
+  style,
+  colors = ["#eee", "#ddd", "#eee"],
+}: Props) => {
   const [positionX, setPositionX] = useState<number | null>(null);
   const viewRef = useRef<View>(null);
 
   return (
     <View
-      style={[
-        styles.shimmer,
-        { width, height, ...style, ...makeRadiusObject(borderRadius) },
-      ]}
+      style={{
+        overflow: "hidden",
+        backgroundColor: colors[0],
+        width,
+        height,
+        ...style,
+        ...makeRadiusObject(borderRadius),
+      }}
       ref={viewRef}
       onLayout={() => {
         if (viewRef) {
@@ -95,7 +98,7 @@ export const Skeleton = ({ width, height, borderRadius, style }: Props) => {
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             locations={LOCATIONS}
-            colors={COLORS}
+            colors={colors}
           />
         </Animated.View>
       )}

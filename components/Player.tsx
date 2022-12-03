@@ -1,4 +1,4 @@
-import { View, Pressable, Text } from "react-native";
+import { View, Pressable } from "react-native";
 import { Colors, Fonts } from "../resources";
 import { Slider } from "react-native-awesome-slider";
 import { useEffect, useMemo } from "react";
@@ -6,6 +6,7 @@ import { makeTimeStringFromMs } from "../utils/time";
 import TrackPlayer from "react-native-track-player";
 import { useTrackProgress, useTrackState } from "../hooks/audio";
 import { useSharedValue } from "react-native-reanimated";
+import { IndependentText as Text } from "./IndependentText";
 
 import Back15Icon from "../icons/Back15";
 import Next15Icon from "../icons/Next15";
@@ -25,8 +26,8 @@ export const Player = ({ storyId, duration }: Props) => {
   const total = useMemo(() => makeTimeStringFromMs(duration), [duration]);
 
   const sharedMin = useSharedValue(0);
-  const sharedDuration = useSharedValue(duration);
-  const sharedProgress = useSharedValue(progress);
+  const sharedDuration = useSharedValue(0);
+  const sharedProgress = useSharedValue(0);
   const isScrubbing = useSharedValue(false);
 
   useEffect(() => {
@@ -46,7 +47,13 @@ export const Player = ({ storyId, duration }: Props) => {
           alignItems: "center",
         }}
       >
-        {/* <Back15Icon /> */}
+        <Back15Icon
+          onPress={async () => {
+            const nextTick = Math.floor(progress / 1000) - 15;
+            if (nextTick > 0) await TrackPlayer.seekTo(nextTick);
+            else await TrackPlayer.seekTo(0);
+          }}
+        />
         <Pressable
           onPress={async () => {
             if (!storyId) return;
@@ -56,7 +63,7 @@ export const Player = ({ storyId, duration }: Props) => {
           style={{
             alignItems: "center",
             justifyContent: "center",
-            // marginLeft: 50,
+            marginLeft: 50,
             width: 74,
             height: 74,
             borderRadius: 74 / 2,
@@ -76,10 +83,14 @@ export const Player = ({ storyId, duration }: Props) => {
             {state === "paused" ? <PlayIcon /> : <PauseIcon />}
           </View>
         </Pressable>
-        {/* <Next15Icon
+        <Next15Icon
           style={{ marginLeft: 50 }}
-          onPress={() => TrackPlayer.seekTo(15)}
-        /> */}
+          onPress={async () => {
+            const nextTick = Math.floor(progress / 1000) + 15;
+            const durationSec = Math.floor(duration / 1000);
+            if (nextTick < durationSec) await TrackPlayer.seekTo(nextTick);
+          }}
+        />
       </View>
       <View
         style={{
@@ -109,12 +120,14 @@ export const Player = ({ storyId, duration }: Props) => {
         </Text>
       </View>
       <Slider
-        onSlidingStart={() => {
+        onSlidingStart={async () => {
           isScrubbing.value = true;
+          await TrackPlayer.pause();
         }}
-        onSlidingComplete={(value) => {
+        onSlidingComplete={async (value) => {
           isScrubbing.value = false;
-          TrackPlayer.seekTo(Math.floor(value / 1000));
+          await TrackPlayer.seekTo(Math.floor(value / 1000));
+          await TrackPlayer.play();
         }}
         renderBubble={() => null}
         renderThumb={() => (

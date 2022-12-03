@@ -59,14 +59,15 @@ const AuthController = () => {
   const token = useGlobalStore((state) => state.token);
   const closeBottomPlayer = useGlobalStore((state) => state.closeBottomPlayer);
   const previousToken = usePreviousImmediate(token);
-  // const [persistToken, setPersistToken] = usePersistedState("@token", "");
-
-  // useEffect(() => {
-  //   if (persistToken && persistToken !== token) setToken(persistToken);
-  // }, [persistToken, token]);
+  const [persistToken, setPersistToken] = usePersistedState("@token", "");
+  const setToken = useGlobalStore((state) => state.setToken);
 
   useEffect(() => {
-    // setPersistToken(token);
+    if (persistToken && persistToken !== token) setToken(persistToken);
+  }, [persistToken, token]);
+
+  useEffect(() => {
+    setPersistToken(token);
     axios.defaults.headers.common.authorization = token;
 
     if (!token) {
@@ -138,6 +139,7 @@ export default function App() {
     [Fonts.firasansRegular]: require("./assets/fonts/FiraSans-Regular.ttf"),
     [Fonts.firasansBold]: require("./assets/fonts/FiraSans-Bold.ttf"),
     [Fonts.firasansMedium]: require("./assets/fonts/FiraSans-Medium.ttf"),
+    [Fonts.firamonoBold]: require("./assets/fonts/FiraMono-Bold.ttf"),
   });
 
   useEffect(() => {

@@ -1,5 +1,6 @@
-import { View, Text, ViewStyle } from "react-native";
+import { View, ViewStyle } from "react-native";
 import { Colors, Fonts } from "../resources";
+import { IndependentText as Text } from "./IndependentText";
 
 interface Props {
   color?: string;
@@ -22,10 +23,9 @@ export const Pin = ({ children, color = Colors.violet80, style }: Props) => {
     >
       <Text
         style={{
-          transform: [{ translateY: (12 / 4) * -1 }],
           color: Colors.light100,
           fontSize: 12,
-          fontFamily: Fonts.firasansBold,
+          fontFamily: Fonts.firamonoBold,
         }}
       >
         {children}

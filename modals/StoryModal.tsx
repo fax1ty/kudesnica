@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Player } from "../components/Player";
 import { generateComponentsFromRichComponents } from "../components/RichView";
 import BottomSheet, {
@@ -7,13 +7,15 @@ import BottomSheet, {
   BottomSheetFlatListMethods,
   TouchableWithoutFeedback,
 } from "@gorhom/bottom-sheet";
-import { Image, View, Text, ViewToken } from "react-native";
+import { Image, View, ViewToken, Platform } from "react-native";
+import { IndependentText as Text } from "../components/IndependentText";
 import { useDimensions } from "@react-native-community/hooks";
 import { percentageOf } from "../utils/math";
 import Animated, {
   Extrapolate,
   interpolate,
   useAnimatedStyle,
+  useDerivedValue,
   withSpring,
 } from "react-native-reanimated";
 import useBus from "use-bus";
@@ -38,14 +40,21 @@ import { useProfile } from "../api/profile";
 import { CustomBackdrop } from "../components/CustomBackdrop";
 import { useBottomSheetBackHandler } from "../hooks/bottom-sheet";
 import { mutate } from "swr";
+import { initialWindowMetrics } from "react-native-safe-area-context";
 
 import ArrowUpIcon from "../icons/ArrowUp";
 import ArrowDownButton from "../icons/ArrowDownButton";
 import HeartIcon from "../icons/Heart";
 import HeartFilledIcon from "../icons/HeartFilled";
 
-const MODAL_OPEN_SNAP = 95;
 const MODAL_OPEN_SNAP_NORMALIZED = 0.95;
+const SHADOW_HEIGHT = 5;
+const BOTTOM_INSET_HACK =
+  initialWindowMetrics && Platform.OS === "android"
+    ? initialWindowMetrics.insets.bottom > 1
+      ? initialWindowMetrics.insets.bottom - 3
+      : 0
+    : 0;
 
 export interface IStoryData {
   content: string;
@@ -73,15 +82,14 @@ const SheetContent = ({ story, doll }: ContentProps) => {
   const { screen: screenSize } = useDimensions();
   const components = useMemo(
     () =>
-      story
-        ? generateComponentsFromRichComponents(
-            doll?.id,
-            story.id,
-            story.media,
-            story.content,
-            story.attachments
-          )
-        : [],
+      generateComponentsFromRichComponents(
+        story?.cover,
+        doll?.id,
+        story?.id,
+        story?.media,
+        story?.content,
+        story?.chat
+      ),
     [doll, story]
   );
   const { data: profile } = useProfile();
@@ -99,6 +107,19 @@ const SheetContent = ({ story, doll }: ContentProps) => {
     (state) => state.openPremiumStoryModal
   );
   const openAuthOnlyModal = useGlobalStore((state) => state.openAuthOnlyModal);
+  const targetLowPlayerY = useDerivedValue(() =>
+    !story
+      ? screenSize.height
+      : isBottomPlayerVisible && animatedIndex.value === 1
+      ? screenSize.height * MODAL_OPEN_SNAP_NORMALIZED -
+        (Values.bottomPlayerHeight + SHADOW_HEIGHT + BOTTOM_INSET_HACK)
+      : animatedIndex.value * screenSize.height
+  );
+
+  useEffect(() => {
+    scroll.current?.scrollToOffset({ animated: false, offset: 0 });
+    setLastViewableItemIndex(-1);
+  }, [story]);
 
   // https://github.com/facebook/react-native/issues/30171#issuecomment-711154425
   const viewabilityConfigCallbackPairs = useRef([
@@ -106,11 +127,12 @@ const SheetContent = ({ story, doll }: ContentProps) => {
       viewabilityConfig: { itemVisiblePercentThreshold: 75 },
       onViewableItemsChanged: (data: { viewableItems: Array<ViewToken> }) => {
         if (!data || !data.viewableItems || data.viewableItems.length === 0)
-          return 0;
-        else
+          return;
+        else {
           setLastViewableItemIndex(
             data.viewableItems[data.viewableItems.length - 1].index
           );
+        }
       },
     },
   ]);
@@ -134,6 +156,9 @@ const SheetContent = ({ story, doll }: ContentProps) => {
         ListHeaderComponent={
           <Animated.View
             style={useAnimatedStyle(() => ({
+              overflow: "hidden",
+              borderTopLeftRadius: 25,
+              borderTopRightRadius: 25,
               flex: 1,
               opacity: interpolate(
                 animatedIndex.value,
@@ -169,9 +194,13 @@ const SheetContent = ({ story, doll }: ContentProps) => {
                     width: 300,
                     aspectRatio: 1,
                     borderRadius: 300 / 2,
+                    backgroundColor: "#eee",
                   }}
                 />
-                <View style={{ paddingHorizontal: 26, marginTop: 24 }}>
+                <View
+                  style={{ paddingHorizontal: 26, marginTop: 24 }}
+                  pointerEvents={story ? undefined : "none"}
+                >
                   <Player
                     storyId={story?.id}
                     duration={story?.audio.duration || 0}
@@ -193,7 +222,12 @@ const SheetContent = ({ story, doll }: ContentProps) => {
                     {story.title}
                   </Text>
                 ) : (
-                  <Skeleton width="100%" height={30} borderRadius={8} />
+                  <Skeleton
+                    width={300}
+                    height={30}
+                    borderRadius={8}
+                    style={{ alignSelf: "center", marginTop: 21 }}
+                  />
                 )}
                 {story ? (
                   <Text
@@ -212,7 +246,16 @@ const SheetContent = ({ story, doll }: ContentProps) => {
                     {story.episode + 1} история, {story.season + 1} сезон
                   </Text>
                 ) : (
-                  <Skeleton width={100} height={12} borderRadius={8} />
+                  <Skeleton
+                    width={100}
+                    height={12}
+                    borderRadius={8}
+                    style={{
+                      alignSelf: "center",
+                      marginTop: 15,
+                      marginBottom: 25,
+                    }}
+                  />
                 )}
               </View>
             </View>
@@ -220,7 +263,7 @@ const SheetContent = ({ story, doll }: ContentProps) => {
         }
         ListFooterComponent={
           <View style={{ paddingLeft: 27, paddingRight: 19 }}>
-            {!story?.isLastInSeason && (
+            {story && !story.isLastInSeason && (
               <Button
                 theme="outlined"
                 style={{ marginTop: 25 }}
@@ -230,7 +273,7 @@ const SheetContent = ({ story, doll }: ContentProps) => {
                   const nextStory = await getStory(doll.id, nextStoryId);
                   if (nextStory.premium && !profile.premium)
                     return openPremiumStoryModal();
-                  updateCurrentlyPlaying(doll, nextStory);
+                  await updateCurrentlyPlaying(doll, nextStory);
                 }}
               >
                 Следующая история →
@@ -240,36 +283,46 @@ const SheetContent = ({ story, doll }: ContentProps) => {
           </View>
         }
       />
+      {/* Нижний плеер */}
       <Animated.View
         style={useAnimatedStyle(() => ({
           position: "absolute",
           width: "100%",
-          top: interpolate(
-            animatedIndex.value,
-            [0, 1],
-            [
-              0,
-              screenSize.height * MODAL_OPEN_SNAP_NORMALIZED -
-                (animatedIndex.value === 0
-                  ? Values.bottomPlayerHeight
-                  : isBottomPlayerVisible
-                  ? Values.bottomPlayerHeight
-                  : 0),
-            ],
-            Extrapolate.CLAMP
-          ),
+          top: targetLowPlayerY.value,
         }))}
       >
         <TouchableWithoutFeedback
           onPress={() => expand()}
           style={{
-            height: Values.bottomPlayerHeight,
+            height: Values.bottomPlayerHeight + SHADOW_HEIGHT,
             width: "100%",
-            paddingHorizontal: 20,
-            backgroundColor: "white",
+            position: "relative",
           }}
         >
+          <Image
+            source={require("../assets/low-player-bg.png")}
+            style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+            }}
+          />
+          <View
+            style={{
+              bottom: 0,
+              position: "absolute",
+              width: "100%",
+              height: Values.bottomPlayerHeight,
+              backgroundColor: Colors.light100,
+            }}
+          />
           <LowPlayer
+            styles={{
+              paddingHorizontal: 20,
+              position: "absolute",
+              bottom: 0,
+              width: "100%",
+            }}
             PressableComponent={TouchableWithoutFeedback}
             duration={story?.audio.duration}
             dollId={doll?.id}
@@ -297,17 +350,13 @@ const SheetContent = ({ story, doll }: ContentProps) => {
           />
         </TouchableWithoutFeedback>
       </Animated.View>
+      {/* Верхний градиент */}
       <Animated.View
         style={useAnimatedStyle(() => ({
           width: "100%",
-          height: 25 + 70,
+          height: 61 + 13,
           position: "absolute",
-          opacity: interpolate(
-            animatedIndex.value,
-            [0, 1],
-            [0, 1],
-            Extrapolate.CLAMP
-          ),
+          opacity: animatedIndex.value,
         }))}
       >
         <Animated.View
@@ -320,11 +369,11 @@ const SheetContent = ({ story, doll }: ContentProps) => {
             }),
           }))}
         >
+          <View style={{ height: 61, backgroundColor: "white" }} />
           <LinearGradient
-            colors={["#fff", "rgba(255, 255, 255, 0)"]}
+            colors={["white", "rgba(255, 255, 255, 0)"]}
             style={{
-              width: "100%",
-              height: "100%",
+              height: 13,
             }}
           />
         </Animated.View>
@@ -374,15 +423,25 @@ export const StoryModal = ({ dollId, storyId }: Props) => {
   const snapPoints = useMemo(
     () => [
       `${percentageOf(Values.bottomPlayerHeight, screenSize.height)}%`,
-      `${MODAL_OPEN_SNAP}%`,
+      `${MODAL_OPEN_SNAP_NORMALIZED * 100}%`,
     ],
-    [screenSize, Values.bottomPlayerHeight, MODAL_OPEN_SNAP]
+    [screenSize, Values.bottomPlayerHeight, MODAL_OPEN_SNAP_NORMALIZED]
   );
-  const { data: story } = useStory(dollId, storyId);
+  const { data: story, isValidating } = useStory(dollId, storyId);
   const { data: doll } = useDoll(dollId);
   const ref = useRef<BottomSheet>(null);
 
   const { handleSheetPositionChange } = useBottomSheetBackHandler(ref, false);
+
+  // const [loading, setLoading] = useState(false);
+
+  // useEffect(() => {
+  //   setLoading(true);
+  // }, [storyId, dollId]);
+
+  // useEffect(() => {
+  //   if (loading && !isValidating) setLoading(false);
+  // }, [loading, isValidating]);
 
   return (
     <BottomSheet
@@ -392,30 +451,20 @@ export const StoryModal = ({ dollId, storyId }: Props) => {
       enableHandlePanningGesture={Boolean(dollId && storyId)}
       snapPoints={snapPoints}
       handleComponent={null}
+      containerStyle={{
+        position: "relative",
+      }}
       style={{
         borderTopLeftRadius: 25,
         borderTopRightRadius: 25,
         overflow: "hidden",
-        // Shadow
-        shadowColor: "black",
-        shadowOffset: {
-          width: 0,
-          height: 12,
-        },
-        shadowOpacity: 0.58,
-        shadowRadius: 16,
-        elevation: 24,
-        //
-      }}
-      containerStyle={{
-        position: "relative",
       }}
       backdropComponent={CustomBackdrop}
       backgroundStyle={{
         backgroundColor: "transparent",
       }}
     >
-      <SheetContent story={story} doll={doll} />
+      <SheetContent story={isValidating ? undefined : story} doll={doll} />
     </BottomSheet>
   );
 };

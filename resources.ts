@@ -28,6 +28,7 @@ export const Fonts = {
   firasansRegular: "FiraSans-Regular",
   firasansBold: "FiraSans-Bold",
   firasansMedium: "FiraSans-Medium",
+  firamonoBold: "FiraMono-Bold",
 };
 
 export const Values = {

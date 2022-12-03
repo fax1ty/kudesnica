@@ -1,6 +1,6 @@
 import { useDimensions } from "@react-native-community/hooks";
 import { useRoute } from "@react-navigation/native";
-import { View, Image, FlatList, Text, Pressable } from "react-native";
+import { View, Image, FlatList, Pressable } from "react-native";
 import Carousel from "react-native-snap-carousel";
 import { DollMainText } from "../components/DollsCarousel";
 import { Colors, Fonts, Values } from "../resources";
@@ -26,6 +26,7 @@ import { useProfile } from "../api/profile";
 import { ScreenTitle } from "../components/ScreenTitle";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAudioStore } from "../stores/audio";
+import { IndependentText as Text } from "../components/IndependentText";
 
 import HeartIcon from "../icons/HeartSmall";
 import HeartFilledIcon from "../icons/HeartSmallFilled";
@@ -101,22 +102,23 @@ export const StoriesScreen = () => {
               </Text>
             )}
             <Pressable
-              onPress={() => {
+              onPress={async () => {
                 if (!doll || !profile) return;
 
                 if (
                   currentSeason === item.season &&
                   currentEpisode === item.episode
                 )
-                  return;
+                  return dispatch("UI_STORY_EXPAND");
 
                 if (item.premium && !profile.premium)
                   return openPremiumStoryModal();
 
                 setCurrentSeason(item.season);
                 setCurrentEpisode(item.episode);
-                updateCurrentlyPlaying(doll, item);
+
                 dispatch("UI_STORY_EXPAND");
+                await updateCurrentlyPlaying(doll, item);
               }}
               style={{
                 paddingLeft: 16,
@@ -285,6 +287,7 @@ export const StoriesScreen = () => {
             {doll && (
               <View style={{ marginTop: 27 }}>
                 <RichView
+                  dollAvatar=""
                   data={doll.description}
                   dollId={doll.id}
                   storyId="doesntmatter"

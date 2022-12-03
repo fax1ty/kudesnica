@@ -39,7 +39,7 @@ export const CircleModal = ({
             width: 272,
             height: 2,
             backgroundColor: Colors.light100,
-            marginTop: 18,
+            marginTop: 23,
           }}
         />
         {footerContent}

@@ -1,4 +1,4 @@
-import { Text } from "react-native";
+import { IndependentText as Text } from "../components/IndependentText";
 import { Colors, Fonts } from "../resources";
 import { CircleModal } from "./CircleModal";
 import { useGlobalStore } from "../stores/global";

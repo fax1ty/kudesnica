@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   Text,
   View,
   Image as ImageView,
-  Pressable,
-  ScrollView,
-  Linking,
   ImageURISource,
+  ViewStyle,
 } from "react-native";
-import { Colors, Fonts, Values } from "../resources";
+import { Colors, Fonts } from "../resources";
 import { IRichBlock, IRichImageBorders, IStory } from "../api/stories";
 import { LoadableImage } from "./LoadableImage";
 import { Button } from "./Button";
@@ -18,26 +16,27 @@ import { useProfile } from "../api/profile";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import axios from "axios";
-import { CircularProgressBase } from "react-native-circular-progress-indicator";
 import Video from "react-native-video";
 import { deleteMedia } from "../api/media";
 import { mutate } from "swr";
 import * as VideoThumbnails from "expo-video-thumbnails";
+import { FlatList } from "react-native-gesture-handler";
+import { TouchableWithoutFeedback } from "@gorhom/bottom-sheet";
+import { Avatar } from "./Avatar";
+import { IDoll } from "../api/dolls";
 
 import RubyIcon from "../icons/Ruby";
-import PlusIcon from "../icons/Plus";
-import Stars from "../icons/Stars";
-import Instagram from "../icons/InstagramBig";
-import VK from "../icons/VKBig";
-import Telegram from "../icons/TelegramBig";
-import EditIcon from "../icons/Edit";
+import ChatRect from "../icons/ChatRect";
+import Notes from "../icons/Notes";
+import MagnifierIcon from "../icons/Magnifier";
 
 interface Props {
+  dollAvatar: IStory["cover"];
   data: Array<IRichBlock>;
   dollId: string;
   storyId: string;
   mediaId?: string;
-  attachments?: IStory["attachments"];
+  chat?: IStory["chat"];
 }
 
 const horizontalPadding = {
@@ -171,322 +170,141 @@ const Image = ({
   );
 };
 
-const Attachment = ({
-  kind,
-  storyId,
-  dollId,
-  mediaId,
-  attachments,
+const ChatMessage = ({
+  avatar,
+  message,
+  style,
+  firstMessage = true,
+  attachment,
+  galleryUrls,
+  position = "left",
 }: {
-  kind: "image" | "video";
-  storyId: string;
-  dollId: string;
-  mediaId?: string;
-  attachments?: IStory["attachments"];
+  avatar?: string | null;
+  firstMessage?: boolean;
+  message?: string;
+  attachment?: {
+    preview: boolean;
+    url: string;
+    kind: "video" | "image";
+  };
+  style?: ViewStyle;
+  galleryUrls?: Array<string>;
+  position?: "left" | "right";
 }) => {
-  const openAuthOnlyModal = useGlobalStore((state) => state.openAuthOnlyModal);
-  const { data: profile } = useProfile();
-  const [status, requestPermission] = ImagePicker.useMediaLibraryPermissions();
-  const [error, setError] = useState("");
-  const token = useGlobalStore((state) => state.token);
-  const [progress, setProgress] = useState(0);
-  const [url, setUrl] = useState("");
-  const [step, setStep] = useState(0);
-  const [viewableAsset, setViewableAsset] = useState("");
-  const setGallery = useGlobalStore((state) => state.setGallery);
   const openGalleryModal = useGlobalStore((state) => state.openGalleryModal);
-  const [isUploading, setIsUploading] = useState(false);
+  const setGallery = useGlobalStore((state) => state.setGallery);
 
-  useEffect(() => {
-    if (!url && mediaId) {
-      setViewableAsset(
-        new URL(`/media/${mediaId}`, axios.defaults.baseURL).href
-      );
-      setStep(1);
-    }
-  }, [mediaId, url]);
-
-  const BUTTON_SIZE = 59;
-  const BUTTON_PROGRESS_WIDTH = 8;
+  console.log(attachment);
 
   return (
-    <>
+    <View
+      style={{
+        ...style,
+        flexDirection: position === "left" ? "row" : "row-reverse",
+      }}
+    >
       <View
         style={{
-          height: 274,
-          position: "relative",
-          borderTopLeftRadius: 25,
-          borderTopRightRadius: 25,
-          borderBottomLeftRadius: 35,
-          borderBottomRightRadius: 35,
-          overflow: "hidden",
-          marginTop: 55,
-          marginLeft: 14,
-          marginRight: 16,
+          marginTop: 5,
+          height: 29,
+          aspectRatio: 1,
+          borderRadius: 29 / 2,
+          opacity: firstMessage ? 1 : 0,
         }}
       >
-        <ImageView
-          source={require("../assets/attachment-bg.png")}
-          style={{
-            position: "absolute",
-            width: "100%",
-            height: "100%",
-          }}
-        />
-        <View
-          style={{
-            width: "100%",
-            height: "100%",
-            position: "absolute",
-            paddingTop: 21,
-            paddingBottom: 16,
-            paddingLeft: 14,
-            paddingRight: 17,
-          }}
-        >
-          {step === 0 && (
-            <>
-              <Text
-                style={{
-                  fontFamily: Fonts.playfairDisplayItalic,
-                  fontSize: 26,
-                  lineHeight: 30,
-                  textAlign: "center",
-                  color: Colors.violet100,
+        <Avatar avatar={avatar || null} size="small" />
+      </View>
+      <View
+        style={{
+          borderRadius: 6,
+          marginLeft: position === "left" ? 9 : 0,
+          marginRight: position === "right" ? 9 : 0,
+          flex: 1,
+          backgroundColor: Colors.light100,
+          paddingTop: 9,
+          paddingBottom: 7,
+          paddingLeft: 11,
+          paddingRight: 8,
+        }}
+      >
+        {message && (
+          <Text
+            style={{
+              fontFamily: Fonts.firasansRegular,
+              fontSize: 13,
+              lineHeight: 16,
+              color: Colors.dark100,
+            }}
+          >
+            {message}
+          </Text>
+        )}
+        {attachment && (
+          <>
+            {attachment.preview && (
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  if (!galleryUrls) return;
+                  setGallery({
+                    urls: galleryUrls,
+                    preselectedIndex: 0,
+                    kind: attachment.kind,
+                  });
+                  openGalleryModal();
                 }}
               >
-                Пришли своё {kind === "image" ? "фото" : "видео"}!
-              </Text>
-              <View
-                style={{
-                  marginTop: 18,
-                  height: BUTTON_SIZE + BUTTON_PROGRESS_WIDTH,
-                  width: "100%",
-                  position: "relative",
-                }}
-              >
-                <Stars style={{ alignSelf: "center", position: "absolute" }} />
-                <Pressable
-                  onPress={async () => {
-                    if (isUploading) return;
-                    setError("");
-                    if (!profile) openAuthOnlyModal();
-                    if (!status?.granted) await requestPermission();
-                    const result = await ImagePicker.launchImageLibraryAsync({
-                      base64: kind === "video" ? false : true,
-                      mediaTypes:
-                        kind === "video"
-                          ? ImagePicker.MediaTypeOptions.Videos
-                          : ImagePicker.MediaTypeOptions.Images,
-                      quality: 0.95,
-                      exif: false,
-                    });
-                    if (result.cancelled) return;
-                    const fileInfo = await FileSystem.getInfoAsync(result.uri, {
-                      size: true,
-                    });
-                    if (
-                      fileInfo.size! >
-                      1024 * 1024 * (kind === "video" ? 200 : 15)
-                    )
-                      return setError(
-                        "Объект слишком большой, выберите другой"
-                      );
-                    setUrl(result.uri);
-                    setViewableAsset(
-                      kind === "video"
-                        ? result.uri
-                        : `data:image/png;base64,${result.base64}`
-                    );
-                  }}
+                <View
                   style={{
-                    alignSelf: "center",
-                    position: "relative",
-                    width: BUTTON_SIZE + BUTTON_PROGRESS_WIDTH,
-                    borderRadius: (BUTTON_SIZE + BUTTON_PROGRESS_WIDTH) / 2,
-                    aspectRatio: 1,
+                    height: 139,
+                    width: "100%",
                     alignItems: "center",
                     justifyContent: "center",
-                    overflow: "hidden",
+                    position: "relative",
                   }}
                 >
-                  <View
-                    style={{
-                      width: "100%",
-                      aspectRatio: 1,
-                    }}
-                  >
-                    <CircularProgressBase
-                      value={progress}
-                      maxValue={100}
-                      radius={(BUTTON_SIZE + BUTTON_PROGRESS_WIDTH) / 2}
-                      inActiveStrokeWidth={BUTTON_PROGRESS_WIDTH}
-                      activeStrokeWidth={BUTTON_PROGRESS_WIDTH}
-                      activeStrokeColor={Colors.violet80}
-                      inActiveStrokeColor={Colors.light100}
+                  {attachment.kind === "image" && (
+                    <Image
+                      width={196}
+                      height={139}
+                      source={{ uri: attachment.url }}
                     />
-                  </View>
+                  )}
+                  {attachment.kind === "video" && (
+                    <VideoPreview
+                      width={196}
+                      height={139}
+                      url={attachment.url}
+                    />
+                  )}
                   <View
                     style={{
-                      position: "absolute",
-                      width: BUTTON_SIZE - BUTTON_PROGRESS_WIDTH / 2,
-                      borderRadius:
-                        (BUTTON_SIZE - BUTTON_PROGRESS_WIDTH / 2) / 2,
+                      width: 54,
                       aspectRatio: 1,
-                      backgroundColor: Colors.violet40,
+                      borderRadius: 54 / 2,
+                      backgroundColor: Colors.pink100,
+                      opacity: 0.9,
                       alignItems: "center",
                       justifyContent: "center",
+                      position: "absolute",
                     }}
                   >
-                    {!isUploading && !url && <PlusIcon />}
-                    {!isUploading && url && <EditIcon />}
+                    <MagnifierIcon />
                   </View>
-                </Pressable>
-              </View>
-              <View
-                style={{ paddingLeft: 26, paddingRight: 29, marginTop: 26 }}
-              >
-                <Button
-                  disabled={!profile ? false : !url || isUploading}
-                  onPress={async () => {
-                    if (isUploading) return;
-                    if (!profile) openAuthOnlyModal();
-                    if (!url) return;
-                    const uploadTask = FileSystem.createUploadTask(
-                      new URL(
-                        `/stories/${dollId}/${storyId}/uploadMedia`,
-                        axios.defaults.baseURL
-                      ).href,
-                      url,
-                      {
-                        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-                        fieldName: "file",
-
-                        headers: {
-                          authorization: token,
-                        },
-                        mimeType: kind === "video" ? "video/mp4" : "image/png",
-                        httpMethod: "POST",
-                        sessionType:
-                          FileSystem.FileSystemSessionType.BACKGROUND,
-                      },
-                      ({ totalByteSent, totalBytesExpectedToSend }) => {
-                        setProgress(
-                          (totalByteSent / totalBytesExpectedToSend) * 100
-                        );
-                      }
-                    );
-                    setIsUploading(true);
-                    const uploadResult = await uploadTask.uploadAsync();
-                    setIsUploading(false);
-                    setProgress(0);
-                    if (!uploadResult) return;
-                    if (uploadResult.status === 200) {
-                      console.log(
-                        "Объект успешно загружено",
-                        uploadResult.body
-                      );
-                      await mutate(
-                        `stories/${dollId}/${storyId}`,
-                        (old: IStory) => ({ ...old, media: uploadResult.body }),
-                        false
-                      );
-                      setStep(1);
-                    } else {
-                      console.error(
-                        "Изображение не загружено. Ошибка",
-                        uploadResult.status
-                      );
-                    }
-                  }}
-                >
-                  Загрузить!
-                </Button>
-              </View>
-              <Text
-                style={{
-                  textAlign: "center",
-                  marginTop: 10,
-                  fontFamily: Fonts.firasansRegular,
-                  fontSize: 12,
-                  lineHeight: 12,
-                  color: "#b0b0b0",
-                }}
-              >
-                Не более {kind === "image" ? 15 : 200} Мб
-              </Text>
-              {error && (
-                <Text
-                  style={{
-                    color: Colors.red80,
-                    fontFamily: Fonts.firasansRegular,
-                    fontSize: 13,
-                    lineHeight: 16,
-                    marginTop: 7,
-                  }}
-                >
-                  {error}
-                </Text>
-              )}
-            </>
-          )}
-          {step === 1 && (
-            <>
-              <Text
-                style={{
-                  marginTop: 40 - 21,
-                  fontFamily: Fonts.firasansRegular,
-                  fontSize: 18,
-                  lineHeight: 23,
-                  color: Colors.green100,
-                  textAlign: "center",
-                }}
-              >
-                {kind === "video" ? "Видео" : "Рисунок"} успешно загружен
-                {kind === "video" ? "о" : ""}
-              </Text>
-              <Text
-                style={{
-                  marginTop: 21,
-                  fontFamily: Fonts.playfairDisplayItalic,
-                  fontSize: 26,
-                  lineHeight: 30,
-                  color: "#df387b",
-                  textAlign: "center",
-                }}
-              >
-                Спасибо за {kind === "video" ? "видео" : "рисунок"}!{"\n"}Ты
-                молодец!
-              </Text>
-              <Button
-                style={{ marginTop: 32 }}
-                onPress={() => setStep(2)}
-              >{`Посмотреть ${kind === "video" ? "видео" : "рисунок"}`}</Button>
-            </>
-          )}
-          {step === 2 && (
-            <>
-              <Text
-                style={{
-                  alignSelf: "center",
-                  fontFamily: Fonts.playfairDisplayItalic,
-                  fontSize: 26,
-                  lineHeight: 30,
-                  color: Colors.violet100,
-                }}
-              >
-                {kind === "video" ? "Твоё видео" : "Твой рисунок"}
-              </Text>
-              <View style={{ alignSelf: "center", marginTop: 5 }}>
-                {kind === "video" && (
+                </View>
+              </TouchableWithoutFeedback>
+            )}
+            {!attachment.preview && (
+              <View style={{ alignSelf: "center" }}>
+                {attachment.kind === "video" && (
                   <Video
+                    paused
                     controls
                     source={{
                       headers: {
                         authorization: axios.defaults.headers.common
                           .authorization as string,
                       },
-                      uri: viewableAsset,
+                      uri: attachment.url,
                     }}
                     style={{
                       width: 226,
@@ -495,12 +313,12 @@ const Attachment = ({
                     }}
                   />
                 )}
-                {kind === "image" && (
+                {attachment.kind === "image" && (
                   <Image
                     width={226}
                     height={161}
                     source={{
-                      uri: viewableAsset,
+                      uri: attachment.url,
                       headers: {
                         authorization: axios.defaults.headers.common
                           .authorization as string,
@@ -509,133 +327,354 @@ const Attachment = ({
                   />
                 )}
               </View>
-              <View
-                style={{
-                  marginTop: 12,
-                  flexDirection: "row",
-                  alignSelf: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    fontFamily: Fonts.firasansRegular,
-                    fontSize: 14,
-                    lineHeight: 18,
-                    color: Colors.violet80,
-                  }}
-                  onPress={async () => {
-                    if (mediaId) await deleteMedia(mediaId);
-                    await mutate(
-                      `stories/${dollId}/${storyId}`,
-                      (old: IStory) => ({ ...old, media: undefined }),
-                      false
-                    );
-                    setStep(0);
-                    setUrl("");
-                  }}
-                >
-                  Удалить
-                </Text>
-              </View>
-            </>
-          )}
-        </View>
+            )}
+          </>
+        )}
+        <ChatRect
+          style={{
+            position: "absolute",
+            top: 0,
+            left: position === "left" ? 0 : undefined,
+            right: position === "right" ? 0 : undefined,
+            width: 15,
+            height: 13,
+            transform: [
+              { translateX: position === "left" ? -15 + 8 : 15 - 8 },
+              { scaleX: position === "left" ? 1 : -1 },
+            ],
+          }}
+        />
       </View>
-      {attachments && attachments[kind]?.length && step === 0 && (
-        <View style={{ marginTop: 20, width: "100%", paddingHorizontal: 34 }}>
-          <Text
-            style={{
-              fontFamily: Fonts.firasansRegular,
-              fontSize: 10,
-              lineHeight: 12,
-              color: Colors.dark25,
-              letterSpacing: 0.08,
-              textTransform: "uppercase",
-            }}
-          >
-            {kind === "video" ? "Видео" : "Рисунки"} других пользователей
-          </Text>
-          <ScrollView
-            style={{ marginTop: 9, height: 64 }}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-          >
-            {attachments[kind]!.map(
-              (id) =>
-                new URL(
-                  `/stories/${dollId}/${storyId}/attachment?id=${id}`,
+    </View>
+  );
+};
+
+type IChatMessage = NonNullable<IStory["chat"]>[0][0];
+
+const ChatChunk = ({
+  dollAvatar,
+  dollId,
+  storyId,
+  messages,
+  style,
+}: {
+  dollAvatar?: IStory["cover"];
+  dollId: IDoll["id"];
+  storyId: IStory["id"];
+  messages: Array<
+    IChatMessage | { kind: "media"; url: string; mediaType: "video" | "image" }
+  >;
+  style?: ViewStyle;
+}) => {
+  const id = useId();
+
+  const getCommonMessageProps = (i: number) => ({
+    firstMessage: i === 0,
+    style: { marginTop: i === 0 ? 0 : 7 },
+    avatar: dollAvatar,
+    key: `${id}-message-${i}`,
+  });
+
+  return (
+    <View style={style}>
+      {messages?.map((message, i) => (
+        <>
+          {message.kind === "gallery" && (
+            <ChatMessage
+              {...getCommonMessageProps(i)}
+              attachment={{
+                kind: message.mediaType,
+                url: new URL(
+                  `/stories/${dollId}/${storyId}/attachment?id=${message.ids[0]}`,
                   axios.defaults.baseURL
-                ).href
-            ).map((url, i, urls) => (
-              <Pressable
-                style={{ marginLeft: i === 0 ? 0 : 24 }}
-                key={`${storyId}-attach-${i}`}
-                onPress={() => {
-                  setGallery({
-                    urls,
-                    kind,
-                    preselectedIndex: i,
-                  });
-                  openGalleryModal();
-                }}
-              >
-                {kind === "video" && (
-                  <VideoPreview width={90} height={64} url={url} />
-                )}
-                {kind === "image" && (
-                  <Image width={90} height={64} source={{ uri: url }} />
-                )}
-              </Pressable>
-            ))}
-          </ScrollView>
-        </View>
-      )}
-      {step !== 0 && (
-        <View style={{ marginTop: 22, marginLeft: 14, marginRight: 16 }}>
-          <Text
-            style={{
-              alignSelf: "center",
-              textAlign: "center",
-              fontFamily: Fonts.firasansRegular,
-              fontSize: 14,
-              lineHeight: 18,
-              color: Colors.dark25,
+                ).href,
+                preview: true,
+              }}
+              galleryUrls={message.ids.map(
+                (id) =>
+                  new URL(
+                    `/stories/${dollId}/${storyId}/attachment?id=${id}`,
+                    axios.defaults.baseURL
+                  ).href
+              )}
+            />
+          )}
+          {message.kind === "media" && (
+            <ChatMessage
+              {...getCommonMessageProps(i)}
+              avatar={null}
+              attachment={{
+                kind: message.mediaType,
+                url: message.url,
+                preview: false,
+              }}
+              position="right"
+            />
+          )}
+          {message.kind === "text" && (
+            <ChatMessage {...getCommonMessageProps(i)} message={message.text} />
+          )}
+        </>
+      ))}
+    </View>
+  );
+};
+
+const Chat = ({
+  kind,
+  storyId,
+  dollId,
+  mediaId,
+  messages,
+  dollAvatar,
+}: {
+  dollAvatar?: IStory["cover"];
+  kind: "image" | "video";
+  storyId: string;
+  dollId: string;
+  mediaId?: string;
+  messages?: IStory["chat"];
+}) => {
+  const openAuthOnlyModal = useGlobalStore((state) => state.openAuthOnlyModal);
+  const { data: profile } = useProfile();
+  const [status, requestPermission] = ImagePicker.useMediaLibraryPermissions();
+  const [error, setError] = useState("");
+  const token = useGlobalStore((state) => state.token);
+  const [progress, setProgress] = useState(0);
+  const [viewableAsset, setViewableAsset] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const chatRef = useRef<FlatList>(null);
+
+  const viewableMessages = useMemo(
+    () => [
+      ...(messages || []),
+      viewableAsset
+        ? [{ mediaType: kind, kind: "media", url: viewableAsset }]
+        : [],
+    ],
+    [messages, viewableAsset]
+  );
+
+  useEffect(() => {
+    if (mediaId) {
+      setViewableAsset(
+        new URL(`/media/${mediaId}`, axios.defaults.baseURL).href
+      );
+    }
+  }, [mediaId]);
+
+  useEffect(() => {
+    if (!chatRef.current) return;
+    chatRef.current.scrollToEnd({ animated: true });
+  }, [viewableMessages]);
+
+  return (
+    <View style={{ paddingTop: 72, paddingLeft: 16, paddingRight: 14 }}>
+      <Text
+        style={{
+          fontFamily: Fonts.playfairDisplayItalic,
+          fontSize: 26,
+          lineHeight: 30,
+          color: Colors.violet100,
+          textAlign: "center",
+          height: 41,
+        }}
+      >
+        Секретный чатик
+      </Text>
+      <View
+        style={{
+          marginTop: 4,
+          height: 656,
+          borderRadius: 25,
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        <ImageView
+          source={require("../assets/chat-bg.png")}
+          style={{ width: "100%", height: "100%", position: "absolute" }}
+        />
+        <View
+          style={{
+            width: "100%",
+            height: "100%",
+            position: "absolute",
+            padding: 3,
+          }}
+        >
+          <FlatList
+            ref={chatRef}
+            showsVerticalScrollIndicator={false}
+            data={viewableMessages}
+            contentContainerStyle={{
+              paddingHorizontal: 17 - 3,
             }}
-          >
-            Следи за нашими социальными сетями, и{"\n"}возможно твой рисунок
-            попадет в{"\n"}подборку интересных работ!
-          </Text>
+            renderItem={({ index, item }) => (
+              <ChatChunk
+                dollAvatar={dollAvatar}
+                storyId={storyId}
+                dollId={dollId}
+                messages={item}
+                style={{
+                  marginTop: index === 0 ? 30 : 7,
+                  marginBottom:
+                    index === (viewableMessages?.length || 0) - 1 ? 17 : 0,
+                }}
+              />
+            )}
+          />
           <View
             style={{
-              marginTop: 14,
-              flexDirection: "row",
-              justifyContent: "center",
+              height: 104,
+              borderBottomLeftRadius: 25,
+              borderBottomRightRadius: 25,
+              backgroundColor: Colors.light100,
+              paddingVertical: 12,
+              paddingHorizontal: 24,
             }}
           >
-            <Instagram
-              onPress={async () => await Linking.openURL(Values.instagramUrl)}
-            />
-            <VK
-              style={{ marginLeft: 33 }}
-              onPress={async () => await Linking.openURL(Values.vkUrl)}
-            />
-            <Telegram
-              style={{ marginLeft: 27 }}
-              onPress={async () => await Linking.openURL(Values.tgUrl)}
-            />
+            {!viewableAsset && (
+              <Button
+                progress={progress}
+                onPress={async () => {
+                  setError("");
+                  if (!profile) return openAuthOnlyModal();
+                  if (!status?.granted) await requestPermission();
+                  const result = await ImagePicker.launchImageLibraryAsync({
+                    base64: kind === "video" ? false : true,
+                    mediaTypes:
+                      kind === "video"
+                        ? ImagePicker.MediaTypeOptions.Videos
+                        : ImagePicker.MediaTypeOptions.Images,
+                    quality: 0.95,
+                    exif: false,
+                  });
+                  if (result.cancelled) return;
+                  const fileInfo = await FileSystem.getInfoAsync(result.uri, {
+                    size: true,
+                  });
+                  if (
+                    fileInfo.size! >
+                    1024 * 1024 * (kind === "video" ? 250 : 15)
+                  )
+                    return setError("Объект слишком большой, выберите другой");
+                  setViewableAsset(
+                    kind === "video"
+                      ? result.uri
+                      : `data:image/png;base64,${result.base64}`
+                  );
+
+                  const uploadTask = FileSystem.createUploadTask(
+                    new URL(
+                      `/stories/${dollId}/${storyId}/uploadMedia`,
+                      axios.defaults.baseURL
+                    ).href,
+                    result.uri,
+                    {
+                      uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+                      fieldName: "file",
+
+                      headers: {
+                        authorization: token,
+                      },
+                      mimeType: kind === "video" ? "video/mp4" : "image/png",
+                      httpMethod: "POST",
+                      sessionType: FileSystem.FileSystemSessionType.BACKGROUND,
+                    },
+                    ({ totalByteSent, totalBytesExpectedToSend }) => {
+                      setProgress(
+                        (totalByteSent / totalBytesExpectedToSend) * 100
+                      );
+                    }
+                  );
+                  setIsUploading(true);
+                  const uploadResult = await uploadTask.uploadAsync();
+                  if (!uploadResult) return;
+                  if (uploadResult.status === 200) {
+                    console.log("Объект успешно загружено", uploadResult.body);
+                    await mutate(
+                      `stories/${dollId}/${storyId}`,
+                      (old: IStory) => ({ ...old, media: uploadResult.body }),
+                      false
+                    );
+                  } else {
+                    setViewableAsset("");
+                    console.error(
+                      "Изображение не загружено. Ошибка",
+                      uploadResult.status
+                    );
+                  }
+                  setIsUploading(false);
+                  setProgress(0);
+                }}
+                disabled={isUploading}
+              >
+                {isUploading
+                  ? "Загружается..."
+                  : `Выбрать ${kind === "video" ? "видео" : "рисунок"}`}
+              </Button>
+            )}
+            {Boolean(viewableAsset) && (
+              <Button
+                onPress={async () => {
+                  if (mediaId) await deleteMedia(mediaId);
+                  await mutate(
+                    `stories/${dollId}/${storyId}`,
+                    (old: IStory) => ({ ...old, media: undefined }),
+                    false
+                  );
+                  setViewableAsset("");
+                }}
+              >
+                Удалить
+              </Button>
+            )}
+            <Text
+              style={{
+                marginTop: 9,
+                textAlign: "center",
+                fontFamily: Fonts.firasansRegular,
+                fontSize: 12,
+                lineHeight: 12,
+                color: "#aea8a8",
+              }}
+            >
+              Не более 15 мб для фото, и 250 мб для видео
+            </Text>
           </View>
         </View>
-      )}
-    </>
+      </View>
+    </View>
+  );
+};
+
+const Lyrics = ({ children }: { children: string }) => {
+  return (
+    <View style={{ marginTop: 25, ...horizontalPadding }}>
+      <Notes style={{ alignSelf: "center" }} />
+      <Text
+        style={{
+          marginTop: 10,
+          fontSize: 15,
+          lineHeight: 24,
+          fontFamily: Fonts.playfairDisplayItalic,
+          color: "#705b9e",
+        }}
+      >
+        {children}
+      </Text>
+    </View>
   );
 };
 
 export const generateComponentsFromRichComponents = (
+  dollAvatar?: string,
   dollId?: string,
   storyId?: string,
   mediaId?: string,
   data?: Array<IRichBlock>,
-  attachments?: IStory["attachments"]
+  chat?: IStory["chat"]
 ) => {
   if (!dollId || !storyId || !data)
     return [
@@ -682,17 +721,19 @@ export const generateComponentsFromRichComponents = (
           borderRadius={token.borderRadius}
         />
       );
-    if (token.type === "attachment")
+    if (token.type === "chat")
       return (
-        <Attachment
-          key={`attachment-${i}`}
+        <Chat
+          dollAvatar={dollAvatar}
+          key={`chat-${i}`}
           kind="video"
           dollId={dollId}
           storyId={storyId}
           mediaId={mediaId}
-          attachments={attachments}
+          messages={chat}
         />
       );
+    if (token.type === "lyrics") return <Lyrics>{token.text}</Lyrics>;
     return null;
   });
 };
@@ -702,16 +743,18 @@ export const RichView = ({
   dollId,
   storyId,
   mediaId,
-  attachments,
+  chat,
+  dollAvatar,
 }: Props) => {
   const components = useMemo(
     () =>
       generateComponentsFromRichComponents(
+        dollAvatar,
         dollId,
         storyId,
         mediaId,
         data,
-        attachments
+        chat
       ),
     [data]
   );

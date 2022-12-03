@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { Colors, Fonts } from "../resources";
 import { useEffect, useState } from "react";
 import { Button } from "../components/Button";
@@ -18,6 +18,7 @@ import { ScreenTitle } from "../components/ScreenTitle";
 import { useGlobalStore } from "../stores/global";
 import { usePreviousImmediate } from "rooks";
 import { useNavigation } from "@react-navigation/native";
+import { IndependentText as Text } from "../components/IndependentText";
 
 import AddIcon from "../icons/Add";
 import DeleteIcon from "../icons/Delete";

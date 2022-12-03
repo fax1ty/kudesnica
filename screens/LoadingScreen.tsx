@@ -137,18 +137,17 @@ export const LoadingScreen = () => {
         <View
           style={{
             height: "100%",
-            justifyContent: "center",
-            alignItems: "center",
             position: "relative",
           }}
         >
-          <LogoWithouText style={{ position: "absolute" }} />
+          <LogoWithouText
+            style={{ position: "absolute", top: 0, left: 44.31 }}
+          />
           <Animated.View
             entering={FadeIn.duration(500)}
             style={{
               position: "absolute",
-              top: 35.14,
-              transform: [{ translateX: -9 }, { translateX: -7 }],
+              top: 40.47,
             }}
           >
             <LogoTextOnly />
@@ -202,6 +201,7 @@ export const LoadingScreen = () => {
       <Animated.Image
         source={require("../assets/cloud.png")}
         style={useAnimatedStyle(() => ({
+          opacity: 0.93,
           width: screenSize.width * 2,
           height: 436,
           position: "absolute",
@@ -209,7 +209,8 @@ export const LoadingScreen = () => {
           transform: [
             { translateY: (436 / 2) * -1 },
             { translateX: shift1.value },
-            { rotate: "-180deg" },
+            { scale: 1.2 },
+            { rotate: "353deg" },
           ],
         }))}
       />

@@ -1,10 +1,8 @@
-import { Text } from "react-native";
+import { IndependentText as Text } from "../components/IndependentText";
 import { Colors, Fonts } from "../resources";
 import { CircleModal } from "./CircleModal";
 import { useGlobalStore } from "../stores/global";
 import { useNavigation } from "@react-navigation/native";
-
-import LockCircled from "../icons/LockCircled";
 
 interface Props {
   visible: boolean;
@@ -14,6 +12,7 @@ export const AuthOnlyModal = ({ visible }: Props) => {
   const closeAuthOnlyModal = useGlobalStore(
     (state) => state.closeAuthOnlyModal
   );
+  const closeBottomPlayer = useGlobalStore((state) => state.closeBottomPlayer);
   const navigation = useNavigation<any>();
 
   return (
@@ -26,7 +25,7 @@ export const AuthOnlyModal = ({ visible }: Props) => {
             style={{
               fontFamily: Fonts.firasansRegular,
               fontSize: 16,
-              lineHeight: 16,
+              lineHeight: 15,
               color: Colors.dark25,
             }}
           >
@@ -36,6 +35,7 @@ export const AuthOnlyModal = ({ visible }: Props) => {
             onPress={() => {
               navigation.navigate("Auth", { mode: "register" });
               closeAuthOnlyModal();
+              closeBottomPlayer();
             }}
             style={{
               marginTop: 7,
@@ -43,7 +43,6 @@ export const AuthOnlyModal = ({ visible }: Props) => {
               fontSize: 26,
               color: Colors.violet100,
               lineHeight: 32,
-              marginBottom: 32 - 24,
               textDecorationLine: "underline",
             }}
           >
@@ -58,7 +57,7 @@ export const AuthOnlyModal = ({ visible }: Props) => {
               marginTop: 33,
               fontFamily: Fonts.firasansRegular,
               fontSize: 16,
-              lineHeight: 16,
+              lineHeight: 15,
               color: Colors.dark25,
             }}
           >
@@ -68,6 +67,7 @@ export const AuthOnlyModal = ({ visible }: Props) => {
             onPress={() => {
               navigation.navigate("Auth", { mode: "login" });
               closeAuthOnlyModal();
+              closeBottomPlayer();
             }}
             style={{
               marginTop: 7,

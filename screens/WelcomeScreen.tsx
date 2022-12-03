@@ -1,6 +1,6 @@
 import { useDimensions } from "@react-native-community/hooks";
 import { useEffect, useRef, useState } from "react";
-import { View, Image, Text } from "react-native";
+import { View, Image } from "react-native";
 import Carousel from "react-native-snap-carousel";
 import { Button } from "../components/Button";
 import { Colors, Fonts } from "../resources";
@@ -9,6 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { usePersistedState } from "react-native-use-persisted-state";
+import { IndependentText as Text } from "../components/IndependentText";
 
 export const WelcomeScreen = () => {
   const { screen: screenSize } = useDimensions();

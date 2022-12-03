@@ -51,7 +51,10 @@ export const DollsScreen = () => {
       {
         title: "Новая героиня",
         id: "next",
-        dollsCarouselPhoto: "https://i.imgur.com/wUoRuv2.png",
+        dollsCarouselPhoto: {
+          background: "https://i.imgur.com/QdPEhBj.png",
+          label: "https://i.imgur.com/2bYt9QL.png",
+        },
         storyViewCarousel: [],
         next: true,
         description: [],

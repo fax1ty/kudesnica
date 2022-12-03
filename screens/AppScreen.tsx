@@ -1,4 +1,4 @@
-import { View, Text, Pressable } from "react-native";
+import { View, Pressable } from "react-native";
 import { ScreenTemplate } from "../components/ScreenTemplate";
 import { ScreenTitle } from "../components/ScreenTitle";
 import { Colors, Fonts, Values } from "../resources";
@@ -7,6 +7,7 @@ import { useMemo } from "react";
 import { useNavigation } from "@react-navigation/native";
 import { getCurrentEnv } from "../utils/misc";
 import { useDimensions } from "@react-native-community/hooks";
+import { IndependentText as Text } from "../components/IndependentText";
 
 import NextIcon from "../icons/Next";
 import Logo from "../icons/LogoFull";

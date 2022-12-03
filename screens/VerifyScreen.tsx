@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { Colors, Fonts } from "../resources";
 import { Button } from "../components/Button";
 import {
@@ -18,6 +18,7 @@ import { ScreenTemplate } from "../components/ScreenTemplate";
 import { ScreenTitle } from "../components/ScreenTitle";
 import crashlytics from "@react-native-firebase/crashlytics";
 import { usePersistedState } from "react-native-use-persisted-state";
+import { IndependentText as Text } from "../components/IndependentText";
 
 export const VerifyScreen = () => {
   const [timeLeft, { start }] = useCountDown(60 * 1000);

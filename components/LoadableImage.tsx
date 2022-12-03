@@ -17,14 +17,14 @@ interface Props {
   source?: ImageURISource;
   style?: ViewStyle;
   resizeMode?: ImageResizeMode;
-  resetBordersAfterLoad?: boolean;
+  skeletonColors?: Array<string>;
 }
 
 export const LoadableImage = ({
+  skeletonColors,
   resizeMode,
   source,
   style,
-  resetBordersAfterLoad = false,
 }: Props) => {
   const [isImageLoaded, setImageLoaded] = useState(false);
 
@@ -34,16 +34,6 @@ export const LoadableImage = ({
         ...style,
         position: "relative",
         overflow: "hidden",
-        ...{
-          ...(resetBordersAfterLoad && isImageLoaded
-            ? {
-                borderTopLeftRadius: 0,
-                borderTopRightRadius: 0,
-                borderBottomLeftRadius: 0,
-                borderBottomRightRadius: 0,
-              }
-            : {}),
-        },
       }}
     >
       {source?.uri && (
@@ -65,7 +55,7 @@ export const LoadableImage = ({
           }),
         }))}
       >
-        <Skeleton width="100%" height="100%" />
+        <Skeleton width="100%" height="100%" colors={skeletonColors} />
       </Animated.View>
     </View>
   );

@@ -1,4 +1,4 @@
-import { FlatList, View, Pressable, Text } from "react-native";
+import { FlatList, View, Pressable } from "react-native";
 import { useProfile } from "../api/profile";
 import { useGlobalStore } from "../stores/global";
 import { LowPlayer } from "../components/LowPlayer";
@@ -14,6 +14,7 @@ import {
 import { mutate } from "swr";
 import { dispatch } from "use-bus";
 import { updateCurrentlyPlaying } from "../utils/audio";
+import { IndependentText as Text } from "../components/IndependentText";
 
 import HeartIcon from "../icons/HeartSmall";
 import HeartFilledIcon from "../icons/HeartSmallFilled";
@@ -67,7 +68,7 @@ export const FavoritesScreen = () => {
         renderItem={({ item, index }) => (
           <View key={`story-${item.season}-${item.episode}`}>
             <Pressable
-              onPress={() => {
+              onPress={async () => {
                 if (!profile) return;
 
                 if (item.premium && !profile.premium)
@@ -75,8 +76,8 @@ export const FavoritesScreen = () => {
 
                 const { doll, ...story } = item;
 
-                updateCurrentlyPlaying(doll, story);
                 dispatch("UI_STORY_EXPAND");
+                await updateCurrentlyPlaying(doll, story);
               }}
             >
               {

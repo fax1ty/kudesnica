@@ -1,6 +1,6 @@
 import { ScreenTemplate } from "../components/ScreenTemplate";
 import { ScreenTitle } from "../components/ScreenTitle";
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { Input } from "../components/Input";
 import { useState } from "react";
 import { Button } from "../components/Button";
@@ -9,6 +9,7 @@ import { useProfile } from "../api/profile";
 import { TextInput } from "react-native-gesture-handler";
 import { sendSupportMail } from "../api/support";
 import { Picker } from "@react-native-picker/picker";
+import { IndependentText as Text } from "../components/IndependentText";
 
 export const HelpScreen = () => {
   const items = [

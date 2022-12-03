@@ -9,24 +9,24 @@ import TrackPlayer, {
 } from "react-native-track-player";
 import { useAudioStore } from "../stores/audio";
 import { useGlobalStore } from "../stores/global";
+import { mutate } from "swr";
 
 export const updateCurrentlyPlaying = async (
   doll: IDollShort,
   story: IStoryShortiest,
   autoPlay = false
 ) => {
-  // const currentlyPlayingStoryId =
-  //   useAudioStore.getState().currentlyPlaying.storyId;
+  // const currentlyPlaying = useAudioStore.getState().currentlyPlaying;
   const setCurrentlyPlaying = useAudioStore.getState().setCurrentlyPlaying;
   const openBottomPlayer = useGlobalStore.getState().openBottomPlayer;
   // if (currentlyPlayingStoryId === story.id) return;
-  openBottomPlayer();
   setCurrentlyPlaying({
     dollId: doll.id,
     storyId: story.id,
     state: autoPlay ? "playing" : "paused",
   } as any);
-  await TrackPlayer.pause();
+  await mutate(`/stories/${doll.id}/${story.id}`);
+  openBottomPlayer();
   await TrackPlayer.add({
     id: story.id,
     url: new URL(
@@ -39,6 +39,7 @@ export const updateCurrentlyPlaying = async (
     duration: Math.ceil(story.audio.duration / 1000),
     headers: { authorization: axios.defaults.headers.common.authorization },
   });
+  await TrackPlayer.skipToNext();
   if (autoPlay) await TrackPlayer.play();
 };
 

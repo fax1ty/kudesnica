@@ -1,5 +1,6 @@
-import { View, Text, Pressable, Linking } from "react-native";
+import { View, Pressable, Linking } from "react-native";
 import { Colors, Fonts } from "../resources";
+import { IndependentText as Text } from "./IndependentText";
 
 import OzonLogo from "../icons/Ozon";
 import WildberriesLogo from "../icons/Wildberries";

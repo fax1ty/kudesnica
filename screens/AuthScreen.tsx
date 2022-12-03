@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { Colors, Fonts } from "../resources";
 import { useEffect, useState } from "react";
 import { Button } from "../components/Button";
@@ -8,6 +8,7 @@ import { auth } from "../api/auth";
 import { useGlobalStore } from "../stores/global";
 import { serializePhoneNumber } from "../utils/phone";
 import { AxiosError } from "axios";
+import { IndependentText as Text } from "../components/IndependentText";
 
 import { ScreenTemplate } from "../components/ScreenTemplate";
 import { ScreenTitle } from "../components/ScreenTitle";
@@ -176,20 +177,6 @@ export const AuthScreen = () => {
             {mode === "register" ? "Войти!" : "Зарегистрироваться"}
           </Text>
         </View>
-        {mode === "login" && (
-          <Text
-            onPress={() => navigation.navigate("Home")}
-            style={{
-              marginTop: 12,
-              fontFamily: Fonts.firasansRegular,
-              fontSize: 18,
-              lineHeight: 23,
-              color: Colors.violet100,
-            }}
-          >
-            Продолжить как гость
-          </Text>
-        )}
       </View>
     </ScreenTemplate>
   );

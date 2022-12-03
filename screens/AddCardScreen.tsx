@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import { Colors, Fonts } from "../resources";
 import { useState } from "react";
 import { Button } from "../components/Button";
@@ -7,6 +7,7 @@ import { AxiosError } from "axios";
 import { ScreenTitle } from "../components/ScreenTitle";
 import { ScreenTemplate } from "../components/ScreenTemplate";
 import { GradientCard } from "../components/GradientCard";
+import { IndependentText as Text } from "../components/IndependentText";
 
 export const AddCardScreen = () => {
   const [error, setError] = useState("");

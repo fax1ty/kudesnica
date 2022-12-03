@@ -1,7 +1,8 @@
-import { Text, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { ScreenTemplate } from "../components/ScreenTemplate";
 import { ScreenTitle } from "../components/ScreenTitle";
 import { Fonts, Values } from "../resources";
+import { IndependentText as Text } from "../components/IndependentText";
 
 export const PrivacyScreen = () => {
   return (

@@ -1,6 +1,5 @@
 import create from "zustand";
 import { combine } from "zustand/middleware";
-import { IStory } from "../api/stories";
 
 export const useGlobalStore = create(
   combine(
@@ -68,7 +67,7 @@ export const useGlobalStore = create(
         set((state) => ({ ...state, storeLinksModalUrls: urls })),
       setGallery: (value: {
         urls: Array<string>;
-        kind: keyof IStory["attachments"];
+        kind: any;
         preselectedIndex: number;
       }) => set((state) => ({ ...state, gallery: value })),
     })

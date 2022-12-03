@@ -1,4 +1,4 @@
-import { View, Image, Text } from "react-native";
+import { View, Image } from "react-native";
 import { ScreenTitle } from "../components/ScreenTitle";
 import { LinearGradient } from "expo-linear-gradient";
 import Carousel from "react-native-snap-carousel";
@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Pagination } from "../components/Pagination";
 import { Colors, Fonts } from "../resources";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { IndependentText as Text } from "../components/IndependentText";
 
 import Logo from "../icons/LogoFullBig";
 
