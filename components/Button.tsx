@@ -16,6 +16,7 @@ export interface ButtonProps {
   disabled?: boolean;
   onPress?: () => void;
   progress?: number;
+  darkPattern?: boolean;
 }
 
 export const Button = ({
@@ -26,6 +27,7 @@ export const Button = ({
   action = "primary",
   style,
   onPress,
+  darkPattern = false,
 }: ButtonProps) => {
   const { onLayout, width } = useLayout();
 
@@ -40,7 +42,7 @@ export const Button = ({
         borderWidth: theme === "outlined" ? 3 : undefined,
         backgroundColor:
           theme === "filled"
-            ? disabled
+            ? disabled || darkPattern
               ? Colors.light20
               : action === "primary"
               ? Colors.pink100
@@ -61,6 +63,7 @@ export const Button = ({
           position: "absolute",
           backgroundColor: Colors.pink60,
           opacity: typeof progress === "number" ? 1 : 0,
+          justifyContent: "center",
           transform: [
             {
               translateX: withSpring(
@@ -75,9 +78,7 @@ export const Button = ({
         style={{
           position: "absolute",
           width: "100%",
-          height: "100%",
           textAlign: "center",
-          textAlignVertical: "center",
           color: theme === "filled" ? Colors.light100 : Colors.pink100,
           fontFamily: Fonts.firasansBold,
           fontSize: 18,

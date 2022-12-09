@@ -296,58 +296,59 @@ const SheetContent = ({ story, doll }: ContentProps) => {
           style={{
             height: Values.bottomPlayerHeight + SHADOW_HEIGHT,
             width: "100%",
-            position: "relative",
           }}
         >
-          <Image
-            source={require("../assets/low-player-bg.png")}
-            style={{
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-            }}
-          />
-          <View
-            style={{
-              bottom: 0,
-              position: "absolute",
-              width: "100%",
-              height: Values.bottomPlayerHeight,
-              backgroundColor: Colors.light100,
-            }}
-          />
-          <LowPlayer
-            styles={{
-              paddingHorizontal: 20,
-              position: "absolute",
-              bottom: 0,
-              width: "100%",
-            }}
-            PressableComponent={TouchableWithoutFeedback}
-            duration={story?.audio.duration}
-            dollId={doll?.id}
-            id={story?.id}
-            cover={story?.cover}
-            title={doll?.title}
-            description={story?.title}
-            icon={
-              story &&
-              doll && (
-                <TouchableWithoutFeedback
-                  onPress={() => expand()}
-                  style={{
-                    width: 20,
-                    height: 20,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginLeft: 20,
-                  }}
-                >
-                  <ArrowUpIcon />
-                </TouchableWithoutFeedback>
-              )
-            }
-          />
+          <View style={{ flex: 1, position: "relative" }}>
+            <Image
+              source={require("../assets/low-player-bg.png")}
+              style={{
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+              }}
+            />
+            <View
+              style={{
+                bottom: 0,
+                position: "absolute",
+                width: "100%",
+                height: Values.bottomPlayerHeight,
+                backgroundColor: Colors.light100,
+              }}
+            />
+            <LowPlayer
+              styles={{
+                paddingHorizontal: 20,
+                position: "absolute",
+                bottom: 0,
+                width: "100%",
+              }}
+              PressableComponent={TouchableWithoutFeedback}
+              duration={story?.audio.duration}
+              dollId={doll?.id}
+              id={story?.id}
+              cover={story?.cover}
+              title={doll?.title}
+              description={story?.title}
+              icon={
+                story &&
+                doll && (
+                  <TouchableWithoutFeedback
+                    onPress={() => expand()}
+                    style={{
+                      width: 20,
+                      height: 20,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginLeft: 20,
+                    }}
+                  >
+                    <ArrowUpIcon />
+                  </TouchableWithoutFeedback>
+                )
+              }
+            />
+          </View>
         </TouchableWithoutFeedback>
       </Animated.View>
       {/* Верхний градиент */}

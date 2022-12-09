@@ -105,7 +105,7 @@ export const LowPlayer = ({
             position: "relative",
           }}
         >
-          <View>
+          <View style={{ flex: 1 }}>
             <View
               style={{
                 position: "relative",

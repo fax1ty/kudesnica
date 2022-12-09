@@ -170,7 +170,7 @@ export const AuthScreen = () => {
             }}
             onPress={() =>
               navigation.navigate("Auth", {
-                mode: mode === "register" ? "login" : "login",
+                mode: mode === "register" ? "login" : "register",
               })
             }
           >

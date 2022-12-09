@@ -111,10 +111,8 @@ export const UserScreen = () => {
               style={{
                 fontFamily: Fonts.firasansBold,
                 fontSize: 14,
-                lineHeight: 18,
+                lineHeight: 14,
                 color: profile?.premium ? Colors.green100 : Colors.violet100,
-                height: 25,
-                textAlignVertical: "bottom",
               }}
             >
               {profile?.premium
@@ -123,15 +121,13 @@ export const UserScreen = () => {
             </Text>
           }
           description={
-            <View style={{ flexDirection: "row", height: 25 }}>
+            <View style={{ flexDirection: "row", marginTop: 8 }}>
               <Text
                 style={{
                   fontFamily: Fonts.firasansRegular,
                   fontSize: 13,
-                  lineHeight: 12,
+                  lineHeight: 13,
                   color: Colors.dark25,
-                  height: 25,
-                  textAlignVertical: "center",
                 }}
               >
                 {profile?.premium
@@ -144,10 +140,8 @@ export const UserScreen = () => {
                     marginLeft: 4,
                     fontFamily: Fonts.firasansBold,
                     fontSize: 13,
-                    lineHeight: 12,
+                    lineHeight: 13,
                     color: Colors.green80,
-                    height: 25,
-                    textAlignVertical: "center",
                   }}
                 >
                   199 ₽

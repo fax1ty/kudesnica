@@ -23,6 +23,7 @@ export const Pin = ({ children, color = Colors.violet80, style }: Props) => {
     >
       <Text
         style={{
+          includeFontPadding: false,
           color: Colors.light100,
           fontSize: 12,
           fontFamily: Fonts.firamonoBold,

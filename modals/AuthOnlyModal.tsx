@@ -84,6 +84,7 @@ export const AuthOnlyModal = ({ visible }: Props) => {
         </>
       }
       buttonProps={{
+        darkPattern: true,
         children: "Продолжить гостевой доступ",
         onPress: () => {
           closeAuthOnlyModal();
