@@ -24,9 +24,10 @@ module.exports = {
     assetBundlePatterns: ["**/*"],
     ios: {
       buildNumber: buildNumber.toString(),
-      bundleIdentifier: "ru.kudesnica.app",
+      bundleIdentifier:
+        ENV === "local" ? "ru.kudesnica.app.local" : "ru.kudesnica.app",
       infoPlist: {
-        UIBackgroundModes: ["audio"],
+        UIBackgroundModes: ["audio", "fetch", "remote-notification"],
       },
       supportsTablet: true,
       googleServicesFile: "./GoogleService-Info.plist",

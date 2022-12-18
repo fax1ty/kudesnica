@@ -49,7 +49,6 @@ export const PremiumStoryModal = ({ visible }: Props) => {
           <Text
             style={{
               width: 250,
-              marginTop: 18,
               fontFamily: Fonts.firasansRegular,
               fontSize: 13,
               lineHeight: 16,

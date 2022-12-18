@@ -39,8 +39,6 @@ export const CongratulationsRegModal = ({ visible }: Props) => {
           <Text
             style={{
               width: 230,
-              height: 46,
-              marginTop: 18,
               fontFamily: Fonts.firasansRegular,
               fontSize: 13,
               lineHeight: 16,

@@ -29,7 +29,7 @@ export const DollsScreen = () => {
     dolls ? (isCurrentDollNext ? undefined : dolls[currentDoll].id) : undefined
   );
   // prefetch our profile
-  const { data: profile } = useProfile();
+  const { data: profile, error } = useProfile();
   const insets = useSafeAreaInsets();
   const openAuthOnlyModal = useGlobalStore((state) => state.openAuthOnlyModal);
 

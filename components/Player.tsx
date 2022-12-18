@@ -52,6 +52,7 @@ export const Player = ({ storyId, duration }: Props) => {
             const nextTick = Math.floor(progress / 1000) - 15;
             if (nextTick > 0) await TrackPlayer.seekTo(nextTick);
             else await TrackPlayer.seekTo(0);
+            if (state === "paused") await TrackPlayer.play();
           }}
         />
         <Pressable
@@ -89,6 +90,7 @@ export const Player = ({ storyId, duration }: Props) => {
             const nextTick = Math.floor(progress / 1000) + 15;
             const durationSec = Math.floor(duration / 1000);
             if (nextTick < durationSec) await TrackPlayer.seekTo(nextTick);
+            if (state === "paused") await TrackPlayer.play();
           }}
         />
       </View>

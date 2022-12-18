@@ -42,7 +42,9 @@ export const CircleModal = ({
             marginTop: 23,
           }}
         />
-        {footerContent}
+        <View style={{ marginTop: 23, alignItems: "center" }}>
+          {footerContent}
+        </View>
       </View>
       <Button {...buttonProps} style={{ marginTop: 43 }}>
         {buttonProps?.children || ""}

@@ -1,6 +1,6 @@
 {
   "name": "kudesnica",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "scripts": {
     "start": "cross-env LOCAL=true expo start --dev-client",
     "android": "expo run:android",
@@ -10,6 +10,8 @@
     "build:apk": "eas build --profile development --platform android",
     "build:apk:preview": "eas build --profile preview --platform android",
     "build:ipa": "eas build --profile production --platform ios",
+    "build:ipa:preview": "eas build --profile preview --platform ios",
+    "build:ipa:debug": "eas build --profile development --platform ios",
     "submit:ipa:lastest": "eas submit -p ios --latest --profile production"
   },
   "dependencies": {

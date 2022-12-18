@@ -48,7 +48,6 @@ export const LoginWelcomeModal = ({ visible }: Props) => {
         <>
           <Text
             style={{
-              marginTop: 21,
               fontFamily: Fonts.firasansRegular,
               fontSize: 14,
               lineHeight: 18,

@@ -87,105 +87,120 @@ export const LowPlayer = ({
         height: Values.bottomPlayerHeight,
       }}
     >
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <PressableElement
-          onPress={async () => {
-            if (!story || !doll) return;
-            if (locked) return openPremiumStoryModal();
-            if (story.id === currentlyPlayingStoryId)
-              if (state === "playing") await TrackPlayer.pause();
-              else await TrackPlayer.play();
-            else {
-              await updateCurrentlyPlaying(doll, story, true);
-            }
-          }}
-          style={{
-            width: PLAYER_COVER_SIZE,
-            height: PLAYER_COVER_SIZE,
-            position: "relative",
-          }}
-        >
-          <View style={{ flex: 1 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+        }}
+      >
+        <View style={{ width: PLAYER_COVER_SIZE, height: PLAYER_COVER_SIZE }}>
+          <PressableElement
+            onPress={async () => {
+              if (!story || !doll) return;
+              if (locked) return openPremiumStoryModal();
+              if (story.id === currentlyPlayingStoryId)
+                if (state === "playing") await TrackPlayer.pause();
+                else await TrackPlayer.play();
+              else {
+                await updateCurrentlyPlaying(doll, story, true);
+              }
+            }}
+            style={{
+              width: PLAYER_COVER_SIZE,
+              height: PLAYER_COVER_SIZE,
+              position: "relative",
+            }}
+          >
             <View
               style={{
-                position: "relative",
-                width: PLAYER_COVER_SIZE - PLAYER_COVER_PROGRESS_WIDTH,
-                aspectRatio: 1,
-                borderRadius:
-                  (PLAYER_COVER_SIZE - PLAYER_COVER_PROGRESS_WIDTH) / 2,
-                overflow: "hidden",
-                transform: [
-                  {
-                    translateX: PLAYER_COVER_PROGRESS_WIDTH / 2,
-                  },
-                  {
-                    translateY: PLAYER_COVER_PROGRESS_WIDTH / 2,
-                  },
-                ],
+                width: "100%",
+                height: "100%",
+                position: "absolute",
+                top: 0,
+                left: 0,
               }}
             >
-              {cover && (
-                <Image
-                  onLoad={() => setCoverLoaded(true)}
-                  style={{
-                    position: "absolute",
-                    width: "100%",
-                    aspectRatio: 1,
-                  }}
-                  source={{ uri: cover }}
-                />
-              )}
               <View
                 style={{
                   position: "relative",
-                  width: "100%",
+                  width: PLAYER_COVER_SIZE - PLAYER_COVER_PROGRESS_WIDTH,
                   aspectRatio: 1,
-                  backgroundColor: "rgba(29, 29, 29, 0.27)",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  borderRadius:
+                    (PLAYER_COVER_SIZE - PLAYER_COVER_PROGRESS_WIDTH) / 2,
+                  overflow: "hidden",
+                  transform: [
+                    {
+                      translateX: PLAYER_COVER_PROGRESS_WIDTH / 2,
+                    },
+                    {
+                      translateY: PLAYER_COVER_PROGRESS_WIDTH / 2,
+                    },
+                  ],
                 }}
               >
-                {(!cover || !coverLoaded) && (
-                  <Skeleton
-                    width="100%"
-                    height="100%"
-                    style={{ position: "absolute" }}
+                {cover && (
+                  <Image
+                    onLoad={() => setCoverLoaded(true)}
+                    style={{
+                      position: "absolute",
+                      width: "100%",
+                      aspectRatio: 1,
+                    }}
+                    source={{ uri: cover }}
                   />
                 )}
-                {title && (
-                  <>
-                    {locked ? (
-                      <LockIcon style={{ position: "absolute" }} />
-                    ) : state === "playing" ? (
-                      <PauseIcon style={{ position: "absolute" }} />
-                    ) : (
-                      <PlayIcon style={{ position: "absolute" }} />
-                    )}
-                  </>
-                )}
+                <View
+                  style={{
+                    position: "relative",
+                    width: "100%",
+                    aspectRatio: 1,
+                    backgroundColor: "rgba(29, 29, 29, 0.27)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  {(!cover || !coverLoaded) && (
+                    <Skeleton
+                      width="100%"
+                      height="100%"
+                      style={{ position: "absolute" }}
+                    />
+                  )}
+                  {title && (
+                    <>
+                      {locked ? (
+                        <LockIcon style={{ position: "absolute" }} />
+                      ) : state === "playing" ? (
+                        <PauseIcon style={{ position: "absolute" }} />
+                      ) : (
+                        <PlayIcon style={{ position: "absolute" }} />
+                      )}
+                    </>
+                  )}
+                </View>
+              </View>
+              <View
+                style={{
+                  width: PLAYER_COVER_SIZE,
+                  height: PLAYER_COVER_SIZE,
+                  position: "absolute",
+                  opacity: progress === 0 ? 0 : 1,
+                }}
+              >
+                <CircularProgressBase
+                  value={total}
+                  maxValue={100}
+                  radius={PLAYER_COVER_SIZE / 2}
+                  inActiveStrokeWidth={PLAYER_COVER_PROGRESS_WIDTH}
+                  activeStrokeWidth={PLAYER_COVER_PROGRESS_WIDTH}
+                  activeStrokeColor={Colors.pink100}
+                  inActiveStrokeColor={Colors.light60}
+                />
               </View>
             </View>
-            <View
-              style={{
-                width: PLAYER_COVER_SIZE,
-                height: PLAYER_COVER_SIZE,
-                position: "absolute",
-                opacity: progress === 0 ? 0 : 1,
-              }}
-            >
-              <CircularProgressBase
-                value={total}
-                maxValue={100}
-                radius={PLAYER_COVER_SIZE / 2}
-                inActiveStrokeWidth={PLAYER_COVER_PROGRESS_WIDTH}
-                activeStrokeWidth={PLAYER_COVER_PROGRESS_WIDTH}
-                activeStrokeColor={Colors.pink100}
-                inActiveStrokeColor={Colors.light60}
-              />
-            </View>
-          </View>
-        </PressableElement>
-        <View style={{ marginLeft: 10, flexShrink: 1 }}>
+          </PressableElement>
+        </View>
+        <View style={{ marginLeft: 10, flex: 1 }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             {titleHilighted && (
               <View
@@ -235,8 +250,8 @@ export const LowPlayer = ({
             />
           )}
         </View>
+        {icon}
       </View>
-      {icon}
     </View>
   );
 };

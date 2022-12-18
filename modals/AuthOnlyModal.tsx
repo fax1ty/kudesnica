@@ -54,7 +54,6 @@ export const AuthOnlyModal = ({ visible }: Props) => {
         <>
           <Text
             style={{
-              marginTop: 33,
               fontFamily: Fonts.firasansRegular,
               fontSize: 16,
               lineHeight: 15,
@@ -75,7 +74,6 @@ export const AuthOnlyModal = ({ visible }: Props) => {
               fontSize: 26,
               lineHeight: 32,
               color: Colors.violet100,
-              height: 57,
               textDecorationLine: "underline",
             }}
           >

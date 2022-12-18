@@ -7,7 +7,7 @@ import BottomSheet, {
   BottomSheetFlatListMethods,
   TouchableWithoutFeedback,
 } from "@gorhom/bottom-sheet";
-import { Image, View, ViewToken, Platform } from "react-native";
+import { Image, View, ViewToken } from "react-native";
 import { IndependentText as Text } from "../components/IndependentText";
 import { useDimensions } from "@react-native-community/hooks";
 import { percentageOf } from "../utils/math";
@@ -15,7 +15,6 @@ import Animated, {
   Extrapolate,
   interpolate,
   useAnimatedStyle,
-  useDerivedValue,
   withSpring,
 } from "react-native-reanimated";
 import useBus from "use-bus";
@@ -40,7 +39,6 @@ import { useProfile } from "../api/profile";
 import { CustomBackdrop } from "../components/CustomBackdrop";
 import { useBottomSheetBackHandler } from "../hooks/bottom-sheet";
 import { mutate } from "swr";
-import { initialWindowMetrics } from "react-native-safe-area-context";
 
 import ArrowUpIcon from "../icons/ArrowUp";
 import ArrowDownButton from "../icons/ArrowDownButton";
@@ -48,13 +46,8 @@ import HeartIcon from "../icons/Heart";
 import HeartFilledIcon from "../icons/HeartFilled";
 
 const MODAL_OPEN_SNAP_NORMALIZED = 0.95;
-const SHADOW_HEIGHT = 5;
-const BOTTOM_INSET_HACK =
-  initialWindowMetrics && Platform.OS === "android"
-    ? initialWindowMetrics.insets.bottom > 1
-      ? initialWindowMetrics.insets.bottom - 3
-      : 0
-    : 0;
+// const SHADOW_HEIGHT = 5;
+const SHADOW_HEIGHT = 0;
 
 export interface IStoryData {
   content: string;
@@ -107,14 +100,6 @@ const SheetContent = ({ story, doll }: ContentProps) => {
     (state) => state.openPremiumStoryModal
   );
   const openAuthOnlyModal = useGlobalStore((state) => state.openAuthOnlyModal);
-  const targetLowPlayerY = useDerivedValue(() =>
-    !story
-      ? screenSize.height
-      : isBottomPlayerVisible && animatedIndex.value === 1
-      ? screenSize.height * MODAL_OPEN_SNAP_NORMALIZED -
-        (Values.bottomPlayerHeight + SHADOW_HEIGHT + BOTTOM_INSET_HACK)
-      : animatedIndex.value * screenSize.height
-  );
 
   useEffect(() => {
     scroll.current?.scrollToOffset({ animated: false, offset: 0 });
@@ -156,9 +141,6 @@ const SheetContent = ({ story, doll }: ContentProps) => {
         ListHeaderComponent={
           <Animated.View
             style={useAnimatedStyle(() => ({
-              overflow: "hidden",
-              borderTopLeftRadius: 25,
-              borderTopRightRadius: 25,
               flex: 1,
               opacity: interpolate(
                 animatedIndex.value,
@@ -286,27 +268,52 @@ const SheetContent = ({ story, doll }: ContentProps) => {
       {/* Нижний плеер */}
       <Animated.View
         style={useAnimatedStyle(() => ({
+          zIndex: 10000,
+          overflow: "hidden",
+          borderTopLeftRadius: 25,
+          borderTopRightRadius: 25,
           position: "absolute",
           width: "100%",
-          top: targetLowPlayerY.value,
+          top: interpolate(
+            animatedIndex.value,
+            [0, 1],
+            [
+              0,
+              screenSize.height * MODAL_OPEN_SNAP_NORMALIZED -
+                (animatedIndex.value === 0
+                  ? Values.bottomPlayerHeight + SHADOW_HEIGHT
+                  : isBottomPlayerVisible
+                  ? Values.bottomPlayerHeight + SHADOW_HEIGHT
+                  : 0),
+            ],
+            Extrapolate.CLAMP
+          ),
         }))}
       >
-        <TouchableWithoutFeedback
-          onPress={() => expand()}
+        <View
+          // onPress={() => expand()}
           style={{
             height: Values.bottomPlayerHeight + SHADOW_HEIGHT,
             width: "100%",
           }}
         >
-          <View style={{ flex: 1, position: "relative" }}>
-            <Image
+          <View
+            style={{
+              width: "100%",
+              height: "100%",
+              position: "relative",
+              top: 0,
+              left: 0,
+            }}
+          >
+            {/* <Image
               source={require("../assets/low-player-bg.png")}
               style={{
                 position: "absolute",
                 width: "100%",
                 height: "100%",
               }}
-            />
+            /> */}
             <View
               style={{
                 bottom: 0,
@@ -321,7 +328,6 @@ const SheetContent = ({ story, doll }: ContentProps) => {
                 paddingHorizontal: 20,
                 position: "absolute",
                 bottom: 0,
-                width: "100%",
               }}
               PressableComponent={TouchableWithoutFeedback}
               duration={story?.audio.duration}
@@ -331,25 +337,29 @@ const SheetContent = ({ story, doll }: ContentProps) => {
               title={doll?.title}
               description={story?.title}
               icon={
-                story &&
-                doll && (
-                  <TouchableWithoutFeedback
-                    onPress={() => expand()}
+                <TouchableWithoutFeedback
+                  onPress={() => {
+                    console.log("хуй");
+                    expand();
+                  }}
+                  style={{}}
+                >
+                  <View
                     style={{
-                      width: 20,
-                      height: 20,
-                      alignItems: "center",
+                      width: 40,
+                      height: 80,
+                      alignItems: "flex-end",
                       justifyContent: "center",
                       marginLeft: 20,
                     }}
                   >
                     <ArrowUpIcon />
-                  </TouchableWithoutFeedback>
-                )
+                  </View>
+                </TouchableWithoutFeedback>
               }
             />
           </View>
-        </TouchableWithoutFeedback>
+        </View>
       </Animated.View>
       {/* Верхний градиент */}
       <Animated.View
@@ -392,6 +402,7 @@ const SheetContent = ({ story, doll }: ContentProps) => {
           <ArrowDownButton onPress={() => collapse()} />
           {story && (
             <TouchableWithoutFeedback
+              style={{ width: 40, height: 40 }}
               onPress={async () => {
                 if (!doll || !story) return;
                 if (!profile) return openAuthOnlyModal();
@@ -423,10 +434,18 @@ export const StoryModal = ({ dollId, storyId }: Props) => {
   const { screen: screenSize } = useDimensions();
   const snapPoints = useMemo(
     () => [
-      `${percentageOf(Values.bottomPlayerHeight, screenSize.height)}%`,
+      `${percentageOf(
+        Values.bottomPlayerHeight + SHADOW_HEIGHT,
+        screenSize.height
+      )}%`,
       `${MODAL_OPEN_SNAP_NORMALIZED * 100}%`,
     ],
-    [screenSize, Values.bottomPlayerHeight, MODAL_OPEN_SNAP_NORMALIZED]
+    [
+      screenSize,
+      Values.bottomPlayerHeight,
+      MODAL_OPEN_SNAP_NORMALIZED,
+      SHADOW_HEIGHT,
+    ]
   );
   const { data: story, isValidating } = useStory(dollId, storyId);
   const { data: doll } = useDoll(dollId);

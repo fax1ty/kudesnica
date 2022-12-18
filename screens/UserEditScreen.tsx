@@ -177,7 +177,7 @@ export const UserEditScreen = () => {
               console.error(error);
               if (error instanceof AxiosError) {
                 setError(
-                  "Прозошла непредвиденная ошибка. Повторите попытку чуть позже"
+                  "Произошла непредвиденная ошибка. Повторите попытку чуть позже"
                 );
               }
             }

@@ -19,9 +19,10 @@ import { ScreenTitle } from "../components/ScreenTitle";
 import crashlytics from "@react-native-firebase/crashlytics";
 import { usePersistedState } from "react-native-use-persisted-state";
 import { IndependentText as Text } from "../components/IndependentText";
+import { auth } from "../api/auth";
 
 export const VerifyScreen = () => {
-  const [timeLeft, { start }] = useCountDown(60 * 1000);
+  const [timeLeft, { start, reset }] = useCountDown(60 * 1000);
   const [code, setCode] = useState("");
   const {
     params: { requestId, mode },
@@ -98,8 +99,14 @@ export const VerifyScreen = () => {
         }}
       >
         <Text
+          onPress={async () => {
+            if (timeLeft) return;
+
+            await auth(userPhone);
+            start();
+          }}
           style={{
-            width: 270,
+            width: Boolean(timeLeft) ? 270 : undefined,
             fontFamily: Fonts.firasansRegular,
             fontSize: 18,
             lineHeight: 23,
