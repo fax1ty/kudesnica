@@ -1,5 +1,6 @@
 import axios from "axios";
 import useSWR from "swr";
+
 import { authGuard } from "../utils/misc";
 import { IDollShort } from "./dolls";
 import { fetcher } from "./fetcher";
@@ -32,16 +33,14 @@ export interface IRichImage {
 
 type IRichChat = {
   type: "chat";
-  messages: Array<
-    Array<
-      | { kind: "text"; text: string }
-      | {
-          kind: "gallery";
-          ids: Array<string>;
-          mediaType: "video" | "image";
-        }
-    >
-  >;
+  messages: (
+    | { kind: "text"; text: string }
+    | {
+        kind: "gallery";
+        ids: string[];
+        mediaType: "video" | "image";
+      }
+  )[][];
 };
 
 interface IRichLyrics {
@@ -59,14 +58,14 @@ export type IRichBlock =
 
 export const useStories = (dollId?: string) =>
   useSWR<{
-    items: Array<Omit<IStoryShort, "isLastInSeason">>;
+    items: Omit<IStoryShort, "isLastInSeason">[];
     unwatchedTotal: number;
   }>(dollId ? `/dolls/${dollId}/storiesList` : null, fetcher, {
     refreshInterval: 0,
   });
 
 export const useFavorites = () =>
-  useSWR<Array<IStoryShortiest & { doll: IDollShort }>>(
+  useSWR<(IStoryShortiest & { doll: IDollShort })[]>(
     authGuard("/stories/favorites"),
     fetcher,
     {
@@ -82,7 +81,7 @@ export interface IStory {
   title: string;
   cover: string;
   audio: { duration: number };
-  content?: Array<IRichBlock>;
+  content?: IRichBlock[];
   watched: boolean;
   isFavorite: boolean;
   isLastInSeason: boolean;

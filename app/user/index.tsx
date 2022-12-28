@@ -1,33 +1,32 @@
-import { View, Image, Pressable } from "react-native";
-import { Colors, Fonts, Values } from "../resources";
-import { useProfile } from "../api/profile";
-import Toggle from "react-native-toggle-element";
+import { useLink } from "expo-router";
 import { useState } from "react";
-import { Pin } from "../components/Pin";
-import { useNavigation } from "@react-navigation/native";
-import { useGlobalStore } from "../stores/global";
-import { Avatar } from "../components/Avatar";
-import { GradientCard } from "../components/GradientCard";
-import { useFavorites } from "../api/stories";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { IndependentText as Text } from "../components/IndependentText";
+import { View, Image, Pressable } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Toggle from "react-native-toggle-element";
 
-import BackIcon from "../icons/Back";
-import EditIcon from "../icons/Edit";
-import LockIcon from "../icons/Lock";
-import DelockIcon from "../icons/Delock";
-import HeartIcon from "../icons/HeartSmallestFilled";
-import NextIcon from "../icons/Next";
-import NorifyIcon from "../icons/Notify";
-import ExitIcon from "../icons/Exit";
-import HelpIcon from "../icons/Help";
+import { useProfile } from "../../api/profile";
+import { useFavorites } from "../../api/stories";
+import { Avatar } from "../../components/Avatar";
+import { GradientCard } from "../../components/GradientCard";
+import { IndependentText as Text } from "../../components/IndependentText";
+import { Pin } from "../../components/Pin";
+import BackIcon from "../../icons/Back";
+import DelockIcon from "../../icons/Delock";
+import EditIcon from "../../icons/Edit";
+import ExitIcon from "../../icons/Exit";
+import HeartIcon from "../../icons/HeartSmallestFilled";
+import HelpIcon from "../../icons/Help";
+import LockIcon from "../../icons/Lock";
+import NextIcon from "../../icons/Next";
+import NorifyIcon from "../../icons/Notify";
+import { Colors, Fonts, Values } from "../../resources";
+import { useGlobalStore } from "../../stores/global";
 
-export const UserScreen = () => {
+export default function Dolls() {
   const { data: profile } = useProfile();
   const [isNotificationActive, setNotificationActive] = useState(true);
-  const navigation = useNavigation<any>();
+  const navigate = useLink();
   const { data: favorites } = useFavorites();
-  const insets = useSafeAreaInsets();
   const openExitConfirmModal = useGlobalStore(
     (state) => state.openExitConfirmModal
   );
@@ -35,12 +34,11 @@ export const UserScreen = () => {
   return (
     <View style={{ position: "relative", flex: 1 }}>
       <Image
-        source={require("../assets/user-bg.png")}
+        source={require("../../assets/user-bg.png")}
         style={{ width: "100%", height: "100%", position: "absolute" }}
       />
-      <View
+      <SafeAreaView
         style={{
-          paddingTop: insets.top + 44,
           position: "absolute",
           width: "100%",
           height: "100%",
@@ -51,13 +49,14 @@ export const UserScreen = () => {
         {/* Шапка */}
         <View
           style={{
+            marginTop: 44,
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
           }}
         >
           <View style={{ flexDirection: "row" }}>
-            <BackIcon onPress={() => navigation.goBack()} />
+            <BackIcon onPress={() => navigate.back()} />
             <Text
               numberOfLines={2}
               style={{
@@ -74,12 +73,12 @@ export const UserScreen = () => {
           </View>
           <Avatar
             avatar={profile?.photo || false}
-            onPress={() => navigation.navigate("UserEdit")}
+            onPress={() => navigate.push("/user/edit")}
           />
         </View>
         {/* Редактировать */}
         <Pressable
-          onPress={() => navigation.navigate("UserEdit")}
+          onPress={() => navigate.push("/user/edit")}
           style={{
             flexDirection: "row",
             paddingLeft: 63 - 16,
@@ -103,7 +102,7 @@ export const UserScreen = () => {
         {/* Разблокировать истории */}
         <GradientCard
           theme={profile?.premium ? "blue" : "red"}
-          onPress={() => navigation.navigate("AddCard")}
+          //   onPress={() => navigate.push("AddCard")}
           icon={profile?.premium ? <DelockIcon /> : <LockIcon />}
           style={{ marginTop: 30 }}
           title={
@@ -161,7 +160,7 @@ export const UserScreen = () => {
           }}
         >
           <Pressable
-            onPress={() => navigation.navigate("Favorites")}
+            onPress={() => navigate.push("favorites")}
             style={{
               flexDirection: "row",
               height: 67 - 1,
@@ -299,7 +298,7 @@ export const UserScreen = () => {
         </View>
         {/* Поддержка */}
         <Pressable
-          onPress={() => navigation.navigate("Help")}
+          onPress={() => navigate.push("help")}
           style={{
             position: "absolute",
             flexDirection: "row",
@@ -321,7 +320,7 @@ export const UserScreen = () => {
             Поддержка
           </Text>
         </Pressable>
-      </View>
+      </SafeAreaView>
     </View>
   );
-};
+}

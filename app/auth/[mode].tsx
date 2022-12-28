@@ -1,25 +1,25 @@
-import { View } from "react-native";
-import { Colors, Fonts } from "../resources";
-import { useEffect, useState } from "react";
-import { Button } from "../components/Button";
-import { Input } from "../components/Input";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { auth } from "../api/auth";
-import { useGlobalStore } from "../stores/global";
-import { serializePhoneNumber } from "../utils/phone";
 import { AxiosError } from "axios";
-import { IndependentText as Text } from "../components/IndependentText";
+import { useHref, useLink } from "expo-router";
+import { useEffect, useState } from "react";
+import { View } from "react-native";
 
-import { ScreenTemplate } from "../components/ScreenTemplate";
-import { ScreenTitle } from "../components/ScreenTitle";
+import { auth } from "../../api/auth";
+import { Button } from "../../components/Button";
+import { IndependentText as Text } from "../../components/IndependentText";
+import { Input } from "../../components/Input";
+import { ScreenTemplate } from "../../components/ScreenTemplate";
+import { ScreenTitle } from "../../components/ScreenTitle";
+import { Colors, Fonts } from "../../resources";
+import { useGlobalStore } from "../../stores/global";
+import { serializePhoneNumber } from "../../utils/phone";
 
-export const AuthScreen = () => {
+export default function Auth() {
   const setPhone = useGlobalStore((state) => state.setPhone);
   const [error, setError] = useState("");
-  const navigation = useNavigation<any>();
+  const navigate = useLink();
   const {
     params: { mode },
-  } = useRoute<any>();
+  } = useHref();
   const [name, setName] = useState("");
   const [localPhone, setLocalPhone] = useState("");
   const [mask] = useState([
@@ -97,7 +97,7 @@ export const AuthScreen = () => {
               const serialized = serializePhoneNumber(localPhone);
               const requestId = await auth(serialized, name);
               setPhone(serialized);
-              navigation.navigate("Verify", { requestId, mode });
+              navigate.push(`/verify/${mode}/${requestId}`);
             } catch (error) {
               console.error(error);
               if (error instanceof AxiosError) {
@@ -169,9 +169,9 @@ export const AuthScreen = () => {
               color: Colors.violet100,
             }}
             onPress={() =>
-              navigation.navigate("Auth", {
-                mode: mode === "register" ? "login" : "register",
-              })
+              navigate.push(
+                `/auth/${mode === "register" ? "login" : "register"}`
+              )
             }
           >
             {mode === "register" ? "Войти!" : "Зарегистрироваться"}
@@ -180,4 +180,4 @@ export const AuthScreen = () => {
       </View>
     </ScreenTemplate>
   );
-};
+}

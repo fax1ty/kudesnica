@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+
 import { useAudioStore } from "../stores/audio";
 
 export const useTrackProgress = (id?: string) => {

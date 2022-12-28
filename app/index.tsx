@@ -1,4 +1,7 @@
 import { useDimensions } from "@react-native-community/hooks";
+import { useFonts } from "expo-font";
+import { useLink } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { View, Image } from "react-native";
 import Animated, {
@@ -10,46 +13,52 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import * as SplashScreen from "expo-splash-screen";
-import { useGlobalStore } from "../stores/global";
-import { StackActions, useNavigation } from "@react-navigation/native";
-import { initAudio } from "../utils/audio";
 import { usePersistedState } from "react-native-use-persisted-state";
 
-import LogoWithouText from "../icons/LogoWithoutText";
 import LogoTextOnly from "../icons/LogoTextOnly";
+import LogoWithouText from "../icons/LogoWithoutText";
 import Star from "../icons/Star";
+import { Fonts } from "../resources";
+import { useGlobalStore } from "../stores/global";
+import { initAudio } from "../utils/audio";
 
-export const LoadingScreen = () => {
+export default function Home() {
+  const navigate = useLink();
+
   const { screen: screenSize } = useDimensions();
   const shift1 = useSharedValue((screenSize.width / 2) * -1);
   const shift2 = useSharedValue((screenSize.width / 2) * -1);
   const opacity1 = useSharedValue(0);
   const opacity2 = useSharedValue(0);
   const opacity3 = useSharedValue(0);
-  const navigation = useNavigation();
-  const fontsLoaded = useGlobalStore((state) => state.fontsLoaded);
   const token = useGlobalStore((state) => state.token);
   const [shouldShowWelcomeScreen] = usePersistedState(
     "@shouldShowWelcomeScreen",
     true
   );
 
+  const [fontsLoaded] = useFonts({
+    [Fonts.playfairDisplayRegular]: require("../assets/fonts/PlayfairDisplay-Regular.ttf"),
+    [Fonts.playfairDisplayItalic]: require("../assets/fonts/PlayfairDisplay-Italic.ttf"),
+    [Fonts.firasansRegular]: require("../assets/fonts/FiraSans-Regular.ttf"),
+    [Fonts.firasansBold]: require("../assets/fonts/FiraSans-Bold.ttf"),
+    [Fonts.firasansMedium]: require("../assets/fonts/FiraSans-Medium.ttf"),
+    [Fonts.firamonoBold]: require("../assets/fonts/FiraMono-Bold.ttf"),
+  });
+
   useEffect(() => {
     if (!fontsLoaded) return;
-    (async () => {
-      await initAudio().catch(console.error);
-      await SplashScreen.hideAsync();
-    })();
+    initAudio().catch(console.error);
+    SplashScreen.hideAsync();
     const timeout = setTimeout(() => {
       if (shouldShowWelcomeScreen) {
-        navigation.dispatch(StackActions.replace("Welcome"));
+        navigate.replace("/welcome");
       } else {
-        navigation.dispatch(StackActions.replace("Home"));
+        navigate.replace("/dolls");
       }
     }, 1000 * 3);
     return () => clearTimeout(timeout);
-  }, [fontsLoaded, token]);
+  }, [fontsLoaded, shouldShowWelcomeScreen, token]);
 
   useEffect(() => {
     shift1.value = withRepeat(
@@ -226,4 +235,4 @@ export const LoadingScreen = () => {
       />
     </View>
   );
-};
+}

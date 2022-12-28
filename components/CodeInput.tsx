@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, TextInput, ViewStyle } from "react-native";
+
 import { Colors, Fonts } from "../resources";
 import { IndependentText as Text } from "./IndependentText";
 

@@ -1,10 +1,11 @@
-import { IndependentText as Text } from "../components/IndependentText";
-import { Colors, Fonts } from "../resources";
-import { CircleModal } from "./CircleModal";
-import { useGlobalStore } from "../stores/global";
+import { useLink } from "expo-router";
 
-import Ura from "../icons/Ura";
+import { IndependentText as Text } from "../components/IndependentText";
 import AddPhotoIcon from "../icons/AddPhoto";
+import Ura from "../icons/Ura";
+import { Colors, Fonts } from "../resources";
+import { useGlobalStore } from "../stores/global";
+import { CircleModal } from "./CircleModal";
 
 interface Props {
   visible: boolean;
@@ -14,6 +15,7 @@ export const CongratulationsRegModal = ({ visible }: Props) => {
   const closeCongratulationsRegModal = useGlobalStore(
     (state) => state.closeCongratulationsRegModal
   );
+  const navigate = useLink();
 
   return (
     <CircleModal
@@ -44,11 +46,12 @@ export const CongratulationsRegModal = ({ visible }: Props) => {
               lineHeight: 16,
               color: Colors.dark25,
               textAlign: "center",
+              marginBottom: 10,
             }}
           >
             Еще можно загрузить фото для аватара и указать e-mail
           </Text>
-          <AddPhotoIcon />
+          <AddPhotoIcon onPress={() => navigate.push("/user/edit")} />
         </>
       }
       buttonProps={{

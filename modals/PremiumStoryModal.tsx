@@ -1,9 +1,8 @@
 import { IndependentText as Text } from "../components/IndependentText";
-import { Colors, Fonts } from "../resources";
-import { CircleModal } from "./CircleModal";
-import { useGlobalStore } from "../stores/global";
-
 import LockCircled from "../icons/LockCircled";
+import { Colors, Fonts } from "../resources";
+import { useGlobalStore } from "../stores/global";
+import { CircleModal } from "./CircleModal";
 
 interface Props {
   visible: boolean;
@@ -23,6 +22,7 @@ export const PremiumStoryModal = ({ visible }: Props) => {
           <LockCircled style={{ marginBottom: 14 }} />
           <Text
             style={{
+              textAlign: "center",
               fontFamily: Fonts.firasansBold,
               fontSize: 18,
               lineHeight: 22,

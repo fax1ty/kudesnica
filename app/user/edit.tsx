@@ -1,29 +1,29 @@
-import { View, Pressable } from "react-native";
-import { Colors, Fonts } from "../resources";
+import axios, { AxiosError } from "axios";
+import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
+import { useLink } from "expo-router";
 import { useEffect, useState } from "react";
-import { Button } from "../components/Button";
-import { Input } from "../components/Input";
+import { View, Pressable } from "react-native";
+import { usePreviousImmediate } from "rooks";
+
 import {
   deleteProfilePhoto,
   editProfileEmail,
   editProfileName,
   useProfile,
-} from "../api/profile";
-import axios, { AxiosError } from "axios";
-import { Avatar } from "../components/Avatar";
-import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
-import { ScreenTemplate } from "../components/ScreenTemplate";
-import { ScreenTitle } from "../components/ScreenTitle";
-import { useGlobalStore } from "../stores/global";
-import { usePreviousImmediate } from "rooks";
-import { useNavigation } from "@react-navigation/native";
-import { IndependentText as Text } from "../components/IndependentText";
+} from "../../api/profile";
+import { Avatar } from "../../components/Avatar";
+import { Button } from "../../components/Button";
+import { IndependentText as Text } from "../../components/IndependentText";
+import { Input } from "../../components/Input";
+import { ScreenTemplate } from "../../components/ScreenTemplate";
+import { ScreenTitle } from "../../components/ScreenTitle";
+import AddIcon from "../../icons/Add";
+import DeleteIcon from "../../icons/Delete";
+import { Colors, Fonts } from "../../resources";
+import { useGlobalStore } from "../../stores/global";
 
-import AddIcon from "../icons/Add";
-import DeleteIcon from "../icons/Delete";
-
-export const UserEditScreen = () => {
+export default function UserEdit() {
   const [error, setError] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -31,7 +31,7 @@ export const UserEditScreen = () => {
   const [status, requestPermission] = ImagePicker.useMediaLibraryPermissions();
   const previousEmail = usePreviousImmediate(email);
   const previousName = usePreviousImmediate(name);
-  const navigation = useNavigation<any>();
+  const naviagte = useLink();
   const token = useGlobalStore((state) => state.token);
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export const UserEditScreen = () => {
                 await editProfileName(name);
                 await mutate((old) => ({ ...old!, name }));
               }
-              navigation.goBack();
+              naviagte.back();
             } catch (error) {
               console.error(error);
               if (error instanceof AxiosError) {
@@ -188,4 +188,4 @@ export const UserEditScreen = () => {
       </View>
     </ScreenTemplate>
   );
-};
+}

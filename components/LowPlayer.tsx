@@ -1,23 +1,23 @@
-import { CircularProgressBase } from "react-native-circular-progress-indicator";
-import { View, Image, Pressable, ViewStyle } from "react-native";
-import { useState, ReactNode, useMemo } from "react";
-import { Colors, Fonts, Values } from "../resources";
-import { Skeleton } from "./Skeleton";
-import { percentageOf } from "../utils/math";
-import { useGlobalStore } from "../stores/global";
-import { useDoll } from "../api/dolls";
-import { useStory } from "../api/stories";
-import { useProfile } from "../api/profile";
-import { updateCurrentlyPlaying } from "../utils/audio";
-import { useAudioStore } from "../stores/audio";
-import TrackPlayer from "react-native-track-player";
-import { useTrackProgress, useTrackState } from "../hooks/audio";
 import { TouchableWithoutFeedback } from "@gorhom/bottom-sheet";
-import { IndependentText as Text } from "./IndependentText";
+import { useState, ReactNode, useMemo } from "react";
+import { View, Image, Pressable, ViewStyle } from "react-native";
+import { CircularProgressBase } from "react-native-circular-progress-indicator";
+import TrackPlayer from "react-native-track-player";
 
-import PlayIcon from "../icons/Play";
+import { useDoll } from "../api/dolls";
+import { useProfile } from "../api/profile";
+import { useStory } from "../api/stories";
+import { useTrackProgress, useTrackState } from "../hooks/audio";
 import PauseIcon from "../icons/Pause";
+import PlayIcon from "../icons/Play";
 import LockIcon from "../icons/PlayerLock";
+import { Colors, Fonts, Values } from "../resources";
+import { useAudioStore } from "../stores/audio";
+import { useGlobalStore } from "../stores/global";
+import { updateCurrentlyPlaying } from "../utils/audio";
+import { percentageOf } from "../utils/math";
+import { IndependentText as Text } from "./IndependentText";
+import { Skeleton } from "./Skeleton";
 
 const PLAYER_COVER_SIZE = 59;
 const PLAYER_COVER_PROGRESS_WIDTH = 4;
@@ -64,7 +64,7 @@ export const LowPlayer = ({
   const state = useTrackState(story?.id);
   const total = useMemo(
     () => percentageOf(progress, duration || 1000),
-    [progress]
+    [duration, progress]
   );
   const openPremiumStoryModal = useGlobalStore(
     (state) => state.openPremiumStoryModal

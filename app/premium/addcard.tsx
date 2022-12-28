@@ -1,15 +1,16 @@
-import { View } from "react-native";
-import { Colors, Fonts } from "../resources";
-import { useState } from "react";
-import { Button } from "../components/Button";
-import { Input } from "../components/Input";
 import { AxiosError } from "axios";
-import { ScreenTitle } from "../components/ScreenTitle";
-import { ScreenTemplate } from "../components/ScreenTemplate";
-import { GradientCard } from "../components/GradientCard";
-import { IndependentText as Text } from "../components/IndependentText";
+import { useState } from "react";
+import { View } from "react-native";
 
-export const AddCardScreen = () => {
+import { Button } from "../../components/Button";
+import { GradientCard } from "../../components/GradientCard";
+import { IndependentText as Text } from "../../components/IndependentText";
+import { Input } from "../../components/Input";
+import { ScreenTemplate } from "../../components/ScreenTemplate";
+import { ScreenTitle } from "../../components/ScreenTitle";
+import { Colors, Fonts } from "../../resources";
+
+export default function PremiumAddCard() {
   const [error, setError] = useState("");
   const [card, setCard] = useState("");
   const [expire, setExpire] = useState("");
@@ -157,4 +158,4 @@ export const AddCardScreen = () => {
       </View>
     </ScreenTemplate>
   );
-};
+}

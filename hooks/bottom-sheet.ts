@@ -33,7 +33,7 @@ export const useBottomSheetBackHandler = (
         backHandlerSubscriptionRef.current = null;
       }
     },
-    [bottomSheetRef, backHandlerSubscriptionRef]
+    [isModal, bottomSheetRef]
   );
   return { handleSheetPositionChange };
 };

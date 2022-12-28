@@ -7,6 +7,7 @@ const buildNumber = version[0] * 100 + version[1] * 10 + version[2];
 
 module.exports = {
   expo: {
+    scheme: "kudesnica",
     jsEngine: "hermes",
     name: ENV === "local" ? "Кудесница (local)" : "Кудесница",
     slug: "kudesnica",

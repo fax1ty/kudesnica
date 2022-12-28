@@ -1,11 +1,12 @@
-import Ripple from "react-native-material-ripple";
-import { ViewStyle } from "react-native";
-import { Colors, Fonts } from "../resources";
 import { useLayout } from "@react-native-community/hooks";
+import { ViewStyle } from "react-native";
+import Ripple from "react-native-material-ripple";
 import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
+
+import { Colors, Fonts } from "../resources";
 import { IndependentText as Text } from "./IndependentText";
 
 export interface ButtonProps {

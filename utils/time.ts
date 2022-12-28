@@ -1,8 +1,9 @@
-import { leadWithZero } from "../utils/math";
 import pms from "parse-ms";
 
+import { leadWithZero } from "../utils/math";
+
 export const makeTimeString = (h: number, m: number, s: number) => {
-  let parts = new Array<string>();
+  const parts = new Array<string>();
   if (h > 0) parts.push(leadWithZero(h));
   parts.push(leadWithZero(m));
   parts.push(leadWithZero(s));

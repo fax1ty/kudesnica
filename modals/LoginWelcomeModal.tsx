@@ -1,8 +1,8 @@
+import { useProfile } from "../api/profile";
 import { IndependentText as Text } from "../components/IndependentText";
 import { Colors, Fonts } from "../resources";
-import { CircleModal } from "./CircleModal";
 import { useGlobalStore } from "../stores/global";
-import { useProfile } from "../api/profile";
+import { CircleModal } from "./CircleModal";
 
 interface Props {
   visible: boolean;
@@ -23,6 +23,7 @@ export const LoginWelcomeModal = ({ visible }: Props) => {
           <Text
             numberOfLines={2}
             style={{
+              textAlign: "center",
               fontFamily: Fonts.playfairDisplayItalic,
               fontSize: 26,
               lineHeight: 32,

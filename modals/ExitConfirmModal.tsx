@@ -1,12 +1,13 @@
+import axios from "axios";
 import { View } from "react-native";
-import { IndependentText as Text } from "../components/IndependentText";
+import { usePersistedState } from "react-native-use-persisted-state";
+import { mutate } from "swr";
+
 import { Button } from "../components/Button";
+import { IndependentText as Text } from "../components/IndependentText";
 import { Colors, Fonts } from "../resources";
 import { useGlobalStore } from "../stores/global";
 import { AutoHeightModal } from "./AutoHeightModal";
-import { mutate } from "swr";
-import axios from "axios";
-import { usePersistedState } from "react-native-use-persisted-state";
 
 interface Props {
   visible: boolean;

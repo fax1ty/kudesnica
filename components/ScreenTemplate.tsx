@@ -1,25 +1,23 @@
 import { ReactNode } from "react";
-import { View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { Colors } from "../resources";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface Props {
   children: ReactNode;
 }
 
 export const ScreenTemplate = ({ children }: Props) => {
-  const insets = useSafeAreaInsets();
-
   return (
-    <View
+    <SafeAreaView
       style={{
         flex: 1,
-        paddingTop: insets.top + 16,
+        paddingTop: 16,
         paddingHorizontal: 16,
         backgroundColor: Colors.light100,
       }}
     >
       {children}
-    </View>
+    </SafeAreaView>
   );
 };

@@ -1,14 +1,14 @@
 import { View, Pressable, Linking } from "react-native";
+
+import AliexpressLogo from "../icons/Aliexpress";
+import NextIcon from "../icons/Next";
+import OzonLogo from "../icons/Ozon";
+import WildberriesLogo from "../icons/Wildberries";
 import { Colors, Fonts } from "../resources";
 import { IndependentText as Text } from "./IndependentText";
 
-import OzonLogo from "../icons/Ozon";
-import WildberriesLogo from "../icons/Wildberries";
-import AliexpressLogo from "../icons/Aliexpress";
-import NextIcon from "../icons/Next";
-
 interface Props {
-  urls: Array<string>;
+  urls: string[];
   onLinkPress?: () => void;
 }
 

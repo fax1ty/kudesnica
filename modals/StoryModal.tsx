@@ -1,26 +1,25 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Player } from "../components/Player";
-import { generateComponentsFromRichComponents } from "../components/RichView";
 import BottomSheet, {
   useBottomSheet,
   BottomSheetFlatList,
   BottomSheetFlatListMethods,
   TouchableWithoutFeedback,
 } from "@gorhom/bottom-sheet";
-import { Image, View, ViewToken } from "react-native";
-import { IndependentText as Text } from "../components/IndependentText";
 import { useDimensions } from "@react-native-community/hooks";
-import { percentageOf } from "../utils/math";
+import { LinearGradient } from "expo-linear-gradient";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Image, View, ViewToken } from "react-native";
 import Animated, {
   Extrapolate,
   interpolate,
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { mutate } from "swr";
 import useBus from "use-bus";
-import { Colors, Fonts, Values } from "../resources";
-import { Button } from "../components/Button";
-import { LowPlayer } from "../components/LowPlayer";
+
+import { IDoll, useDoll } from "../api/dolls";
+import { useProfile } from "../api/profile";
 import {
   addStoryToFavorites,
   getNextStoryId,
@@ -29,21 +28,23 @@ import {
   removeStoryFromFavorites,
   useStory,
 } from "../api/stories";
-import { IDoll, useDoll } from "../api/dolls";
-import { LoadableImage } from "../components/LoadableImage";
-import { Skeleton } from "../components/Skeleton";
-import { LinearGradient } from "expo-linear-gradient";
-import { updateCurrentlyPlaying } from "../utils/audio";
-import { useGlobalStore } from "../stores/global";
-import { useProfile } from "../api/profile";
+import { Button } from "../components/Button";
 import { CustomBackdrop } from "../components/CustomBackdrop";
+import { IndependentText as Text } from "../components/IndependentText";
+import { LoadableImage } from "../components/LoadableImage";
+import { LowPlayer } from "../components/LowPlayer";
+import { Player } from "../components/Player";
+import { generateComponentsFromRichComponents } from "../components/RichView";
+import { Skeleton } from "../components/Skeleton";
 import { useBottomSheetBackHandler } from "../hooks/bottom-sheet";
-import { mutate } from "swr";
-
-import ArrowUpIcon from "../icons/ArrowUp";
 import ArrowDownButton from "../icons/ArrowDownButton";
+import ArrowUpIcon from "../icons/ArrowUp";
 import HeartIcon from "../icons/Heart";
 import HeartFilledIcon from "../icons/HeartFilled";
+import { Colors, Fonts, Values } from "../resources";
+import { useGlobalStore } from "../stores/global";
+import { updateCurrentlyPlaying } from "../utils/audio";
+import { percentageOf } from "../utils/math";
 
 const MODAL_OPEN_SNAP_NORMALIZED = 0.95;
 // const SHADOW_HEIGHT = 5;
@@ -72,7 +73,8 @@ interface Props {
 const SheetContent = ({ story, doll }: ContentProps) => {
   const { animatedIndex, expand, collapse } = useBottomSheet();
   const scroll = useRef<BottomSheetFlatListMethods>(null);
-  const { screen: screenSize } = useDimensions();
+  const insets = useSafeAreaInsets();
+  const { window: windowSize } = useDimensions();
   const components = useMemo(
     () =>
       generateComponentsFromRichComponents(
@@ -110,14 +112,12 @@ const SheetContent = ({ story, doll }: ContentProps) => {
   const viewabilityConfigCallbackPairs = useRef([
     {
       viewabilityConfig: { itemVisiblePercentThreshold: 75 },
-      onViewableItemsChanged: (data: { viewableItems: Array<ViewToken> }) => {
+      onViewableItemsChanged: (data: { viewableItems: ViewToken[] }) => {
         if (!data || !data.viewableItems || data.viewableItems.length === 0)
           return;
-        else {
-          setLastViewableItemIndex(
-            data.viewableItems[data.viewableItems.length - 1].index
-          );
-        }
+        setLastViewableItemIndex(
+          data.viewableItems[data.viewableItems.length - 1].index
+        );
       },
     },
   ]);
@@ -250,10 +250,10 @@ const SheetContent = ({ story, doll }: ContentProps) => {
                 theme="outlined"
                 style={{ marginTop: 25 }}
                 onPress={async () => {
-                  if (!doll || !story || !profile) return;
+                  if (!doll || !story) return;
                   const nextStoryId = await getNextStoryId(doll.id, story.id);
                   const nextStory = await getStory(doll.id, nextStoryId);
-                  if (nextStory.premium && !profile.premium)
+                  if (nextStory.premium && !profile?.premium)
                     return openPremiumStoryModal();
                   await updateCurrentlyPlaying(doll, nextStory);
                 }}
@@ -279,7 +279,7 @@ const SheetContent = ({ story, doll }: ContentProps) => {
             [0, 1],
             [
               0,
-              screenSize.height * MODAL_OPEN_SNAP_NORMALIZED -
+              (windowSize.height + insets.top) * MODAL_OPEN_SNAP_NORMALIZED -
                 (animatedIndex.value === 0
                   ? Values.bottomPlayerHeight + SHADOW_HEIGHT
                   : isBottomPlayerVisible
@@ -339,7 +339,6 @@ const SheetContent = ({ story, doll }: ContentProps) => {
               icon={
                 <TouchableWithoutFeedback
                   onPress={() => {
-                    console.log("хуй");
                     expand();
                   }}
                   style={{}}
@@ -402,7 +401,12 @@ const SheetContent = ({ story, doll }: ContentProps) => {
           <ArrowDownButton onPress={() => collapse()} />
           {story && (
             <TouchableWithoutFeedback
-              style={{ width: 40, height: 40 }}
+              style={{
+                width: 40,
+                height: 40,
+                alignItems: "flex-end",
+                justifyContent: "center",
+              }}
               onPress={async () => {
                 if (!doll || !story) return;
                 if (!profile) return openAuthOnlyModal();
@@ -414,7 +418,7 @@ const SheetContent = ({ story, doll }: ContentProps) => {
                   `/stories/${doll.id}/${story.id}`,
                   (old) => ({
                     ...old!,
-                    isFavorite: story.isFavorite ? false : true,
+                    isFavorite: !story.isFavorite,
                   }),
                   false
                 );
@@ -440,12 +444,7 @@ export const StoryModal = ({ dollId, storyId }: Props) => {
       )}%`,
       `${MODAL_OPEN_SNAP_NORMALIZED * 100}%`,
     ],
-    [
-      screenSize,
-      Values.bottomPlayerHeight,
-      MODAL_OPEN_SNAP_NORMALIZED,
-      SHADOW_HEIGHT,
-    ]
+    [screenSize]
   );
   const { data: story, isValidating } = useStory(dollId, storyId);
   const { data: doll } = useDoll(dollId);

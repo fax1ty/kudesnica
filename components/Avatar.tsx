@@ -1,10 +1,10 @@
-import { Pressable, Image, View } from "react-native";
-import { Colors } from "../resources";
-import { useMemo } from "react";
 import axios from "axios";
+import { useMemo } from "react";
+import { Pressable, Image, View } from "react-native";
 
-import NoAvatarBig from "../icons/NoAvatarBig";
 import NoAvatar from "../icons/NoAvatar";
+import NoAvatarBig from "../icons/NoAvatarBig";
+import { Colors } from "../resources";
 
 interface Props {
   size?: "small" | "normal";

@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
-import { Dimensions, View, Animated, Easing } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { ViewStyle } from "react-native";
+import { useRef, useState } from "react";
+import { Dimensions, View, Animated, Easing, ViewStyle } from "react-native";
 
 const SCREEN_WIDTH = Dimensions.get("screen").width;
 const START = -1;
@@ -53,7 +52,7 @@ interface Props {
   height: number | string;
   borderRadius?: number | [number, number, number, number];
   style?: ViewStyle;
-  colors?: Array<string>;
+  colors?: string[];
 }
 
 export const Skeleton = ({

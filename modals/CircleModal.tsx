@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { View } from "react-native";
+
 import { Button, ButtonProps } from "../components/Button";
 import { Colors } from "../resources";
 import { AutoHeightModal } from "./AutoHeightModal";

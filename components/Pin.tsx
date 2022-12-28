@@ -1,4 +1,5 @@
 import { View, ViewStyle } from "react-native";
+
 import { Colors, Fonts } from "../resources";
 import { IndependentText as Text } from "./IndependentText";
 

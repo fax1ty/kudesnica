@@ -1,36 +1,42 @@
-import { DrawerActions, useNavigation } from "@react-navigation/native";
+import { useLink } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
 import { View, Pressable } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { Colors, Values } from "../resources";
-import { DollsCarousel } from "../components/DollsCarousel";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { usePreviousImmediate } from "rooks";
+import { dispatch } from "use-bus";
+
 import { useDolls } from "../api/dolls";
-import { useEffect, useMemo, useState } from "react";
+import { useProfile } from "../api/profile";
 import { useStories } from "../api/stories";
 import { Avatar } from "../components/Avatar";
-import { useProfile } from "../api/profile";
-import { updateCurrentlyPlaying } from "../utils/audio";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useGlobalStore } from "../stores/global";
-
+import { DollsCarousel } from "../components/DollsCarousel";
 import BurgerButton from "../icons/BurgerButton";
 import Logo from "../icons/Logo";
+import { Colors, Values } from "../resources";
+import { useGlobalStore } from "../stores/global";
+import { updateCurrentlyPlaying } from "../utils/audio";
 
-export const DollsScreen = () => {
+export default function Dolls() {
   const [currentDoll, setCurrentDoll] = useState(0);
   const [isCurrentDollNext, setCurrentDollNext] = useState(false);
-  const navigation = useNavigation<any>();
+  const isPreviousDollNext = usePreviousImmediate(isCurrentDollNext);
+  const navigate = useLink();
   const shift = useSharedValue(0);
   const { data: dolls } = useDolls();
   const { data: stories } = useStories(
-    dolls ? (isCurrentDollNext ? undefined : dolls[currentDoll].id) : undefined
+    dolls
+      ? isCurrentDollNext || isPreviousDollNext
+        ? undefined
+        : dolls[currentDoll].id
+      : undefined
   );
   // prefetch our profile
-  const { data: profile, error } = useProfile();
-  const insets = useSafeAreaInsets();
+  const { data: profile } = useProfile();
   const openAuthOnlyModal = useGlobalStore((state) => state.openAuthOnlyModal);
 
   useEffect(() => {
@@ -39,7 +45,7 @@ export const DollsScreen = () => {
     const doll = dolls[currentDoll];
     const story = stories.items[0];
     updateCurrentlyPlaying(doll, story);
-  }, [stories, isCurrentDollNext]);
+  }, [stories, isCurrentDollNext, dolls, currentDoll]);
 
   const renderedDolls = useMemo(
     () => [
@@ -62,7 +68,7 @@ export const DollsScreen = () => {
         storeLinks: [],
       },
     ],
-    [dolls]
+    [dolls, stories]
   );
 
   return (
@@ -100,24 +106,18 @@ export const DollsScreen = () => {
         }))}
         source={require("../assets/cloud.png")}
       />
-      <View
-        style={{
-          width: "100%",
-          height: "100%",
-          position: "absolute",
-        }}
+      <SafeAreaView
+        style={{ width: "100%", height: "100%", position: "absolute" }}
       >
-        <View style={{ height: insets.top + 20 }} />
         <View
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
             paddingHorizontal: 20,
+            marginTop: 20,
           }}
         >
-          <Pressable
-            onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-          >
+          <Pressable onPress={() => dispatch("UI_DRAWER_OPEN")}>
             <BurgerButton />
           </Pressable>
           <Logo />
@@ -125,7 +125,7 @@ export const DollsScreen = () => {
             avatar={null}
             onPress={() => {
               if (!profile) return openAuthOnlyModal();
-              navigation.navigate("User");
+              navigate.push("/user");
             }}
             size="small"
           />
@@ -140,7 +140,7 @@ export const DollsScreen = () => {
             onShift={(v) => (shift.value = v)}
           />
         </View>
-      </View>
+      </SafeAreaView>
     </View>
   );
-};
+}

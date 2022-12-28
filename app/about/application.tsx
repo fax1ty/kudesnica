@@ -1,21 +1,21 @@
-import { View, Pressable } from "react-native";
-import { ScreenTemplate } from "../components/ScreenTemplate";
-import { ScreenTitle } from "../components/ScreenTitle";
-import { Colors, Fonts, Values } from "../resources";
-import { version } from "../package.json";
-import { useMemo } from "react";
-import { useNavigation } from "@react-navigation/native";
-import { getCurrentEnv } from "../utils/misc";
 import { useDimensions } from "@react-native-community/hooks";
-import { IndependentText as Text } from "../components/IndependentText";
+import { useLink } from "expo-router";
+import { useMemo } from "react";
+import { View, Pressable } from "react-native";
 
-import NextIcon from "../icons/Next";
-import Logo from "../icons/LogoFull";
+import { IndependentText as Text } from "../../components/IndependentText";
+import { ScreenTemplate } from "../../components/ScreenTemplate";
+import { ScreenTitle } from "../../components/ScreenTitle";
+import Logo from "../../icons/LogoFull";
+import NextIcon from "../../icons/Next";
+import { version } from "../../package.json";
+import { Colors, Fonts, Values } from "../../resources";
+import { getCurrentEnv } from "../../utils/misc";
 
-export const AppScreen = () => {
+export default function AboutApp() {
   const currentYear = useMemo(() => new Date().getFullYear(), []);
   const env = useMemo(() => getCurrentEnv(), []);
-  const navigation = useNavigation<any>();
+  const navigate = useLink();
   const { screen: screenSize } = useDimensions();
 
   return (
@@ -23,7 +23,7 @@ export const AppScreen = () => {
       <ScreenTitle>О приложении</ScreenTitle>
       <View style={{ flex: 1 }}>
         <Pressable
-          onPress={() => navigation.navigate("Privacy")}
+          onPress={() => navigate.push("/about/privacy")}
           style={{
             height: 56,
             paddingLeft: 1,
@@ -91,4 +91,4 @@ export const AppScreen = () => {
       </View>
     </ScreenTemplate>
   );
-};
+}

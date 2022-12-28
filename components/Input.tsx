@@ -1,17 +1,18 @@
-import MaskInput from "react-native-mask-input";
+import { useEffect, useMemo, useState } from "react";
 import { TextInput, TextInputProps } from "react-native";
-import { Colors, Fonts } from "../resources";
+import MaskInput from "react-native-mask-input";
 import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
-import { useEffect, useMemo, useState } from "react";
+
+import { Colors, Fonts } from "../resources";
 import { IndependentText as Text } from "./IndependentText";
 
 type Props = {
   error?: string;
   value: string;
-  mask?: Array<string | RegExp>;
+  mask?: (string | RegExp)[];
   disabled?: boolean;
 } & TextInputProps;
 
@@ -41,7 +42,7 @@ export const Input = ({
   useEffect(() => {
     if (props.value === value) return;
     setValue(props.value);
-  }, [props.value]);
+  }, [props.value, value]);
 
   return (
     <Animated.View

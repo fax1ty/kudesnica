@@ -1,11 +1,10 @@
-import { useNavigation } from "@react-navigation/native";
+import { useLink } from "expo-router";
 import { View, ViewStyle, Pressable } from "react-native";
-import { Colors, Fonts, Values } from "../resources";
-import { useMemo } from "react";
-import { Pin } from "./Pin";
-import { IndependentText as Text } from "./IndependentText";
 
 import BackIcon from "../icons/Back";
+import { Colors, Fonts, Values } from "../resources";
+import { IndependentText as Text } from "./IndependentText";
+import { Pin } from "./Pin";
 
 interface Props {
   children: string;
@@ -14,8 +13,7 @@ interface Props {
 }
 
 export const ScreenTitle = ({ children, style, pinNumber }: Props) => {
-  const navigation = useNavigation<any>();
-  const canGoBack = useMemo(() => navigation.canGoBack(), [navigation]);
+  const navigate = useLink();
 
   return (
     <View
@@ -27,24 +25,22 @@ export const ScreenTitle = ({ children, style, pinNumber }: Props) => {
         position: "relative",
       }}
     >
-      {canGoBack && (
-        <Pressable
-          style={{
-            top: 0,
-            left: 0,
-            width: Values.titleHeight,
-            aspectRatio: 1,
-            position: "absolute",
-            justifyContent: "center",
-          }}
-          onPress={() => {
-            console.log("Идём назад");
-            navigation.goBack();
-          }}
-        >
-          <BackIcon />
-        </Pressable>
-      )}
+      <Pressable
+        style={{
+          top: 0,
+          left: 0,
+          width: Values.titleHeight,
+          aspectRatio: 1,
+          position: "absolute",
+          justifyContent: "center",
+        }}
+        onPress={() => {
+          console.log("Идём назад");
+          navigate.back();
+        }}
+      >
+        <BackIcon />
+      </Pressable>
       <View
         style={{
           flex: 1,

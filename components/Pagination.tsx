@@ -4,6 +4,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
+
 import { Colors } from "../resources";
 
 interface Props {
@@ -32,18 +33,20 @@ export const Pagination = ({
         alignItems: "center",
       }}
     >
-      {dots.map((_, i) => (
-        <Animated.View
-          key={`pagination-item-${i}`}
-          style={useAnimatedStyle(() => ({
-            width: withSpring(currentIndex === i ? 16 : 8),
-            aspectRatio: 1,
-            borderRadius: withSpring(currentIndex === i ? 16 / 2 : 8 / 2),
-            backgroundColor: currentIndex === i ? activeColor : inactiveColor,
-            marginLeft: i === 0 ? 0 : 16,
-          }))}
-        />
-      ))}
+      {dots.map(function Dot(_, i) {
+        return (
+          <Animated.View
+            key={`pagination-item-${i}`}
+            style={useAnimatedStyle(() => ({
+              width: withSpring(currentIndex === i ? 16 : 8),
+              aspectRatio: 1,
+              borderRadius: withSpring(currentIndex === i ? 16 / 2 : 8 / 2),
+              backgroundColor: currentIndex === i ? activeColor : inactiveColor,
+              marginLeft: i === 0 ? 0 : 16,
+            }))}
+          />
+        );
+      })}
     </View>
   );
 };

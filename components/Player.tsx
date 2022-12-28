@@ -1,17 +1,17 @@
-import { View, Pressable } from "react-native";
-import { Colors, Fonts } from "../resources";
-import { Slider } from "react-native-awesome-slider";
 import { useEffect, useMemo } from "react";
-import { makeTimeStringFromMs } from "../utils/time";
-import TrackPlayer from "react-native-track-player";
-import { useTrackProgress, useTrackState } from "../hooks/audio";
+import { View, Pressable } from "react-native";
+import { Slider } from "react-native-awesome-slider";
 import { useSharedValue } from "react-native-reanimated";
-import { IndependentText as Text } from "./IndependentText";
+import TrackPlayer from "react-native-track-player";
 
+import { useTrackProgress, useTrackState } from "../hooks/audio";
 import Back15Icon from "../icons/Back15";
 import Next15Icon from "../icons/Next15";
 import PauseIcon from "../icons/Pause";
 import PlayIcon from "../icons/Play";
+import { Colors, Fonts } from "../resources";
+import { makeTimeStringFromMs } from "../utils/time";
+import { IndependentText as Text } from "./IndependentText";
 
 interface Props {
   duration: number;

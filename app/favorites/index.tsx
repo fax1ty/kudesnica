@@ -1,25 +1,25 @@
 import { FlatList, View, Pressable } from "react-native";
-import { useProfile } from "../api/profile";
-import { useGlobalStore } from "../stores/global";
-import { LowPlayer } from "../components/LowPlayer";
-import { Colors, Fonts } from "../resources";
-import { ScreenTemplate } from "../components/ScreenTemplate";
-import { ScreenTitle } from "../components/ScreenTitle";
+import { mutate } from "swr";
+import { dispatch } from "use-bus";
+
+import { useProfile } from "../../api/profile";
 import {
   addStoryToFavorites,
   IStory,
   removeStoryFromFavorites,
   useFavorites,
-} from "../api/stories";
-import { mutate } from "swr";
-import { dispatch } from "use-bus";
-import { updateCurrentlyPlaying } from "../utils/audio";
-import { IndependentText as Text } from "../components/IndependentText";
+} from "../../api/stories";
+import { IndependentText as Text } from "../../components/IndependentText";
+import { LowPlayer } from "../../components/LowPlayer";
+import { ScreenTemplate } from "../../components/ScreenTemplate";
+import { ScreenTitle } from "../../components/ScreenTitle";
+import HeartIcon from "../../icons/HeartSmall";
+import HeartFilledIcon from "../../icons/HeartSmallFilled";
+import { Colors, Fonts } from "../../resources";
+import { useGlobalStore } from "../../stores/global";
+import { updateCurrentlyPlaying } from "../../utils/audio";
 
-import HeartIcon from "../icons/HeartSmall";
-import HeartFilledIcon from "../icons/HeartSmallFilled";
-
-export const FavoritesScreen = () => {
+export default function Favorites() {
   const { data: profile } = useProfile();
   const { data: favorites, mutate: mutateFavorites } = useFavorites();
   const openPremiumStoryModal = useGlobalStore(
@@ -80,45 +80,43 @@ export const FavoritesScreen = () => {
                 await updateCurrentlyPlaying(doll, story);
               }}
             >
-              {
-                <LowPlayer
-                  dollId={item.doll.id}
-                  duration={item.audio.duration}
-                  id={item.id}
-                  title={item.doll.title}
-                  description={item.title}
-                  cover={item.cover}
-                  titleHilighted={!item.watched}
-                  icon={
-                    item.isFavorite ? (
-                      <HeartFilledIcon
-                        onPress={async () => {
-                          await removeStoryFromFavorites(item.doll.id, item.id);
-                          await mutate<IStory>(
-                            `/stories/${item.doll.id}/${item.id}`,
-                            (old) => ({ ...old!, isFavorite: false }),
-                            false
-                          );
-                          await mutateFavorites();
-                        }}
-                      />
-                    ) : (
-                      <HeartIcon
-                        onPress={async () => {
-                          if (!profile) return openAuthOnlyModal();
-                          await addStoryToFavorites(item.doll.id, item.id);
-                          await mutate<IStory>(
-                            `/stories/${item.doll.id}/${item.id}`,
-                            (old) => ({ ...old!, isFavorite: true }),
-                            false
-                          );
-                          await mutateFavorites();
-                        }}
-                      />
-                    )
-                  }
-                />
-              }
+              <LowPlayer
+                dollId={item.doll.id}
+                duration={item.audio.duration}
+                id={item.id}
+                title={item.doll.title}
+                description={item.title}
+                cover={item.cover}
+                titleHilighted={!item.watched}
+                icon={
+                  item.isFavorite ? (
+                    <HeartFilledIcon
+                      onPress={async () => {
+                        await removeStoryFromFavorites(item.doll.id, item.id);
+                        await mutate<IStory>(
+                          `/stories/${item.doll.id}/${item.id}`,
+                          (old) => ({ ...old!, isFavorite: false }),
+                          false
+                        );
+                        await mutateFavorites();
+                      }}
+                    />
+                  ) : (
+                    <HeartIcon
+                      onPress={async () => {
+                        if (!profile) return openAuthOnlyModal();
+                        await addStoryToFavorites(item.doll.id, item.id);
+                        await mutate<IStory>(
+                          `/stories/${item.doll.id}/${item.id}`,
+                          (old) => ({ ...old!, isFavorite: true }),
+                          false
+                        );
+                        await mutateFavorites();
+                      }}
+                    />
+                  )
+                }
+              />
               {(favorites
                 ? index !== favorites.length - 1 &&
                   favorites[index + 1].season === item.season
@@ -138,4 +136,4 @@ export const FavoritesScreen = () => {
       />
     </ScreenTemplate>
   );
-};
+}

@@ -1,17 +1,18 @@
-import { ScreenTemplate } from "../components/ScreenTemplate";
-import { ScreenTitle } from "../components/ScreenTitle";
-import { View } from "react-native";
-import { Input } from "../components/Input";
-import { useState } from "react";
-import { Button } from "../components/Button";
-import { Colors, Fonts } from "../resources";
-import { useProfile } from "../api/profile";
-import { TextInput } from "react-native-gesture-handler";
-import { sendSupportMail } from "../api/support";
 import { Picker } from "@react-native-picker/picker";
-import { IndependentText as Text } from "../components/IndependentText";
+import { useState } from "react";
+import { View } from "react-native";
+import { TextInput } from "react-native-gesture-handler";
 
-export const HelpScreen = () => {
+import { useProfile } from "../../api/profile";
+import { sendSupportMail } from "../../api/support";
+import { Button } from "../../components/Button";
+import { IndependentText as Text } from "../../components/IndependentText";
+import { Input } from "../../components/Input";
+import { ScreenTemplate } from "../../components/ScreenTemplate";
+import { ScreenTitle } from "../../components/ScreenTitle";
+import { Colors, Fonts } from "../../resources";
+
+export default function Help() {
   const items = [
     "Общие вопросы",
     "Вопрос подписки",
@@ -170,4 +171,4 @@ export const HelpScreen = () => {
       </View>
     </ScreenTemplate>
   );
-};
+}

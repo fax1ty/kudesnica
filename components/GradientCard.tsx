@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { View, Image, ViewStyle, Pressable } from "react-native";
+
 import { Colors } from "../resources";
 
 interface Props {

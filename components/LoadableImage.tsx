@@ -6,18 +6,19 @@ import {
   ImageURISource,
   ImageResizeMode,
 } from "react-native";
-import { Skeleton } from "./Skeleton";
 import Animated, {
   Easing,
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
 
+import { Skeleton } from "./Skeleton";
+
 interface Props {
   source?: ImageURISource;
   style?: ViewStyle;
   resizeMode?: ImageResizeMode;
-  skeletonColors?: Array<string>;
+  skeletonColors?: string[];
 }
 
 export const LoadableImage = ({

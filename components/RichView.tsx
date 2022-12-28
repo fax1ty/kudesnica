@@ -1,3 +1,8 @@
+import { TouchableWithoutFeedback } from "@gorhom/bottom-sheet";
+import axios from "axios";
+import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
+import * as VideoThumbnails from "expo-video-thumbnails";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   Text,
@@ -6,33 +11,28 @@ import {
   ImageURISource,
   ViewStyle,
 } from "react-native";
-import { Colors, Fonts } from "../resources";
-import { IRichBlock, IRichImageBorders, IStory } from "../api/stories";
-import { LoadableImage } from "./LoadableImage";
-import { Button } from "./Button";
-import { Skeleton } from "./Skeleton";
-import { useGlobalStore } from "../stores/global";
-import { useProfile } from "../api/profile";
-import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system";
-import axios from "axios";
-import Video from "react-native-video";
-import { deleteMedia } from "../api/media";
-import { mutate } from "swr";
-import * as VideoThumbnails from "expo-video-thumbnails";
 import { FlatList } from "react-native-gesture-handler";
-import { TouchableWithoutFeedback } from "@gorhom/bottom-sheet";
-import { Avatar } from "./Avatar";
-import { IDoll } from "../api/dolls";
+import Video from "react-native-video";
+import { mutate } from "swr";
 
-import RubyIcon from "../icons/Ruby";
+import { IDoll } from "../api/dolls";
+import { deleteMedia } from "../api/media";
+import { useProfile } from "../api/profile";
+import { IRichBlock, IRichImageBorders, IStory } from "../api/stories";
 import ChatRect from "../icons/ChatRect";
-import Notes from "../icons/Notes";
 import MagnifierIcon from "../icons/Magnifier";
+import Notes from "../icons/Notes";
+import RubyIcon from "../icons/Ruby";
+import { Colors, Fonts } from "../resources";
+import { useGlobalStore } from "../stores/global";
+import { Avatar } from "./Avatar";
+import { Button } from "./Button";
+import { LoadableImage } from "./LoadableImage";
+import { Skeleton } from "./Skeleton";
 
 interface Props {
   dollAvatar: IStory["cover"];
-  data: Array<IRichBlock>;
+  data: IRichBlock[];
   dollId: string;
   storyId: string;
   mediaId?: string;
@@ -135,7 +135,7 @@ const VideoPreview = ({
     VideoThumbnails.getThumbnailAsync(url, { quality: 0.5 }).then(({ uri }) =>
       setShowUrl(uri)
     );
-  }, []);
+  }, [url]);
 
   return <LoadableImage source={{ uri: showUrl }} style={{ width, height }} />;
 };
@@ -188,7 +188,7 @@ const ChatMessage = ({
     kind: "video" | "image";
   };
   style?: ViewStyle;
-  galleryUrls?: Array<string>;
+  galleryUrls?: string[];
   position?: "left" | "right";
 }) => {
   const openGalleryModal = useGlobalStore((state) => state.openGalleryModal);
@@ -361,9 +361,10 @@ const ChatChunk = ({
   dollAvatar?: IStory["cover"];
   dollId: IDoll["id"];
   storyId: IStory["id"];
-  messages: Array<
-    IChatMessage | { kind: "media"; url: string; mediaType: "video" | "image" }
-  >;
+  messages: (
+    | IChatMessage
+    | { kind: "media"; url: string; mediaType: "video" | "image" }
+  )[];
   style?: ViewStyle;
 }) => {
   const id = useId();
@@ -438,7 +439,7 @@ const Chat = ({
   const openAuthOnlyModal = useGlobalStore((state) => state.openAuthOnlyModal);
   const { data: profile } = useProfile();
   const [status, requestPermission] = ImagePicker.useMediaLibraryPermissions();
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
   const token = useGlobalStore((state) => state.token);
   const [progress, setProgress] = useState(0);
   const [viewableAsset, setViewableAsset] = useState("");
@@ -452,7 +453,7 @@ const Chat = ({
         ? [{ mediaType: kind, kind: "media", url: viewableAsset }]
         : [],
     ],
-    [messages, viewableAsset]
+    [kind, messages, viewableAsset]
   );
 
   useEffect(() => {
@@ -542,7 +543,7 @@ const Chat = ({
                   if (!profile) return openAuthOnlyModal();
                   if (!status?.granted) await requestPermission();
                   const result = await ImagePicker.launchImageLibraryAsync({
-                    base64: kind === "video" ? false : true,
+                    base64: kind !== "video",
                     mediaTypes:
                       kind === "video"
                         ? ImagePicker.MediaTypeOptions.Videos
@@ -593,9 +594,9 @@ const Chat = ({
                   if (!uploadResult) return;
                   if (uploadResult.status === 200) {
                     console.log("Объект успешно загружено", uploadResult.body);
-                    await mutate(
+                    await mutate<IStory>(
                       `stories/${dollId}/${storyId}`,
-                      (old: IStory) => ({ ...old, media: uploadResult.body }),
+                      (old) => ({ ...old!, media: uploadResult.body }),
                       false
                     );
                   } else {
@@ -619,9 +620,9 @@ const Chat = ({
               <Button
                 onPress={async () => {
                   if (mediaId) await deleteMedia(mediaId);
-                  await mutate(
+                  await mutate<IStory>(
                     `stories/${dollId}/${storyId}`,
-                    (old: IStory) => ({ ...old, media: undefined }),
+                    (old) => ({ ...old!, media: undefined }),
                     false
                   );
                   setViewableAsset("");
@@ -673,7 +674,7 @@ export const generateComponentsFromRichComponents = (
   dollId?: string,
   storyId?: string,
   mediaId?: string,
-  data?: Array<IRichBlock>,
+  data?: IRichBlock[],
   chat?: IStory["chat"]
 ) => {
   if (!dollId || !storyId || !data)
@@ -687,19 +688,19 @@ export const generateComponentsFromRichComponents = (
           style={{ marginTop: 12 }}
         />
         <Skeleton
-          width={"100%"}
+          width="100%"
           height={18}
           borderRadius={8}
           style={{ marginTop: 12 }}
         />
         <Skeleton
-          width={"100%"}
+          width="100%"
           height={18}
           borderRadius={8}
           style={{ marginTop: 12 }}
         />
         <Skeleton
-          width={"100%"}
+          width="100%"
           height={18}
           borderRadius={8}
           style={{ marginTop: 12 }}
@@ -756,7 +757,7 @@ export const RichView = ({
         data,
         chat
       ),
-    [data]
+    [chat, data, dollAvatar, dollId, mediaId, storyId]
   );
   return <View>{components}</View>;
 };

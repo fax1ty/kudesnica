@@ -1,8 +1,9 @@
+import { useLink } from "expo-router";
+
 import { IndependentText as Text } from "../components/IndependentText";
 import { Colors, Fonts } from "../resources";
-import { CircleModal } from "./CircleModal";
 import { useGlobalStore } from "../stores/global";
-import { useNavigation } from "@react-navigation/native";
+import { CircleModal } from "./CircleModal";
 
 interface Props {
   visible: boolean;
@@ -13,7 +14,7 @@ export const AuthOnlyModal = ({ visible }: Props) => {
     (state) => state.closeAuthOnlyModal
   );
   const closeBottomPlayer = useGlobalStore((state) => state.closeBottomPlayer);
-  const navigation = useNavigation<any>();
+  const navigate = useLink();
 
   return (
     <CircleModal
@@ -23,6 +24,7 @@ export const AuthOnlyModal = ({ visible }: Props) => {
         <>
           <Text
             style={{
+              textAlign: "center",
               fontFamily: Fonts.firasansRegular,
               fontSize: 16,
               lineHeight: 15,
@@ -33,7 +35,7 @@ export const AuthOnlyModal = ({ visible }: Props) => {
           </Text>
           <Text
             onPress={() => {
-              navigation.navigate("Auth", { mode: "register" });
+              navigate.push("/auth/register");
               closeAuthOnlyModal();
               closeBottomPlayer();
             }}
@@ -64,7 +66,7 @@ export const AuthOnlyModal = ({ visible }: Props) => {
           </Text>
           <Text
             onPress={() => {
-              navigation.navigate("Auth", { mode: "login" });
+              navigate.push("/auth/login");
               closeAuthOnlyModal();
               closeBottomPlayer();
             }}

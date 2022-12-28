@@ -1,21 +1,24 @@
 import axios from "axios";
-import { IDollShort } from "../api/dolls";
-import { IStoryShortiest } from "../api/stories";
 import TrackPlayer, {
   AppKilledPlaybackBehavior,
   RatingType,
   IOSCategoryOptions,
   IOSCategory,
 } from "react-native-track-player";
+import { mutate } from "swr";
+
+import { IDollShort } from "../api/dolls";
+import { IStoryShortiest } from "../api/stories";
 import { useAudioStore } from "../stores/audio";
 import { useGlobalStore } from "../stores/global";
-import { mutate } from "swr";
 
 export const updateCurrentlyPlaying = async (
   doll: IDollShort,
   story: IStoryShortiest,
   autoPlay = false
 ) => {
+  if (useAudioStore.getState().currentlyPlaying.storyId === story.id) return;
+
   // const currentlyPlaying = useAudioStore.getState().currentlyPlaying;
   const setCurrentlyPlaying = useAudioStore.getState().setCurrentlyPlaying;
   const openBottomPlayer = useGlobalStore.getState().openBottomPlayer;

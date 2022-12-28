@@ -1,34 +1,30 @@
-import { View } from "react-native";
-import { Colors, Fonts } from "../resources";
-import { Button } from "../components/Button";
-import {
-  CommonActions,
-  useNavigation,
-  useRoute,
-} from "@react-navigation/native";
-import useCountDown from "react-countdown-hook";
-import { useEffect, useMemo, useState } from "react";
-import pms from "parse-ms";
-import { leadWithZero } from "../utils/math";
-import { CodeInput } from "../components/CodeInput";
-import { useGlobalStore } from "../stores/global";
-import { verify } from "../api/auth";
-import axios from "axios";
-import { ScreenTemplate } from "../components/ScreenTemplate";
-import { ScreenTitle } from "../components/ScreenTitle";
 import crashlytics from "@react-native-firebase/crashlytics";
+import axios from "axios";
+import { useHref, useLink } from "expo-router";
+import pms from "parse-ms";
+import { useEffect, useMemo, useState } from "react";
+import useCountDown from "react-countdown-hook";
+import { View } from "react-native";
 import { usePersistedState } from "react-native-use-persisted-state";
-import { IndependentText as Text } from "../components/IndependentText";
-import { auth } from "../api/auth";
 
-export const VerifyScreen = () => {
-  const [timeLeft, { start, reset }] = useCountDown(60 * 1000);
+import { verify, auth } from "../../../api/auth";
+import { Button } from "../../../components/Button";
+import { CodeInput } from "../../../components/CodeInput";
+import { IndependentText as Text } from "../../../components/IndependentText";
+import { ScreenTemplate } from "../../../components/ScreenTemplate";
+import { ScreenTitle } from "../../../components/ScreenTitle";
+import { Colors, Fonts } from "../../../resources";
+import { useGlobalStore } from "../../../stores/global";
+import { leadWithZero } from "../../../utils/math";
+
+export default function Verify() {
+  const [timeLeft, { start }] = useCountDown(60 * 1000);
   const [code, setCode] = useState("");
   const {
     params: { requestId, mode },
-  } = useRoute<any>();
+  } = useHref();
 
-  const navigation = useNavigation<any>();
+  const navigate = useLink();
   const userPhone = useGlobalStore((state) => state.phone);
   const setToken = useGlobalStore((state) => state.setToken);
   const openCongratulationsRegModal = useGlobalStore(
@@ -81,9 +77,7 @@ export const VerifyScreen = () => {
             axios.defaults.headers.common.authorization = token;
             setToken(token);
             setPersistToken(token);
-            navigation.dispatch(
-              CommonActions.reset({ index: 0, routes: [{ name: "Home" }] })
-            );
+            navigate.replace("/");
             if (mode === "register") openCongratulationsRegModal();
             else openLoginWelcomeModal();
           }}
@@ -106,7 +100,7 @@ export const VerifyScreen = () => {
             start();
           }}
           style={{
-            width: Boolean(timeLeft) ? 270 : undefined,
+            width: timeLeft ? 270 : undefined,
             fontFamily: Fonts.firasansRegular,
             fontSize: 18,
             lineHeight: 23,
@@ -127,4 +121,4 @@ export const VerifyScreen = () => {
       </View>
     </ScreenTemplate>
   );
-};
+}

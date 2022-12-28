@@ -1,17 +1,17 @@
-import { View, Image } from "react-native";
-import { ScreenTitle } from "../components/ScreenTitle";
-import { LinearGradient } from "expo-linear-gradient";
-import Carousel from "react-native-snap-carousel";
 import { useDimensions } from "@react-native-community/hooks";
+import { LinearGradient } from "expo-linear-gradient";
 import { useState } from "react";
-import { Pagination } from "../components/Pagination";
-import { Colors, Fonts } from "../resources";
+import { View, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { IndependentText as Text } from "../components/IndependentText";
+import Carousel from "react-native-snap-carousel";
 
-import Logo from "../icons/LogoFullBig";
+import { IndependentText as Text } from "../../components/IndependentText";
+import { Pagination } from "../../components/Pagination";
+import { ScreenTitle } from "../../components/ScreenTitle";
+import Logo from "../../icons/LogoFullBig";
+import { Colors, Fonts } from "../../resources";
 
-export const CompanyScreen = () => {
+export default function AboutCompany() {
   const { screen: screenSize } = useDimensions();
   const [currentTab, setCurrentTab] = useState(0);
   const insets = useSafeAreaInsets();
@@ -19,7 +19,7 @@ export const CompanyScreen = () => {
   return (
     <View style={{ flex: 1, position: "relative", backgroundColor: "#dff5ff" }}>
       <Image
-        source={require("../assets/loading-bg.png")}
+        source={require("../../assets/loading-bg.png")}
         style={{ position: "absolute", width: "100%", height: "100%" }}
       />
       <View style={{ position: "absolute", width: "100%", height: "100%" }}>
@@ -29,7 +29,7 @@ export const CompanyScreen = () => {
         />
         <View style={{ flex: 1, backgroundColor: "white" }} />
         <Image
-          source={require("../assets/company-cloud.png")}
+          source={require("../../assets/company-cloud.png")}
           style={{
             resizeMode: "contain",
             width: screenSize.width,
@@ -100,4 +100,4 @@ export const CompanyScreen = () => {
       </ScreenTitle>
     </View>
   );
-};
+}

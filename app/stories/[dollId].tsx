@@ -1,46 +1,44 @@
 import { useDimensions } from "@react-native-community/hooks";
-import { useRoute } from "@react-navigation/native";
-import { View, Image, FlatList, Pressable } from "react-native";
-import Carousel from "react-native-snap-carousel";
-import { DollMainText } from "../components/DollsCarousel";
-import { Colors, Fonts, Values } from "../resources";
-import { RichView } from "../components/RichView";
-import { Button } from "../components/Button";
-import { LowPlayer } from "../components/LowPlayer";
-import romans from "romans";
+import { useHref } from "expo-router";
 import { useMemo, useState } from "react";
+import { View, Image, FlatList, Pressable } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Carousel from "react-native-snap-carousel";
+import romans from "romans";
+import { mutate } from "swr";
 import { dispatch } from "use-bus";
+
+import { useDoll } from "../../api/dolls";
+import { useProfile } from "../../api/profile";
 import {
   addStoryToFavorites,
   IStory,
   removeStoryFromFavorites,
   useStories,
-} from "../api/stories";
-import { useDoll } from "../api/dolls";
-import { useGlobalStore } from "../stores/global";
-import { Pagination } from "../components/Pagination";
-import { makeTimeStringFromMs } from "../utils/time";
-import { mutate } from "swr";
-import { updateCurrentlyPlaying } from "../utils/audio";
-import { useProfile } from "../api/profile";
-import { ScreenTitle } from "../components/ScreenTitle";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAudioStore } from "../stores/audio";
-import { IndependentText as Text } from "../components/IndependentText";
+} from "../../api/stories";
+import { Button } from "../../components/Button";
+import { DollMainText } from "../../components/DollsCarousel";
+import { IndependentText as Text } from "../../components/IndependentText";
+import { LowPlayer } from "../../components/LowPlayer";
+import { Pagination } from "../../components/Pagination";
+import { RichView } from "../../components/RichView";
+import { ScreenTitle } from "../../components/ScreenTitle";
+import HeartIcon from "../../icons/HeartSmall";
+import HeartFilledIcon from "../../icons/HeartSmallFilled";
+import { Colors, Fonts, Values } from "../../resources";
+import { useAudioStore } from "../../stores/audio";
+import { useGlobalStore } from "../../stores/global";
+import { updateCurrentlyPlaying } from "../../utils/audio";
+import { makeTimeStringFromMs } from "../../utils/time";
 
-import HeartIcon from "../icons/HeartSmall";
-import HeartFilledIcon from "../icons/HeartSmallFilled";
-
-export const StoriesScreen = () => {
+export default function Stories() {
   const {
-    params: { doll: dollId },
-  } = useRoute<any>();
+    params: { dollId },
+  } = useHref();
   const { screen: screenSize } = useDimensions();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { data: stories, mutate: mutateStories } = useStories(dollId);
   const { data: doll } = useDoll(dollId);
-  const [currentSeason, setCurrentSeason] = useState(-1);
-  const [currentEpisode, setCurrentEpisode] = useState(-1);
   const { data: profile } = useProfile();
   const insets = useSafeAreaInsets();
   const openPremiumStoryModal = useGlobalStore(
@@ -59,8 +57,8 @@ export const StoriesScreen = () => {
 
   const fakeArray = useMemo(
     () => [
-      require("../assets/white-pixel.png").uri,
-      require("../assets/white-pixel.png").uri,
+      require("../../assets/white-pixel.png").uri,
+      require("../../assets/white-pixel.png").uri,
     ],
     []
   );
@@ -103,19 +101,17 @@ export const StoriesScreen = () => {
             )}
             <Pressable
               onPress={async () => {
-                if (!doll || !profile) return;
+                if (!doll) return;
 
-                if (
-                  currentSeason === item.season &&
-                  currentEpisode === item.episode
-                )
-                  return dispatch("UI_STORY_EXPAND");
-
-                if (item.premium && !profile.premium)
+                if (item.premium && !profile?.premium)
                   return openPremiumStoryModal();
 
-                setCurrentSeason(item.season);
-                setCurrentEpisode(item.episode);
+                await mutate<IStory>(
+                  `/stories/${dollId}/${item.id}`,
+                  (old) => ({ ...old!, watched: true }),
+                  false
+                );
+                await mutate(`/dolls/${dollId}/storiesList`);
 
                 dispatch("UI_STORY_EXPAND");
                 await updateCurrentlyPlaying(doll, item);
@@ -127,46 +123,44 @@ export const StoriesScreen = () => {
                   currentlyPlayingStoryId === item.id ? "#f6f6f6" : undefined,
               }}
             >
-              {
-                <LowPlayer
-                  dollId={doll?.id}
-                  duration={item.audio.duration}
-                  id={item.id}
-                  title={item.title}
-                  description={makeTimeStringFromMs(item.audio.duration)}
-                  cover={item.cover}
-                  titleHilighted={!item.watched}
-                  icon={
-                    item.isFavorite ? (
-                      <HeartFilledIcon
-                        onPress={async () => {
-                          if (!profile) return openAuthOnlyModal();
-                          await removeStoryFromFavorites(doll!.id, item.id);
-                          await mutate<IStory>(
-                            `/stories/${dollId}/${item.id}`,
-                            (old) => ({ ...old!, isFavorite: false }),
-                            false
-                          );
-                          await mutateStories();
-                        }}
-                      />
-                    ) : (
-                      <HeartIcon
-                        onPress={async () => {
-                          if (!profile) return openAuthOnlyModal();
-                          await addStoryToFavorites(doll!.id, item.id);
-                          await mutate<IStory>(
-                            `/stories/${dollId}/${item.id}`,
-                            (old) => ({ ...old!, isFavorite: true }),
-                            false
-                          );
-                          await mutateStories();
-                        }}
-                      />
-                    )
-                  }
-                />
-              }
+              <LowPlayer
+                dollId={doll?.id}
+                duration={item.audio.duration}
+                id={item.id}
+                title={item.title}
+                description={makeTimeStringFromMs(item.audio.duration)}
+                cover={item.cover}
+                titleHilighted={!item.watched}
+                icon={
+                  item.isFavorite ? (
+                    <HeartFilledIcon
+                      onPress={async () => {
+                        if (!profile) return openAuthOnlyModal();
+                        await removeStoryFromFavorites(doll!.id, item.id);
+                        await mutate<IStory>(
+                          `/stories/${dollId}/${item.id}`,
+                          (old) => ({ ...old!, isFavorite: false }),
+                          false
+                        );
+                        await mutateStories();
+                      }}
+                    />
+                  ) : (
+                    <HeartIcon
+                      onPress={async () => {
+                        if (!profile) return openAuthOnlyModal();
+                        await addStoryToFavorites(doll!.id, item.id);
+                        await mutate<IStory>(
+                          `/stories/${dollId}/${item.id}`,
+                          (old) => ({ ...old!, isFavorite: true }),
+                          false
+                        );
+                        await mutateStories();
+                      }}
+                    />
+                  )
+                }
+              />
               {(stories
                 ? index !== stories.items.length - 1 &&
                   stories.items[index + 1].season === item.season
@@ -200,7 +194,7 @@ export const StoriesScreen = () => {
                   width: "100%",
                   height: "100%",
                 }}
-                source={require("../assets/story-player-blur.png")}
+                source={require("../../assets/story-player-blur.png")}
               />
               <View
                 style={{
@@ -309,4 +303,4 @@ export const StoriesScreen = () => {
       </View>
     </View>
   );
-};
+}

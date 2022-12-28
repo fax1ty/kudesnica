@@ -5,8 +5,8 @@ import {
 } from "@gorhom/bottom-sheet";
 import { ReactNode, useCallback, useEffect, useRef } from "react";
 import { View } from "react-native";
+
 import { CustomBackdrop } from "../components/CustomBackdrop";
-import { useBottomSheetBackHandler } from "../hooks/bottom-sheet";
 import { Colors } from "../resources";
 
 interface Props {
@@ -85,7 +85,7 @@ export const AutoHeightModal = ({ visible, children, onClose }: Props) => {
           if (onClose) onClose();
         }
       }}
-      enablePanDownToClose={true}
+      enablePanDownToClose
       snapPoints={animatedSnapPoints}
       handleHeight={animatedHandleHeight}
       contentHeight={animatedContentHeight}

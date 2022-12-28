@@ -1,15 +1,15 @@
-import { View, StyleSheet, Image } from "react-native";
-import { Colors } from "../resources";
-import Carousel from "react-native-snap-carousel";
-import { useGlobalStore } from "../stores/global";
-import Video from "react-native-video";
-import { useDimensions } from "@react-native-community/hooks";
 import { Portal } from "@gorhom/portal";
-import { FullWindowOverlay } from "react-native-screens";
+import { useDimensions } from "@react-native-community/hooks";
 import { useEffect, useState } from "react";
+import { View, StyleSheet, Image } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { FullWindowOverlay } from "react-native-screens";
+import Carousel from "react-native-snap-carousel";
+import Video from "react-native-video";
 
 import X from "../icons/XCircle";
+import { Colors } from "../resources";
+import { useGlobalStore } from "../stores/global";
 
 export const GalleryModal = () => {
   const urls = useGlobalStore((state) => state.gallery.urls);

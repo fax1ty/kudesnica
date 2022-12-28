@@ -4,7 +4,6 @@ import { combine } from "zustand/middleware";
 export const useGlobalStore = create(
   combine(
     {
-      fontsLoaded: false,
       isBottomPlayerOpen: false,
       isCongratulationsRegModalVisible: false,
       isPremiumStoryModalVisible: false,
@@ -27,8 +26,6 @@ export const useGlobalStore = create(
       },
     },
     (set) => ({
-      setFontsLoaded: (value: boolean) =>
-        set((state) => ({ ...state, fontsLoaded: value })),
       openBottomPlayer: () =>
         set((state) => ({ ...state, isBottomPlayerOpen: true })),
       closeBottomPlayer: () =>

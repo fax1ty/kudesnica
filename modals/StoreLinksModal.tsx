@@ -1,6 +1,6 @@
+import { StoreLinksList } from "../components/StoreLinksList";
 import { useGlobalStore } from "../stores/global";
 import { AutoHeightModal } from "./AutoHeightModal";
-import { StoreLinksList } from "../components/StoreLinksList";
 
 interface Props {
   visible: boolean;

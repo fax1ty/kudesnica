@@ -1,22 +1,22 @@
 import { useDimensions } from "@react-native-community/hooks";
+import { useLink } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import { View, Image } from "react-native";
-import Carousel from "react-native-snap-carousel";
-import { Button } from "../components/Button";
-import { Colors, Fonts } from "../resources";
-import { Pagination } from "../components/Pagination";
-import { useNavigation } from "@react-navigation/native";
 import Animated, { FadeIn } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Carousel from "react-native-snap-carousel";
 import { usePersistedState } from "react-native-use-persisted-state";
-import { IndependentText as Text } from "../components/IndependentText";
 
-export const WelcomeScreen = () => {
+import { Button } from "../../components/Button";
+import { IndependentText as Text } from "../../components/IndependentText";
+import { Pagination } from "../../components/Pagination";
+import { Colors, Fonts } from "../../resources";
+
+export default function Welcome() {
   const { screen: screenSize } = useDimensions();
   const [currentScreen, setCurrentScreen] = useState(0);
   const ref = useRef<Carousel<any>>(null);
-  const navigation = useNavigation<any>();
-  const insets = useSafeAreaInsets();
+  const navigate = useLink();
   const [, setShouldShowWelcomeScreen] = usePersistedState(
     "@shouldShowWelcomeScreen",
     true
@@ -37,17 +37,17 @@ export const WelcomeScreen = () => {
           {
             title: "Добро пожаловать!",
             text: "Слушайте и читайте увлекательные\nистории кукол с красивыми\nиллюстрациями!",
-            background: require("../assets/welcome-1.png"),
+            background: require("../../assets/welcome-1.png"),
           },
           {
             title: "Новые истории",
             text: "Слушайте и читайте увлекательные\nистории кукол с красивыми\nиллюстрациями!",
-            background: require("../assets/welcome-2.png"),
+            background: require("../../assets/welcome-2.png"),
           },
           {
             title: "Алина Балерина",
             text: "Слушайте и читайте увлекательные\nистории кукол с красивыми\nиллюстрациями!",
-            background: require("../assets/welcome-3.png"),
+            background: require("../../assets/welcome-3.png"),
           },
         ]}
         renderItem={({ item }) => (
@@ -56,7 +56,7 @@ export const WelcomeScreen = () => {
               source={item.background}
               style={{ position: "absolute", width: "100%", height: "100%" }}
             />
-            <View
+            <SafeAreaView
               style={{
                 position: "absolute",
                 width: "100%",
@@ -67,7 +67,7 @@ export const WelcomeScreen = () => {
               <Animated.View
                 entering={FadeIn.duration(300).delay(500)}
                 style={{
-                  marginTop: insets.top + +35,
+                  marginTop: 35,
                   paddingHorizontal: 29,
                 }}
               >
@@ -95,7 +95,7 @@ export const WelcomeScreen = () => {
                   {item.text}
                 </Text>
               </Animated.View>
-            </View>
+            </SafeAreaView>
           </View>
         )}
         sliderWidth={screenSize.width}
@@ -104,7 +104,7 @@ export const WelcomeScreen = () => {
       <Animated.View
         entering={FadeIn.duration(300).delay(500)}
         style={{
-          bottom: 50 - 33 + insets.bottom,
+          bottom: 50 - 33,
           paddingHorizontal: 16,
           width: "100%",
           position: "absolute",
@@ -117,7 +117,7 @@ export const WelcomeScreen = () => {
         />
         <Button
           onPress={() => {
-            if (currentScreen == 2) navigation.navigate("Home");
+            if (currentScreen === 2) navigate.replace("/dolls");
             else ref.current?.snapToNext();
           }}
           style={{ marginTop: 24 }}
@@ -127,4 +127,4 @@ export const WelcomeScreen = () => {
       </Animated.View>
     </View>
   );
-};
+}

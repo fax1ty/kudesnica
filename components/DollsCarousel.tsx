@@ -1,19 +1,19 @@
-import Carousel from "react-native-snap-carousel";
-import { Image, Pressable, View } from "react-native";
 import { useDimensions } from "@react-native-community/hooks";
-import { Colors, Fonts } from "../resources";
-import { useNavigation } from "@react-navigation/native";
-import { IDoll } from "../api/dolls";
-import { Pin } from "./Pin";
-import { IndependentText as Text } from "./IndependentText";
+import { useLink } from "expo-router";
+import { Image, Pressable, View } from "react-native";
+import Carousel from "react-native-snap-carousel";
 
+import { IDoll } from "../api/dolls";
 import BellIcon from "../icons/Bell";
+import { Colors, Fonts } from "../resources";
+import { IndependentText as Text } from "./IndependentText";
 import { LoadableImage } from "./LoadableImage";
+import { Pin } from "./Pin";
 
 interface Props {
   onShift?: (v: number) => void;
   onIndexChange?: (v: number, next: boolean) => void;
-  data: Array<IDoll & { next: boolean; unwatched: number }>;
+  data: (IDoll & { next: boolean; unwatched: number })[];
 }
 
 export const DollMainText = ({
@@ -86,7 +86,7 @@ export const DollMainText = ({
 
 export const DollsCarousel = ({ data, onShift, onIndexChange }: Props) => {
   const { screen: screenSize } = useDimensions();
-  const navigation = useNavigation<any>();
+  const navigate = useLink();
 
   return (
     <Carousel
@@ -107,7 +107,7 @@ export const DollsCarousel = ({ data, onShift, onIndexChange }: Props) => {
         <Pressable
           onPress={() => {
             if (item.next) return;
-            navigation.navigate("Stories", { doll: item.id });
+            navigate.push(`/stories/${item.id}`);
           }}
         >
           <View
