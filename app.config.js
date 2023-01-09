@@ -2,7 +2,7 @@ const info = require("./package.json");
 
 const ENV = process.env.APP_ENV || "local";
 
-const version = info.version.split(".").map((value) => parseInt(value));
+const version = info.version.split(".").map((value) => parseInt(value, 10));
 const buildNumber = version[0] * 100 + version[1] * 10 + version[2];
 
 module.exports = {
@@ -73,10 +73,9 @@ module.exports = {
             targetSdkVersion: 33,
             buildToolsVersion: "33.0.0",
           },
-          // https://forums.expo.dev/t/eas-update-could-not-get-batchedbridge/66824/8
-          // ios: {
-          //   useFrameworks: "static",
-          // },
+          ios: {
+            useFrameworks: "static",
+          },
         },
       ],
     ],

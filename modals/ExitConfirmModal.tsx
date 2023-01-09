@@ -59,8 +59,8 @@ export const ExitConfirmModal = ({ visible }: Props) => {
             onPress={async () => {
               await mutate(() => true, undefined, false);
               axios.defaults.headers.common.authorization = "";
-              setToken("");
               setPersistToken("");
+              setToken("");
               closeExitConfirmModal();
             }}
           >

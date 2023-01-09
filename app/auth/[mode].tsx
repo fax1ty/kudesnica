@@ -94,7 +94,7 @@ export default function Auth() {
           }
           onPress={async () => {
             try {
-              const serialized = serializePhoneNumber(localPhone);
+              const serialized = serializePhoneNumber(localPhone).toString();
               const requestId = await auth(serialized, name);
               setPhone(serialized);
               navigate.push(`/verify/${mode}/${requestId}`);

@@ -115,43 +115,56 @@ export const DollsCarousel = ({ data, onShift, onIndexChange }: Props) => {
               alignItems: "center",
             }}
           >
-            <View style={{ position: "relative" }}>
-              <LoadableImage
-                resizeMode="contain"
+            <View
+              style={{
+                position: "relative",
+                justifyContent: "flex-end",
+                height: 463,
+                width: 296,
+              }}
+            >
+              <View
                 style={{
-                  width: screenSize.width - 38 * 2,
-                  aspectRatio: 296 / 409,
-                  borderTopLeftRadius: 500,
-                  borderTopRightRadius: 500,
+                  position: "relative",
+                  bottom: 0,
                 }}
-                source={{ uri: item.dollsCarouselPhoto.background }}
-                skeletonColors={[
-                  Colors.light100,
-                  Colors.light80,
-                  Colors.light100,
-                ]}
-              />
-              {item.dollsCarouselPhoto.label && (
-                <Image
+              >
+                <LoadableImage
                   style={{
                     position: "absolute",
-                    top: 0,
-                    right: 0,
-                    width: 73,
-                    aspectRatio: 1,
-                    resizeMode: "contain",
+                    width: 296,
+                    height: 409,
+                    borderTopLeftRadius: 500,
+                    borderTopRightRadius: 500,
                   }}
-                  source={{ uri: item.dollsCarouselPhoto.label }}
+                  source={{ uri: item.dollsCarouselPhoto.background }}
+                  skeletonColors={[
+                    Colors.light100,
+                    Colors.light80,
+                    Colors.light100,
+                  ]}
                 />
-              )}
+                {item.dollsCarouselPhoto.label && (
+                  <Image
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      right: 0,
+                      width: 73,
+                      aspectRatio: 1,
+                      resizeMode: "contain",
+                    }}
+                    source={{ uri: item.dollsCarouselPhoto.label }}
+                  />
+                )}
+              </View>
               {item.dollsCarouselPhoto.doll && (
                 <Image
                   style={{
                     position: "absolute",
                     bottom: 20,
-                    alignSelf: "center",
-                    width: screenSize.width * 0.6,
-                    aspectRatio: 226 / 463,
+                    width: 296,
+                    height: 463,
                     resizeMode: "contain",
                   }}
                   source={{ uri: item.dollsCarouselPhoto.doll }}

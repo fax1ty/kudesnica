@@ -37,7 +37,6 @@ export const AuthOnlyModal = ({ visible }: Props) => {
             onPress={() => {
               navigate.push("/auth/register");
               closeAuthOnlyModal();
-              closeBottomPlayer();
             }}
             style={{
               marginTop: 7,
@@ -68,7 +67,6 @@ export const AuthOnlyModal = ({ visible }: Props) => {
             onPress={() => {
               navigate.push("/auth/login");
               closeAuthOnlyModal();
-              closeBottomPlayer();
             }}
             style={{
               marginTop: 7,

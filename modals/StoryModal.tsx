@@ -7,7 +7,7 @@ import BottomSheet, {
 import { useDimensions } from "@react-native-community/hooks";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Image, View, ViewToken } from "react-native";
+import { Image, View, ViewToken, Platform, Pressable } from "react-native";
 import Animated, {
   Extrapolate,
   interpolate,
@@ -74,7 +74,7 @@ const SheetContent = ({ story, doll }: ContentProps) => {
   const { animatedIndex, expand, collapse } = useBottomSheet();
   const scroll = useRef<BottomSheetFlatListMethods>(null);
   const insets = useSafeAreaInsets();
-  const { window: windowSize } = useDimensions();
+  const { window: windowSize, screen: screenSize } = useDimensions();
   const components = useMemo(
     () =>
       generateComponentsFromRichComponents(
@@ -106,7 +106,7 @@ const SheetContent = ({ story, doll }: ContentProps) => {
   useEffect(() => {
     scroll.current?.scrollToOffset({ animated: false, offset: 0 });
     setLastViewableItemIndex(-1);
-  }, [story]);
+  }, [story?.id]);
 
   // https://github.com/facebook/react-native/issues/30171#issuecomment-711154425
   const viewabilityConfigCallbackPairs = useRef([
@@ -279,7 +279,10 @@ const SheetContent = ({ story, doll }: ContentProps) => {
             [0, 1],
             [
               0,
-              (windowSize.height + insets.top) * MODAL_OPEN_SNAP_NORMALIZED -
+              (Platform.OS === "ios"
+                ? screenSize.height
+                : windowSize.height + insets.top) *
+                MODAL_OPEN_SNAP_NORMALIZED -
                 (animatedIndex.value === 0
                   ? Values.bottomPlayerHeight + SHADOW_HEIGHT
                   : isBottomPlayerVisible
@@ -396,11 +399,12 @@ const SheetContent = ({ story, doll }: ContentProps) => {
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
+            zIndex: 1000,
           }}
         >
           <ArrowDownButton onPress={() => collapse()} />
           {story && (
-            <TouchableWithoutFeedback
+            <Pressable
               style={{
                 width: 40,
                 height: 40,
@@ -408,25 +412,31 @@ const SheetContent = ({ story, doll }: ContentProps) => {
                 justifyContent: "center",
               }}
               onPress={async () => {
-                if (!doll || !story) return;
-                if (!profile) return openAuthOnlyModal();
+                try {
+                  console.log(Boolean(doll), Boolean(story), Boolean(profile));
 
-                if (story.isFavorite)
-                  await removeStoryFromFavorites(doll.id, story.id);
-                else await addStoryToFavorites(doll.id, story.id);
-                await mutate<IStory>(
-                  `/stories/${doll.id}/${story.id}`,
-                  (old) => ({
-                    ...old!,
-                    isFavorite: !story.isFavorite,
-                  }),
-                  false
-                );
-                await mutate("/stories/favorites");
+                  if (!doll || !story) return;
+                  if (!profile) return openAuthOnlyModal();
+
+                  if (story.isFavorite)
+                    await removeStoryFromFavorites(doll.id, story.id);
+                  else await addStoryToFavorites(doll.id, story.id);
+                  await mutate<IStory>(
+                    `/stories/${doll.id}/${story.id}`,
+                    (old) => ({
+                      ...old!,
+                      isFavorite: !story.isFavorite,
+                    }),
+                    false
+                  );
+                  await mutate("/stories/favorites");
+                } catch (error) {
+                  console.error(error);
+                }
               }}
             >
               {story.isFavorite ? <HeartFilledIcon /> : <HeartIcon />}
-            </TouchableWithoutFeedback>
+            </Pressable>
           )}
         </View>
       </Animated.View>

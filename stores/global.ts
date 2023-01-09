@@ -12,7 +12,7 @@ export const useGlobalStore = create(
       isExitConfirmModalVisible: false,
       isStoreLinksModalVisible: false,
       isGalleryModalVisible: false,
-      phone: 0,
+      phone: "",
       token: "",
       storeLinksModalUrls: [
         "https://ozon.ru",
@@ -20,7 +20,7 @@ export const useGlobalStore = create(
         "https://aliexpress.ru",
       ],
       gallery: {
-        urls: new Array<string>(),
+        urls: [] as string[],
         kind: "image",
         preselectedIndex: 0,
       },
@@ -58,12 +58,12 @@ export const useGlobalStore = create(
         set((state) => ({ ...state, isGalleryModalVisible: true })),
       closeGalleryModal: () =>
         set((state) => ({ ...state, isGalleryModalVisible: false })),
-      setPhone: (phone: number) => set((state) => ({ ...state, phone })),
+      setPhone: (phone: string) => set((state) => ({ ...state, phone })),
       setToken: (token: string) => set((state) => ({ ...state, token })),
-      setStoreLinksModalUrls: (urls: Array<string>) =>
+      setStoreLinksModalUrls: (urls: string[]) =>
         set((state) => ({ ...state, storeLinksModalUrls: urls })),
       setGallery: (value: {
-        urls: Array<string>;
+        urls: string[];
         kind: any;
         preselectedIndex: number;
       }) => set((state) => ({ ...state, gallery: value })),

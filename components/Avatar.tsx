@@ -68,7 +68,13 @@ export const Avatar = ({
             }}
           >
             <Image
-              source={{ uri: url }}
+              source={{
+                uri: url,
+                headers: {
+                  authorization: axios.defaults.headers.common
+                    .authorization as string,
+                },
+              }}
               style={{ width: "100%", height: "100%" }}
             />
           </View>
@@ -129,7 +135,13 @@ export const Avatar = ({
             }}
           >
             <Image
-              source={{ uri: url }}
+              source={{
+                uri: url,
+                headers: {
+                  authorization: axios.defaults.headers.common
+                    .authorization as string,
+                },
+              }}
               style={{ width: "100%", height: "100%" }}
             />
           </View>

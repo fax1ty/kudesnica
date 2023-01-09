@@ -1,7 +1,5 @@
 import { useDimensions } from "@react-native-community/hooks";
-import { useFonts } from "expo-font";
 import { useLink } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { View, Image } from "react-native";
 import Animated, {
@@ -18,7 +16,6 @@ import { usePersistedState } from "react-native-use-persisted-state";
 import LogoTextOnly from "../icons/LogoTextOnly";
 import LogoWithouText from "../icons/LogoWithoutText";
 import Star from "../icons/Star";
-import { Fonts } from "../resources";
 import { useGlobalStore } from "../stores/global";
 import { initAudio } from "../utils/audio";
 
@@ -37,19 +34,8 @@ export default function Home() {
     true
   );
 
-  const [fontsLoaded] = useFonts({
-    [Fonts.playfairDisplayRegular]: require("../assets/fonts/PlayfairDisplay-Regular.ttf"),
-    [Fonts.playfairDisplayItalic]: require("../assets/fonts/PlayfairDisplay-Italic.ttf"),
-    [Fonts.firasansRegular]: require("../assets/fonts/FiraSans-Regular.ttf"),
-    [Fonts.firasansBold]: require("../assets/fonts/FiraSans-Bold.ttf"),
-    [Fonts.firasansMedium]: require("../assets/fonts/FiraSans-Medium.ttf"),
-    [Fonts.firamonoBold]: require("../assets/fonts/FiraMono-Bold.ttf"),
-  });
-
   useEffect(() => {
-    if (!fontsLoaded) return;
     initAudio().catch(console.error);
-    SplashScreen.hideAsync();
     const timeout = setTimeout(() => {
       if (shouldShowWelcomeScreen) {
         navigate.replace("/welcome");
@@ -58,7 +44,7 @@ export default function Home() {
       }
     }, 1000 * 3);
     return () => clearTimeout(timeout);
-  }, [fontsLoaded, shouldShowWelcomeScreen, token]);
+  }, [shouldShowWelcomeScreen, token]);
 
   useEffect(() => {
     shift1.value = withRepeat(

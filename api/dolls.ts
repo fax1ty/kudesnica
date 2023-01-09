@@ -1,4 +1,5 @@
 import useSWR from "swr";
+
 import { fetcher } from "./fetcher";
 import { IRichBlock } from "./stories";
 
@@ -10,9 +11,9 @@ export interface IDoll {
     background: string;
     label: string;
   }>;
-  storyViewCarousel: Array<string>;
-  description: Array<IRichBlock>;
-  storeLinks: Array<string>;
+  storyViewCarousel: string[];
+  description: IRichBlock[];
+  storeLinks: string[];
 }
 
 export type IDollShort = Omit<
@@ -21,7 +22,7 @@ export type IDollShort = Omit<
 >;
 
 export const useDolls = () =>
-  useSWR<Array<IDoll>>("/dolls", fetcher, { refreshInterval: 0 });
+  useSWR<IDoll[]>("/dolls", fetcher, { refreshInterval: 0 });
 
 export const useDoll = (dollId: string | null) =>
   useSWR<IDoll>(dollId ? `/dolls/${dollId}` : null, fetcher, {

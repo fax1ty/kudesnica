@@ -1,16 +1,17 @@
 import axios from "axios";
 import useSWR from "swr";
+
 import { authGuard } from "../utils/misc";
 import { fetcher } from "./fetcher";
 
 export const useProfile = () =>
   useSWR<{
     name: string;
-    phone: number;
+    phone: string;
     photo: boolean;
     premium: boolean;
     email?: string;
-    favorites: Array<string>;
+    favorites: string[];
   }>(authGuard("/me"), fetcher, {
     refreshInterval: 0,
   });

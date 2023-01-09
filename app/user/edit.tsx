@@ -46,10 +46,10 @@ export default function UserEdit() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 0.95,
     });
-    if (result.cancelled) return;
+    if (!result.assets) return;
     const uploadResult = await FileSystem.uploadAsync(
       new URL("/me/photo", axios.defaults.baseURL).href,
-      result.uri,
+      result.assets[0].uri,
       {
         uploadType: FileSystem.FileSystemUploadType.MULTIPART,
         fieldName: "file",

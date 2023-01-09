@@ -56,49 +56,53 @@ export default function Dolls() {
           }}
         >
           <View style={{ flexDirection: "row" }}>
-            <BackIcon onPress={() => navigate.back()} />
-            <Text
-              numberOfLines={2}
-              style={{
-                marginLeft: 21,
-                fontFamily: Fonts.playfairDisplayItalic,
-                fontSize: 26,
-                lineHeight: 32,
-                color: Colors.violet100,
-                width: 190,
-              }}
+            <Pressable
+              onPress={() => navigate.back()}
+              style={{ aspectRatio: 1 }}
             >
-              {profile?.name.replace(" ", "\n")}
-            </Text>
+              <BackIcon />
+            </Pressable>
+            <View style={{ marginLeft: 21 }}>
+              <Text
+                numberOfLines={2}
+                style={{
+                  fontFamily: Fonts.playfairDisplayItalic,
+                  fontSize: 26,
+                  lineHeight: 32,
+                  color: Colors.violet100,
+                  width: 190,
+                }}
+              >
+                {profile?.name.replace(" ", "\n")}
+              </Text>
+              <Pressable
+                onPress={() => navigate.push("/user/edit")}
+                style={{
+                  flexDirection: "row",
+                  marginTop: 4,
+                  alignItems: "center",
+                }}
+              >
+                <EditIcon />
+                <Text
+                  style={{
+                    marginLeft: 4,
+                    fontFamily: Fonts.firasansRegular,
+                    fontSize: 13,
+                    lineHeight: 16,
+                    color: Colors.pink100,
+                  }}
+                >
+                  Редактировать
+                </Text>
+              </Pressable>
+            </View>
           </View>
           <Avatar
             avatar={profile?.photo || false}
             onPress={() => navigate.push("/user/edit")}
           />
         </View>
-        {/* Редактировать */}
-        <Pressable
-          onPress={() => navigate.push("/user/edit")}
-          style={{
-            flexDirection: "row",
-            paddingLeft: 63 - 16,
-            marginTop: 4,
-            alignItems: "center",
-          }}
-        >
-          <EditIcon />
-          <Text
-            style={{
-              marginLeft: 4,
-              fontFamily: Fonts.firasansRegular,
-              fontSize: 13,
-              lineHeight: 16,
-              color: Colors.pink100,
-            }}
-          >
-            Редактировать
-          </Text>
-        </Pressable>
         {/* Разблокировать истории */}
         <GradientCard
           theme={profile?.premium ? "blue" : "red"}

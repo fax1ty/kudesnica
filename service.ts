@@ -1,4 +1,5 @@
 import TrackPlayer, { Event, State } from "react-native-track-player";
+
 import { useAudioStore } from "./stores/audio";
 
 export const PlaybackService = async function () {

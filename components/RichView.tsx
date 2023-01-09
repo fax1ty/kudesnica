@@ -551,10 +551,13 @@ const Chat = ({
                     quality: 0.95,
                     exif: false,
                   });
-                  if (result.cancelled) return;
-                  const fileInfo = await FileSystem.getInfoAsync(result.uri, {
-                    size: true,
-                  });
+                  if (!result.assets) return;
+                  const fileInfo = await FileSystem.getInfoAsync(
+                    result.assets[0].uri,
+                    {
+                      size: true,
+                    }
+                  );
                   if (
                     fileInfo.size! >
                     1024 * 1024 * (kind === "video" ? 250 : 15)
@@ -562,8 +565,8 @@ const Chat = ({
                     return setError("Объект слишком большой, выберите другой");
                   setViewableAsset(
                     kind === "video"
-                      ? result.uri
-                      : `data:image/png;base64,${result.base64}`
+                      ? result.assets[0].uri
+                      : `data:image/png;base64,${result.assets[0].base64}`
                   );
 
                   const uploadTask = FileSystem.createUploadTask(
@@ -571,7 +574,7 @@ const Chat = ({
                       `/stories/${dollId}/${storyId}/uploadMedia`,
                       axios.defaults.baseURL
                     ).href,
-                    result.uri,
+                    result.assets[0].uri,
                     {
                       uploadType: FileSystem.FileSystemUploadType.MULTIPART,
                       fieldName: "file",

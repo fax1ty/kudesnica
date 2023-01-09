@@ -1,5 +1,5 @@
 import crashlytics from "@react-native-firebase/crashlytics";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useHref, useLink } from "expo-router";
 import pms from "parse-ms";
 import { useEffect, useMemo, useState } from "react";
@@ -42,6 +42,7 @@ export default function Verify() {
     )}`;
   }, [timeLeft]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => start(), []);
 
   return (
@@ -72,14 +73,24 @@ export default function Verify() {
               throw new Error(
                 "Номер телефона должен быть заранее указан! Вы не прошли предыдущий шаг?"
               );
-            const { token, phone } = await verify(userPhone, code, requestId);
-            await crashlytics().setUserId(phone.toString());
-            axios.defaults.headers.common.authorization = token;
-            setToken(token);
-            setPersistToken(token);
-            navigate.replace("/");
-            if (mode === "register") openCongratulationsRegModal();
-            else openLoginWelcomeModal();
+            try {
+              const { token, phone } = await verify(userPhone, code, requestId);
+              await crashlytics().setUserId(phone.toString());
+              axios.defaults.headers.common.authorization = token;
+              setToken(token);
+              setPersistToken(token);
+              navigate.replace("/dolls");
+              if (mode === "register") openCongratulationsRegModal();
+              else openLoginWelcomeModal();
+            } catch (error) {
+              if (error instanceof AxiosError)
+                console.error(
+                  error.config.baseURL,
+                  error.config.url,
+                  error.message
+                );
+              else console.error(error);
+            }
           }}
         >
           Подтвердить

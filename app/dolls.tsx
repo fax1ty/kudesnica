@@ -107,7 +107,11 @@ export default function Dolls() {
         source={require("../assets/cloud.png")}
       />
       <SafeAreaView
-        style={{ width: "100%", height: "100%", position: "absolute" }}
+        style={{
+          width: "100%",
+          height: "100%",
+          position: "absolute",
+        }}
       >
         <View
           style={{
@@ -122,7 +126,7 @@ export default function Dolls() {
           </Pressable>
           <Logo />
           <Avatar
-            avatar={null}
+            avatar={profile?.photo || false}
             onPress={() => {
               if (!profile) return openAuthOnlyModal();
               navigate.push("/user");
@@ -130,7 +134,12 @@ export default function Dolls() {
             size="small"
           />
         </View>
-        <View style={{ flex: 1, marginBottom: Values.bottomPlayerHeight }}>
+        <View
+          style={{
+            flex: 1,
+            marginBottom: Values.bottomPlayerHeight,
+          }}
+        >
           <DollsCarousel
             data={renderedDolls}
             onIndexChange={(value, next) => {

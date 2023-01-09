@@ -33,6 +33,7 @@ export const ScreenTitle = ({ children, style, pinNumber }: Props) => {
           aspectRatio: 1,
           position: "absolute",
           justifyContent: "center",
+          zIndex: 1000,
         }}
         onPress={() => {
           console.log("Идём назад");

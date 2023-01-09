@@ -1,10 +1,21 @@
+import { FiraMono_700Bold } from "@expo-google-fonts/fira-mono";
+import {
+  FiraSans_400Regular,
+  FiraSans_700Bold,
+  FiraSans_500Medium,
+} from "@expo-google-fonts/fira-sans";
+import {
+  PlayfairDisplay_400Regular,
+  PlayfairDisplay_400Regular_Italic,
+} from "@expo-google-fonts/playfair-display";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { PortalProvider } from "@gorhom/portal";
 import analytics from "@react-native-firebase/analytics";
 import crashlytics from "@react-native-firebase/crashlytics";
 import perf, { FirebasePerformanceTypes } from "@react-native-firebase/perf";
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
-import { useLink, useHref, Children } from "expo-router";
+import { useFonts } from "expo-font";
+import { useLink, useHref, Children, SplashScreen } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { createElement, useEffect, useRef } from "react";
 import { Linking, View, Image, Text } from "react-native";
@@ -39,18 +50,25 @@ import { useGlobalStore } from "../stores/global";
 import { getCurrentEnv } from "../utils/misc";
 
 const AuthController = () => {
+  const pathname = useHref();
   const navigate = useLink();
   const token = useGlobalStore((state) => state.token);
   const closeBottomPlayer = useGlobalStore((state) => state.closeBottomPlayer);
+  const openBottomPlayer = useGlobalStore((state) => state.openBottomPlayer);
   const previousToken = usePreviousImmediate(token);
   const [persistToken, setPersistToken] = usePersistedState("@token", "");
   const setToken = useGlobalStore((state) => state.setToken);
 
   useEffect(() => {
-    if (persistToken && persistToken !== token) setToken(persistToken);
-  }, [persistToken, token]);
+    if (persistToken && persistToken !== token && previousToken !== token) {
+      console.log("Обновляем токен в сторе из-за изменения токена в хранилище");
+      setToken(persistToken);
+    }
+  }, [persistToken, token, previousToken]);
 
   useEffect(() => {
+    console.log("Обновляем токен в хранилище из-за изменения токена в сторе");
+
     setPersistToken(token);
     axios.defaults.headers.common.authorization = token;
 
@@ -66,15 +84,35 @@ const AuthController = () => {
   useEffect(() => {
     if (!token && previousToken) {
       console.log("Разлогинились, идём на логин!");
-      closeBottomPlayer();
       navigate.replace("auth/login");
     }
   }, [token, previousToken]);
+
+  useEffect(() => {
+    console.log(pathname);
+    if (
+      pathname.href === "/" ||
+      pathname.href.includes("/auth") ||
+      pathname.href.includes("/verify") ||
+      pathname.href.includes("/about")
+    )
+      closeBottomPlayer();
+    else openBottomPlayer();
+  }, [pathname]);
 
   return null;
 };
 
 export default function MainLayout() {
+  const [fontsLoaded] = useFonts({
+    [Fonts.playfairDisplayRegular]: PlayfairDisplay_400Regular,
+    [Fonts.playfairDisplayItalic]: PlayfairDisplay_400Regular_Italic,
+    [Fonts.firasansRegular]: FiraSans_400Regular,
+    [Fonts.firasansBold]: FiraSans_700Bold,
+    [Fonts.firasansMedium]: FiraSans_500Medium,
+    [Fonts.firamonoBold]: FiraMono_700Bold,
+  });
+
   const isLoginWelcomeModalVisible = useGlobalStore(
     (state) => state.isLoginWelcomeModalVisible
   );
@@ -163,7 +201,10 @@ export default function MainLayout() {
         return Promise.reject(error);
       }
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (!fontsLoaded) return <SplashScreen />;
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

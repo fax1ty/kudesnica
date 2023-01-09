@@ -90,30 +90,34 @@ export default function Favorites() {
                 titleHilighted={!item.watched}
                 icon={
                   item.isFavorite ? (
-                    <HeartFilledIcon
-                      onPress={async () => {
-                        await removeStoryFromFavorites(item.doll.id, item.id);
-                        await mutate<IStory>(
-                          `/stories/${item.doll.id}/${item.id}`,
-                          (old) => ({ ...old!, isFavorite: false }),
-                          false
-                        );
-                        await mutateFavorites();
-                      }}
-                    />
+                    // <Pressable
+                    //   onPress={async () => {
+                    //     await removeStoryFromFavorites(item.doll.id, item.id);
+                    //     await mutate<IStory>(
+                    //       `/stories/${item.doll.id}/${item.id}`,
+                    //       (old) => ({ ...old!, isFavorite: false }),
+                    //       false
+                    //     );
+                    //     await mutateFavorites();
+                    //   }}
+                    // >
+                    <HeartFilledIcon />
                   ) : (
-                    <HeartIcon
-                      onPress={async () => {
-                        if (!profile) return openAuthOnlyModal();
-                        await addStoryToFavorites(item.doll.id, item.id);
-                        await mutate<IStory>(
-                          `/stories/${item.doll.id}/${item.id}`,
-                          (old) => ({ ...old!, isFavorite: true }),
-                          false
-                        );
-                        await mutateFavorites();
-                      }}
-                    />
+                    // </Pressable>
+                    // <Pressable
+                    //   onPress={async () => {
+                    //     if (!profile) return openAuthOnlyModal();
+                    //     await addStoryToFavorites(item.doll.id, item.id);
+                    //     await mutate<IStory>(
+                    //       `/stories/${item.doll.id}/${item.id}`,
+                    //       (old) => ({ ...old!, isFavorite: true }),
+                    //       false
+                    //     );
+                    //     await mutateFavorites();
+                    //   }}
+                    // >
+                    <HeartIcon />
+                    // </Pressable>
                   )
                 }
               />
