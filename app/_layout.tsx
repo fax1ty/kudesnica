@@ -94,7 +94,8 @@ const AuthController = () => {
       pathname.href === "/" ||
       pathname.href.includes("/auth") ||
       pathname.href.includes("/verify") ||
-      pathname.href.includes("/about")
+      pathname.href.includes("/user") ||
+      pathname.href.includes("/welcome")
     )
       closeBottomPlayer();
     else openBottomPlayer();

@@ -1,7 +1,7 @@
 {
   "name": "kudesnica",
   "private": true,
-  "version": "0.1.7",
+  "version": "0.1.9",
   "scripts": {
     "start": "cross-env LOCAL=true expo start --dev-client",
     "android": "expo run:android",

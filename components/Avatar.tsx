@@ -1,10 +1,11 @@
 import axios from "axios";
 import { useMemo } from "react";
-import { Pressable, Image, View } from "react-native";
+import { Pressable, View, Image } from "react-native";
 
 import NoAvatar from "../icons/NoAvatar";
 import NoAvatarBig from "../icons/NoAvatarBig";
 import { Colors } from "../resources";
+import { LoadableImage } from "./LoadableImage";
 
 interface Props {
   size?: "small" | "normal";
@@ -21,7 +22,9 @@ export const Avatar = ({
 }: Props) => {
   const url = useMemo(() => {
     if (avatar === true)
-      return new URL("/me/photo", axios.defaults.baseURL).href;
+      return (
+        new URL("/me/photo", axios.defaults.baseURL).href + "?v=" + Date.now()
+      );
     if (typeof avatar === "string") return avatar;
     return null;
   }, [avatar]);
@@ -67,7 +70,7 @@ export const Avatar = ({
               justifyContent: "center",
             }}
           >
-            <Image
+            <LoadableImage
               source={{
                 uri: url,
                 headers: {
@@ -134,7 +137,7 @@ export const Avatar = ({
               justifyContent: "center",
             }}
           >
-            <Image
+            <LoadableImage
               source={{
                 uri: url,
                 headers: {

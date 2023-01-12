@@ -6,6 +6,7 @@ import { IRichBlock } from "./stories";
 export interface IDoll {
   id: string;
   title: string;
+  chatAvatar: string;
   dollsCarouselPhoto: Partial<{
     doll: string;
     background: string;

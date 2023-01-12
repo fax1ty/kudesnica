@@ -1,6 +1,5 @@
-import { Picker } from "@react-native-picker/picker";
-import { useState } from "react";
-import { View } from "react-native";
+import { useMemo, useState } from "react";
+import { KeyboardAvoidingView } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 
 import { useProfile } from "../../api/profile";
@@ -8,19 +7,23 @@ import { sendSupportMail } from "../../api/support";
 import { Button } from "../../components/Button";
 import { IndependentText as Text } from "../../components/IndependentText";
 import { Input } from "../../components/Input";
+import { Picker } from "../../components/Picker";
 import { ScreenTemplate } from "../../components/ScreenTemplate";
 import { ScreenTitle } from "../../components/ScreenTitle";
 import { Colors, Fonts } from "../../resources";
 
 export default function Help() {
-  const items = [
-    "Общие вопросы",
-    "Вопрос подписки",
-    "Ошибки приложения",
-    "Предложения",
-  ];
+  const options = useMemo(
+    () => [
+      { label: "Общие вопросы", value: "general" },
+      { label: "Вопрос подписки", value: "subscription" },
+      { label: "Ошибки приложения", value: "errors" },
+      { label: "Предложения", value: "suggestion" },
+    ],
+    []
+  );
   const [message, setMessage] = useState("");
-  const [selected, setSelected] = useState(items[0]);
+  const [selected, setSelected] = useState(options[0].value);
   const { data: profile } = useProfile();
   const [email, setEmail] = useState(profile?.email);
   const [step, setStep] = useState<0 | 1>(0);
@@ -28,7 +31,7 @@ export default function Help() {
   return (
     <ScreenTemplate>
       <ScreenTitle>Поддержка</ScreenTitle>
-      <View style={{ flex: 1 }}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
         {step === 0 && (
           <>
             <Text
@@ -41,37 +44,7 @@ export default function Help() {
             >
               Выберите тему обращения
             </Text>
-            <View
-              style={{
-                borderWidth: 1,
-                borderColor: Colors.light40,
-                backgroundColor: Colors.light80,
-                height: 56,
-                borderRadius: 16,
-                overflow: "hidden",
-                marginTop: 12,
-              }}
-            >
-              <Picker
-                selectedValue={selected}
-                onValueChange={setSelected}
-                style={{
-                  fontFamily: Fonts.firasansRegular,
-                  fontSize: 16,
-                  lineHeight: 18,
-                  color: Colors.dark100,
-                  backgroundColor: Colors.light80,
-                }}
-              >
-                {items.map((item, i) => (
-                  <Picker.Item
-                    key={`help-list-item-${i}`}
-                    label={item}
-                    value={item}
-                  />
-                ))}
-              </Picker>
-            </View>
+            <Picker value={selected} onChange={setSelected} options={options} />
             <Input
               disabled={Boolean(profile?.email)}
               onChangeText={setEmail}
@@ -94,7 +67,11 @@ export default function Help() {
                 borderColor: Colors.light40,
                 borderRadius: 16,
                 paddingHorizontal: 16,
-                paddingVertical: 8,
+                paddingTop: 16,
+                paddingBottom: 16,
+                fontFamily: Fonts.firasansRegular,
+                fontSize: 16,
+                lineHeight: 15,
               }}
               multiline
               textAlignVertical="top"
@@ -104,7 +81,12 @@ export default function Help() {
               style={{ marginTop: 30 }}
               onPress={async () => {
                 if (!email) return;
-                await sendSupportMail(email, selected[0], message);
+                await sendSupportMail(
+                  email,
+                  options.find((v) => v.value === selected)?.label ||
+                    "Unknown reason",
+                  message
+                );
                 setMessage("");
                 setStep(1);
               }}
@@ -168,7 +150,7 @@ export default function Help() {
             </Button>
           </>
         )}
-      </View>
+      </KeyboardAvoidingView>
     </ScreenTemplate>
   );
 }

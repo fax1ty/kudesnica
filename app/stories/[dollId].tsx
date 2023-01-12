@@ -281,7 +281,7 @@ export default function Stories() {
             {doll && (
               <View style={{ marginTop: 27 }}>
                 <RichView
-                  dollAvatar=""
+                  dollAvatar={doll.chatAvatar}
                   data={doll.description}
                   dollId={doll.id}
                   storyId="doesntmatter"

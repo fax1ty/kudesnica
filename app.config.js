@@ -73,9 +73,9 @@ module.exports = {
             targetSdkVersion: 33,
             buildToolsVersion: "33.0.0",
           },
-          ios: {
-            useFrameworks: "static",
-          },
+          // ios: {
+          //   useFrameworks: "static",
+          // },
         },
       ],
     ],

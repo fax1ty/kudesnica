@@ -78,7 +78,7 @@ const SheetContent = ({ story, doll }: ContentProps) => {
   const components = useMemo(
     () =>
       generateComponentsFromRichComponents(
-        story?.cover,
+        doll?.chatAvatar,
         doll?.id,
         story?.id,
         story?.media,

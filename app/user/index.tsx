@@ -7,19 +7,23 @@ import Toggle from "react-native-toggle-element";
 import { useProfile } from "../../api/profile";
 import { useFavorites } from "../../api/stories";
 import { Avatar } from "../../components/Avatar";
-import { GradientCard } from "../../components/GradientCard";
+// import { GradientCard } from "../../components/GradientCard";
 import { IndependentText as Text } from "../../components/IndependentText";
 import { Pin } from "../../components/Pin";
 import BackIcon from "../../icons/Back";
-import DelockIcon from "../../icons/Delock";
+// import DelockIcon from "../../icons/Delock";
 import EditIcon from "../../icons/Edit";
 import ExitIcon from "../../icons/Exit";
 import HeartIcon from "../../icons/HeartSmallestFilled";
 import HelpIcon from "../../icons/Help";
-import LockIcon from "../../icons/Lock";
+// import LockIcon from "../../icons/Lock";
 import NextIcon from "../../icons/Next";
 import NorifyIcon from "../../icons/Notify";
-import { Colors, Fonts, Values } from "../../resources";
+import {
+  Colors,
+  Fonts,
+  // Values
+} from "../../resources";
 import { useGlobalStore } from "../../stores/global";
 
 export default function Dolls() {
@@ -104,7 +108,7 @@ export default function Dolls() {
           />
         </View>
         {/* Разблокировать истории */}
-        <GradientCard
+        {/* <GradientCard
           theme={profile?.premium ? "blue" : "red"}
           //   onPress={() => navigate.push("AddCard")}
           icon={profile?.premium ? <DelockIcon /> : <LockIcon />}
@@ -152,7 +156,7 @@ export default function Dolls() {
               )}
             </View>
           }
-        />
+        /> */}
         {/* Меню */}
         <View
           style={{
@@ -306,7 +310,7 @@ export default function Dolls() {
           style={{
             position: "absolute",
             flexDirection: "row",
-            bottom: Values.bottomPlayerHeight + 30,
+            bottom: 30,
             alignItems: "center",
             alignSelf: "center",
           }}

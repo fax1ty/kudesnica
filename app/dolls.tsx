@@ -61,6 +61,7 @@ export default function Dolls() {
           background: "https://i.imgur.com/QdPEhBj.png",
           label: "https://i.imgur.com/2bYt9QL.png",
         },
+        chatAvatar: "",
         storyViewCarousel: [],
         next: true,
         description: [],

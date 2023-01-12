@@ -47,6 +47,7 @@ export default function UserEdit() {
       quality: 0.95,
     });
     if (!result.assets) return;
+    await mutate((old) => ({ ...old!, photo: false }), false);
     const uploadResult = await FileSystem.uploadAsync(
       new URL("/me/photo", axios.defaults.baseURL).href,
       result.assets[0].uri,

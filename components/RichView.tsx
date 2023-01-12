@@ -179,7 +179,7 @@ const ChatMessage = ({
   galleryUrls,
   position = "left",
 }: {
-  avatar?: string | null;
+  avatar?: string | null | boolean;
   firstMessage?: boolean;
   message?: string;
   attachment?: {
@@ -403,7 +403,7 @@ const ChatChunk = ({
           {message.kind === "media" && (
             <ChatMessage
               {...getCommonMessageProps(i)}
-              avatar={null}
+              avatar
               attachment={{
                 kind: message.mediaType,
                 url: message.url,
